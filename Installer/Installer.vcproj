@@ -139,9 +139,6 @@
 				RelativePath=".\Installer.ico">
 			</File>
 			<File
-				RelativePath=".\Installer.rc">
-			</File>
-			<File
 				RelativePath=".\small.ico">
 			</File>
 		</Filter>

@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3"
+!define PRODUCT_VERSION "0.0.4"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -14,8 +14,18 @@ SetCompressor lzma
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
-!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
+
+Function .onInit
+  ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
+  StrCmp $0 "" NoAbort 0 
+    MessageBox MB_ICONSTOP|MB_OK "偵測到已安裝 ${PRODUCT_NAME} $0，請先移除後再重新安裝。"
+    Abort
+  NoAbort:
+FunctionEnd
+
+BGGradient 0000FF 000000 FFFFFF
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
@@ -23,10 +33,12 @@ SetCompressor lzma
 !define MUI_LICENSEPAGE_RADIOBUTTONS
 !insertmacro MUI_PAGE_LICENSE "License.txt"
 ; Directory page
-!insertmacro MUI_PAGE_DIRECTORY
+; !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
+!define MUI_FINISHPAGE_LINK_LOCATION "http://chewing.csie.net/"
+!define MUI_FINISHPAGE_LINK "參觀新酷音輸入法網站： ${MUI_FINISHPAGE_LINK_LOCATION}"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -41,10 +53,11 @@ SetCompressor lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Chewing_Win32_0.3b_Setup.exe"
-InstallDir "$PROGRAMFILES\新酷音輸入法"
+OutFile "win32-chewing-${PRODUCT_VERSION}.exe"
+InstallDir "$SYSDIR\IME\Chewing"
 ShowInstDetails show
 ShowUnInstDetails show
+
 
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
@@ -57,8 +70,8 @@ Section "MainSection" SEC01
   File "License.txt"
   File "Installer\Release\Installer.exe"
   SetOutPath "$SYSDIR"
-  File "PCManIME\Release\Chewing.ime"
-  File "libchewing.dll"
+  File "ChewingIME\Release\Chewing.ime"
+  File "..\libchewing\branches\win32\win32\Release\libchewing.dll"
 SectionEnd
 
 Section -AdditionalIcons
@@ -68,12 +81,13 @@ Section -AdditionalIcons
 SectionEnd
 
 Section -Post
-  Exec "$SYSDIR\IME\Chewing\Installer.exe"
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+
+  Exec '"$SYSDIR\IME\Chewing\Installer.exe"'
 SectionEnd
 
 
@@ -88,6 +102,9 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
+
+  Exec '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
+
   Delete "$INSTDIR\uninst.exe"
   Delete "$SYSDIR\libchewing.dll"
   Delete "$SYSDIR\Chewing.ime"

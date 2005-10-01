@@ -19,21 +19,55 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	HKL kl;
 
+	HKEY hk = NULL;
+	if( ERROR_SUCCESS != RegCreateKeyEx( HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\新酷音輸入法", 0, 
+			NULL, 0, KEY_ALL_ACCESS , NULL, &hk, NULL) )
+		hk = NULL;
+
 	if( strstr( lpCmdLine, "/uninstall" ) )
 	{
-/*		HKEY hk = NULL;
-		if( ERROR_SUCCESS != RegOpenKey( HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ChewingIME", &hk ) )
-			return -1;
-		RegCloseKey(hkey);
-*/		
+		if( hk )
+		{
+			DWORD type = REG_DWORD, size = sizeof(DWORD);
+			if(	ERROR_SUCCESS == RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&kl, &size ) )
+			{
+				UnloadKeyboardLayout( kl );
+				char klstr[10];
+				wsprintf( klstr, "%X", kl );
+				char regpath[256];
+				lstrcpy( regpath, "Keyboard Layout\\Preload" );
+				HKEY hk2 = NULL;
+				if( ERROR_SUCCESS == RegOpenKey( HKEY_CURRENT_USER, regpath, &hk2 ) )
+				{
+					for( int i = 1; i <= 100; ++i )
+					{
+						char num[4];
+						wsprintf( num, "%d", i );
+						type = REG_SZ;	size = sizeof(regpath);
+						if(	ERROR_SUCCESS != RegQueryValueEx( hk2, num, 0, &type, (LPBYTE)regpath, &size ) )
+							continue;
+						if( 0 == lstrcmp( regpath, klstr ) )
+						{
+							RegDeleteValue( hk2, num );
+							break;
+						}
+					}
+					RegCloseKey(hk2);
+				}
+
+				wsprintf( regpath, "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layouts\\%s", klstr );
+				RegDeleteKey( HKEY_LOCAL_MACHINE, regpath );
+			}
+		}
 	}
 	else
 	{
 		kl = ImmInstallIME( "Chewing.ime", "中文 (繁體) - 新酷音輸入法" );
-		char regpath[256];
-		wsprintf( regpath, "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layouts\\%X", kl );
+		if( hk )
+			RegSetValueEx( hk, "KeyboardLayout", 0, REG_DWORD, (LPBYTE)&kl, sizeof(DWORD) );
 	}
 
+	RegCloseKey( hk );
 
 	return 0;
 }
