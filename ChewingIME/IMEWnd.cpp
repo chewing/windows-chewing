@@ -5,7 +5,7 @@
 IMEWnd::IMEWnd( HWND imeUIWnd, LPCTSTR classname )
 {
 	hwnd = CreateWindowEx(0, classname, NULL,
-					WS_DISABLED | WS_POPUP,
+					WS_POPUP|WS_CLIPCHILDREN,
 					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	this->assocWndObj();
 }
@@ -18,6 +18,7 @@ IMEWnd::IMEWnd( HWND existing )
 
 IMEWnd::~IMEWnd(void)
 {
+	DestroyWindow(hwnd);
 }
 
 void IMEWnd::assocWndObj(void)
@@ -51,3 +52,47 @@ IMEWnd* IMEWnd::getAssocWndObj(HWND hwnd)
 	return NULL;
 }
 
+
+void IMEWnd::OnLButtonDown(WPARAM wp, LPARAM lp)
+{
+	oldPos = MAKEPOINTS(lp);
+	SetCapture(hwnd);
+}
+
+void IMEWnd::OnLButtonUp(WPARAM wp, LPARAM lp)
+{
+	POINTS pt = MAKEPOINTS(lp);
+	ReleaseCapture();
+}
+
+void IMEWnd::OnMouseMove(WPARAM wp, LPARAM lp)
+{
+	if( GetCapture() != hwnd )
+		return;
+	POINTS pt = MAKEPOINTS(lp);
+	RECT rc;
+	GetWindowRect( hwnd, &rc );
+	OffsetRect( &rc, (pt.x - oldPos.x), (pt.y - oldPos.y) );
+//	MoveWindow( hwnd, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, TRUE );
+	Move(rc.left, rc.top);
+}
+
+void IMEWnd::Move(int x, int y)
+{
+	int w, h;
+	getSize(&w, &h);
+
+	RECT rc;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+	if( x < rc.left )
+		x = rc.left;
+	else if( (x + w) > rc.right )
+		x = rc.right - w;
+
+	if( y < rc.top )
+		y = rc.top;
+	else if( (y + h) > rc.bottom )
+		y = rc.bottom - h;
+
+	MoveWindow( hwnd, x, y, w, h, TRUE );
+}

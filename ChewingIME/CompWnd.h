@@ -11,21 +11,17 @@ public:
 	CompWnd(HWND imeUIWnd);
 	~CompWnd(void);
 	static BOOL RegisterClass(void);
-	void setCompStr( string compstr );
-	void setCursorPos(int pos);
-	string getCompStr(){ return compStr; }
 protected:
 	static LRESULT WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
 	void OnPaint(PAINTSTRUCT& ps);
-	string compStr;
 	HFONT font;
-	int cursorPos;
 public:
 	void setFont(LOGFONT* lf);
 	HFONT getFont(){	return font;	}
 	void getSize(int* w, int* h);
-protected:
-	int indexToXPos(int idx);
-public:
+	string getDisplayedCompStr(void);
+	int getDisplayedCursorPos(void);
 	void showCand(void);
+protected:
+	int indexToXPos( string compStr, int idx);
 };

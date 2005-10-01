@@ -6,8 +6,6 @@
 #include ".\candwnd.h"
 #include <tchar.h>
 
-#define		ITEMS_PER_ROW	4
-
 static CandWnd* g_thisCandWnd = NULL;
 CandWnd::CandWnd( HWND imeUIWnd ) : IMEWnd(imeUIWnd, g_cand_wnd_class)
 {
@@ -57,6 +55,17 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 		case WM_ERASEBKGND:
 			return TRUE;
 			break;
+		case WM_LBUTTONDOWN:
+			g_thisCandWnd->OnLButtonDown(wp, lp);
+			break;
+		case WM_MOUSEMOVE:
+			g_thisCandWnd->OnMouseMove(wp, lp);
+			break;
+		case WM_LBUTTONUP:
+			g_thisCandWnd->OnLButtonUp(wp, lp);
+			break;
+		case WM_MOUSEACTIVATE:
+			return MA_NOACTIVATE;
 		default:
 			if (!IsImeMessage(msg))
 				return DefWindowProc(hwnd, msg, wp, lp);
@@ -84,7 +93,7 @@ void CandWnd::OnPaint(PAINTSTRUCT& ps)
 	SetTextColor( hDC, GetSysColor( COLOR_WINDOWTEXT ) );
 	SetBkColor( hDC, GetSysColor( COLOR_WINDOW ) );
 
-	int items_per_row =  ITEMS_PER_ROW;
+	int items_per_row =  g_candPerRow;
 
 	RECT cand_rc;	cand_rc.left = 1;	cand_rc.top = 1;	cand_rc.right = 1;
 
@@ -150,7 +159,7 @@ void CandWnd::getSize(int* w, int* h)
 
 	oldFont = (HFONT)SelectObject(hDC, font);
 
-	int items_per_row =  ITEMS_PER_ROW;
+	int items_per_row =  g_candPerRow;
 
 	int pageEnd = candList->getPageStart() + candList->getPageSize();
 	if( pageEnd > candList->getTotalCount() )

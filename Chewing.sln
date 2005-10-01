@@ -5,7 +5,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Installer", "Installer\Inst
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChewingIME", "ChewingIME\ChewingIME.vcproj", "{517658CE-EFFE-4C17-BF82-55F743CB3123}"
 	ProjectSection(ProjectDependencies) = postProject
-		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062} = {AF909FB6-6C9F-4218-B360-4FDBEA1F7062}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libChewing", "..\libchewing\branches\win32\win32\libChewing.vcproj", "{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}"
@@ -19,17 +18,14 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{C7C053CC-FDDC-4398-881E-F31FF82340BD}.Debug.ActiveCfg = Debug|Win32
-		{C7C053CC-FDDC-4398-881E-F31FF82340BD}.Debug.Build.0 = Debug|Win32
 		{C7C053CC-FDDC-4398-881E-F31FF82340BD}.Release.ActiveCfg = Release|Win32
-		{C7C053CC-FDDC-4398-881E-F31FF82340BD}.Release.Build.0 = Release|Win32
 		{517658CE-EFFE-4C17-BF82-55F743CB3123}.Debug.ActiveCfg = Debug|Win32
 		{517658CE-EFFE-4C17-BF82-55F743CB3123}.Debug.Build.0 = Debug|Win32
 		{517658CE-EFFE-4C17-BF82-55F743CB3123}.Release.ActiveCfg = Release|Win32
 		{517658CE-EFFE-4C17-BF82-55F743CB3123}.Release.Build.0 = Release|Win32
-		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.ActiveCfg = Release|Win32
-		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.Build.0 = Release|Win32
+		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.ActiveCfg = Debug|Win32
+		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.Build.0 = Debug|Win32
 		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Release.ActiveCfg = Release|Win32
-		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

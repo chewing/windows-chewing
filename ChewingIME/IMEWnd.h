@@ -8,7 +8,7 @@ class IMEWnd
 public:
 	IMEWnd( HWND existing );
 	IMEWnd( HWND imeUIWnd, LPCTSTR classname );
-	~IMEWnd(void);
+	virtual ~IMEWnd(void);
 	void Show(){ ShowWindow(hwnd, SW_SHOWNA); }
 	void Hide(){ ShowWindow(hwnd, SW_HIDE); }
 	BOOL isWindow(){ return IsWindow(hwnd); }
@@ -19,13 +19,13 @@ public:
 	BOOL isVisible(){ return IsWindowVisible(hwnd); }
 protected:
 	HWND hwnd;
+	POINTS oldPos;
 	void assocWndObj(void);
 public:
 	static IMEWnd* getAssocWndObj(HWND hwnd);
-	void Move(int x, int y)
-	{
-		int w, h;
-		getSize(&w, &h);
-		MoveWindow( hwnd, x, y, w, h, TRUE );
-	}
+	void Move(int x, int y);
+protected:
+	void OnLButtonDown(WPARAM wp, LPARAM lp);
+	void OnLButtonUp(WPARAM wp, LPARAM lp);
+	void OnMouseMove(WPARAM wp, LPARAM lp);
 };

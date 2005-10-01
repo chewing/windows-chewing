@@ -18,6 +18,4 @@ ImeEnumRegisterWord
 ImeSetCompositionString
 ImeGetImeMenuItems
 UIWndProc
-;CompWndProc
-;CandWndProc
-;StatusWndProc
+ConfigureChewingIME

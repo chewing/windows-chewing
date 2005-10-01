@@ -99,29 +99,36 @@ IDI_ICON                ICON                    "icon1.ico"
 // Dialog
 //
 
-IDD_CONFIG DIALOGEX 0, 0, 164, 145
-STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | 
-    WS_CAPTION | WS_SYSMENU
+IDD_CONFIG DIALOGEX 0, 0, 214, 142
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | 
+    WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 CAPTION "新酷音輸入法設定"
 FONT 9, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "確定",IDOK,107,7,50,14
-    PUSHBUTTON      "取消",IDCANCEL,107,23,50,14
-    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,93,130
-    CONTROL         "預設",IDC_KB1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,16,
+    CONTROL         "預設",IDC_KB1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,
                     21,75,10
-    CONTROL         "許氏鍵盤",IDC_KB2,"Button",BS_AUTORADIOBUTTON,16,35,75,
+    CONTROL         "許氏鍵盤",IDC_KB2,"Button",BS_AUTORADIOBUTTON,15,33,75,
                     10
-    CONTROL         "IBM",IDC_KB3,"Button",BS_AUTORADIOBUTTON,16,49,75,10
-    CONTROL         "精業",IDC_KB4,"Button",BS_AUTORADIOBUTTON,16,63,75,10
-    CONTROL         "倚天",IDC_KB5,"Button",BS_AUTORADIOBUTTON,16,77,75,10
-    CONTROL         "倚天 26 鍵",IDC_KB6,"Button",BS_AUTORADIOBUTTON,16,91,
+    CONTROL         "IBM",IDC_KB3,"Button",BS_AUTORADIOBUTTON,15,45,75,10
+    CONTROL         "精業",IDC_KB4,"Button",BS_AUTORADIOBUTTON,15,57,75,10
+    CONTROL         "倚天",IDC_KB5,"Button",BS_AUTORADIOBUTTON,15,69,75,10
+    CONTROL         "倚天 26 鍵",IDC_KB6,"Button",BS_AUTORADIOBUTTON,15,81,
                     75,10
-    CONTROL         "DVORAK",IDC_KB7,"Button",BS_AUTORADIOBUTTON,16,105,75,
+    CONTROL         "DVORAK",IDC_KB7,"Button",BS_AUTORADIOBUTTON,15,93,75,10
+    CONTROL         "DVORAK 許氏",IDC_KB8,"Button",BS_AUTORADIOBUTTON,15,105,
+                    75,10
+    CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,15,117,75,
                     10
-    CONTROL         "DVORAK 許氏",IDC_KB8,"Button",BS_AUTORADIOBUTTON,16,119,
-                    75,10
+    EDITTEXT        IDC_CAND_PER_ROW,175,19,25,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_CAND_PER_ROW_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS,197,18,10,14
+    DEFPUSHBUTTON   "確定",IDOK,103,121,50,14
+    PUSHBUTTON      "取消",IDCANCEL,157,121,50,14
+    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,128
+    GROUPBOX        "候選字視窗",IDC_STATIC,99,7,108,36
+    LTEXT           "每列顯示候選字個數",IDC_STATIC,107,22,63,8
 END
 
 
@@ -136,12 +143,33 @@ BEGIN
     IDD_CONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 157
+        RIGHTMARGIN, 207
         TOPMARGIN, 7
-        BOTTOMMARGIN, 138
+        BOTTOMMARGIN, 135
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_STATUS_TB           BITMAP                  "status_bar24.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    ID_CHI_ENG              "中英文切換"
+    ID_FULL_HALF            "全半形切換"
+    ID_CONFIG               "設定新酷音輸入法"
+    IDS_CONFIGTIELE         "新酷音輸入法設定"
+END
 
 #endif    // 中文 (台灣) resources
 /////////////////////////////////////////////////////////////////////////////

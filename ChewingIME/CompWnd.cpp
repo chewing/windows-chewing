@@ -1,7 +1,8 @@
-#include "compwnd.h"
+#include ".\compwnd.h"
 #include "ChewingIME.h"
 #include "DrawUtil.h"
 #include "CandWnd.h"
+#include "CompStr.h"
 
 static CompWnd* g_thisCompWnd = NULL;
 
@@ -68,7 +69,19 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			if ((msg == WM_LBUTTONUP) || (msg == WM_RBUTTONUP))
 				SetWindowLong(hWnd, FIGWL_MOUSE, 0L);
 			break;
-*/		default:
+*/
+		case WM_LBUTTONDOWN:
+			g_thisCompWnd->OnLButtonDown(wp, lp);
+			break;
+		case WM_MOUSEMOVE:
+			g_thisCompWnd->OnMouseMove(wp, lp);
+			break;
+		case WM_LBUTTONUP:
+			g_thisCompWnd->OnLButtonUp(wp, lp);
+			break;
+		case WM_MOUSEACTIVATE:
+			return MA_NOACTIVATE;
+		default:
 			if (!IsImeMessage(msg))
 				return DefWindowProc(hwnd, msg, wp, lp);
 	}
@@ -76,18 +89,12 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 }
 
 
-void CompWnd::setCompStr( string compstr )
-{
-	compStr = compstr;
-	int w, h;
-	getSize(&w, &h);
-	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
-	InvalidateRect( hwnd, NULL, FALSE );
-}
-
 
 void CompWnd::OnPaint(PAINTSTRUCT& ps)
 {
+	string compStr = getDisplayedCompStr();
+	int cursorPos = getDisplayedCursorPos();
+
 	HFONT oldFont;
 	RECT rc;
 	HBRUSH hBrush = (HBRUSH)NULL;
@@ -111,7 +118,7 @@ void CompWnd::OnPaint(PAINTSTRUCT& ps)
 			compStr.length(), NULL);
 //		int selstart = indexToXPos( CompSelStart );
 //		int selend = indexToXPos( CompSelEnd );
-		int cursor = indexToXPos( cursorPos );
+		int cursor = indexToXPos( compStr, cursorPos );
 //		BitBlt( memdc, selstart, 0, selend-selstart, rc.bottom, memdc, selstart, 0, NOTSRCCOPY );
 		BitBlt( memdc, cursor, 0, 1, rc.bottom, memdc, cursor, 0, SRCINVERT );
 	}
@@ -136,8 +143,8 @@ void CompWnd::setFont(LOGFONT* lf)
 	LOGFONT lf2;
 	memcpy( &lf2, lf, sizeof( lf2) );
 
-	if( abs(lf2.lfHeight) < 12 )
-		lf2.lfHeight = abs(lf2.lfHeight) + 2;
+	if( abs(lf2.lfHeight) < 16 )
+		lf2.lfHeight = 16;
 
 	if( font )
 		DeleteObject( font );
@@ -150,6 +157,7 @@ void CompWnd::getSize(int* w, int* h)
 	HDC dc = GetDC( hwnd );
 	HGDIOBJ oldfont = SelectObject( dc, font );
 	SIZE size;
+	string compStr = getDisplayedCompStr();
 	GetTextExtentPoint( dc, compStr.c_str(), compStr.length(), &size );
 	SelectObject( dc, oldfont );
 	ReleaseDC( hwnd, dc );
@@ -157,6 +165,7 @@ void CompWnd::getSize(int* w, int* h)
 	*h = size.cy + 4;
 }
 
+/*
 void CompWnd::setCursorPos(int pos)
 {
 	int x = indexToXPos( cursorPos );
@@ -168,8 +177,9 @@ void CompWnd::setCursorPos(int pos)
 	x = indexToXPos( pos );
 	BitBlt( dc, x, 0, 1, rc.bottom, dc, x, 0, SRCINVERT );
 }
+*/
 
-int CompWnd::indexToXPos(int idx)
+int CompWnd::indexToXPos( string compStr, int idx)
 {
 	if( compStr.empty() || idx <=0 )
 		return 2;
@@ -197,7 +207,7 @@ void CompWnd::showCand(void)
 		pt = ic->cfCandForm->ptCurrentPos;
 
 		ClientToScreen( ic->hWnd, &pt );
-		pt.x += indexToXPos(cursorPos);
+		pt.x += indexToXPos( getDisplayedCompStr(), getDisplayedCursorPos());
 		g_candWnd->Move( pt.x, pt.y );
 	}
 	ImmUnlockIMC(hIMC);
@@ -206,4 +216,31 @@ void CompWnd::showCand(void)
 	g_candWnd->updateSize();
 	g_candWnd->Show();
 
+}
+
+string CompWnd::getDisplayedCompStr(void)
+{
+	HIMC hIMC = getIMC();
+	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
+
+	string comp_str = compStr->getCompStr();
+
+	ImmUnlockIMCC(ic->hCompStr);
+	ImmUnlockIMC(hIMC);
+
+	return comp_str;
+}
+
+int CompWnd::getDisplayedCursorPos(void)
+{
+	HIMC hIMC = getIMC();
+	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
+
+	int cursorPos = compStr->getCursorPos();
+
+	ImmUnlockIMCC(ic->hCompStr);
+	ImmUnlockIMC(hIMC);
+	return cursorPos;
 }
