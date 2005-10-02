@@ -221,7 +221,6 @@ LRESULT APIENTRY ImeEscape(HIMC, UINT, LPVOID)
 }
 
 
-
 BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState
 )
 {
@@ -366,31 +365,17 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 	else
 	{
 		CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
-		if( !cs->isEmpty() )
-		{
-			g_chewing->Enter();	// Commit
-			if( g_chewing->CommitReady() )
-			{
-				char* cstr = g_chewing->CommitStr();
-				cs->setResultStr(cstr);
-				free(cstr);
-			}
-			else
-				cs->setResultStr( cs->getCompStr() );
-			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
-			cs->setCompStr("");
-			cs->setCursorPos(0);
-			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION );
-		}
 		cs->~CompStr();	// delete cs;
 		ImmUnlockIMCC( ic->hCompStr );
 		CandList* cl = (CandList*)ImmLockIMCC( ic->hCandInfo );
 		cl->~CandList();	// delete cl;
 		ImmUnlockIMCC( ic->hCandInfo );
-
 	}
 	ImmUnlockIMC( hIMC );
 
+	// FIXME: I don't know why this is needed, but without this
+	//        action, the IME cannot work normally under Win 2000/XP.
+	//        It seems that Windows 98/ME don't have this problem.
 	if( g_isWindowNT )
 		ImmSetOpenStatus( hIMC, fSelect );
 
@@ -431,9 +416,49 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 	case NI_CONTEXTUPDATED:
 		break;
 	case NI_COMPOSITIONSTR:
+		{
+			INPUTCONTEXT* ic = ImmLockIMC( hIMC );
+			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
+			switch( dwIndex )
+			{
+			case CPS_COMPLETE:
+				if( !cs->isEmpty() )
+				{
+					// FIXME: If candidate window is opened, this
+					//        will cause problems.
+					g_chewing->Enter();	// Commit
+					if( g_chewing->CommitReady() )
+					{
+						char* cstr = g_chewing->CommitStr();
+						cs->setResultStr(cstr);
+						free(cstr);
+					}
+					else
+						cs->setResultStr( cs->getCompStr() );
+					cs->setCompStr("");
+					cs->setCursorPos(0);
+					cs->setZuin("");
+					GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
+						0,
+						(GCS_RESULTSTR|GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
+						GCS_COMPREADATTR/*|GCS_CURSORPOS|GCS_DELTASTART*/) );
+
+					GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
+				}
+				break;
+			case CPS_CONVERT:
+				break;
+			case CPS_CANCEL:
+				cs->setCompStr("");
+				cs->setZuin("");
+				break;
+			}
+			ImmUnlockIMCC( ic->hCompStr );
+			ImmUnlockIMC(hIMC);
+		}
 		break;
 	}
-	return FALSE;
+	return TRUE;
 }
 
 BOOL    APIENTRY ImeRegisterWord(LPCTSTR, DWORD, LPCTSTR)
@@ -612,8 +637,11 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 				ClientToScreen( ic->hWnd, &pt );
 				g_compWnd->Move( pt.x, pt.y );
 
-				if( !g_compWnd->isVisible() && ! cs->isEmpty() )
-					g_compWnd->Show();
+				if( ! cs->isEmpty() )
+				{
+					if( !g_compWnd->isVisible() )
+						g_compWnd->Show();
+				}
 				else
 					g_compWnd->Hide();
 			}
@@ -642,6 +670,10 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 			else
 				g_candWnd->Hide();
 */
+		}
+		else
+		{
+		
 		}
 		break;
 	case WM_IME_RELOADCONFIG:

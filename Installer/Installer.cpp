@@ -33,22 +33,27 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 				char regpath[256];
 				lstrcpy( regpath, "Keyboard Layout\\Preload" );
 				HKEY hk2 = NULL;
-				if( ERROR_SUCCESS == RegOpenKey( HKEY_CURRENT_USER, regpath, &hk2 ) )
+
+				// Windows NT only, 9x will be supported in the future
+				if( (GetVersion() < 0x80000000) )
 				{
-					for( int i = 1; i <= 100; ++i )
+					if( ERROR_SUCCESS == RegOpenKey( HKEY_CURRENT_USER, regpath, &hk2 ) )
 					{
-						char num[4];
-						wsprintf( num, "%d", i );
-						type = REG_SZ;	size = sizeof(regpath);
-						if(	ERROR_SUCCESS != RegQueryValueEx( hk2, num, 0, &type, (LPBYTE)regpath, &size ) )
-							continue;
-						if( 0 == lstrcmp( regpath, klstr ) )
+						for( int i = 1; i <= 100; ++i )
 						{
-							RegDeleteValue( hk2, num );
-							break;
+							char num[4];
+							wsprintf( num, "%d", i );
+							type = REG_SZ;	size = sizeof(regpath);
+							if(	ERROR_SUCCESS != RegQueryValueEx( hk2, num, 0, &type, (LPBYTE)regpath, &size ) )
+								continue;
+							if( 0 == lstrcmp( regpath, klstr ) )
+							{
+								RegDeleteValue( hk2, num );
+								break;
+							}
 						}
+						RegCloseKey(hk2);
 					}
-					RegCloseKey(hk2);
 				}
 
 				wsprintf( regpath, "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layouts\\%s", klstr );
@@ -62,7 +67,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		GetSystemDirectory(path, MAX_PATH);
 
 		lstrcat( path, "\\Chewing.ime" );
-		kl = ImmInstallIME( path, "中文 (繁體) - 新酷音輸入法" );
+		kl = ImmInstallIME( path, 
+			(GetVersion() < 0x80000000) ? "中文 (繁體) - 新酷音輸入法" : "新酷音輸入法" );
 		if( hk )
 			RegSetValueEx( hk, "KeyboardLayout", 0, REG_DWORD, (LPBYTE)&kl, sizeof(DWORD) );
 	}
