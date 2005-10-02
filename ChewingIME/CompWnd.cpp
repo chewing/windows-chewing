@@ -194,26 +194,53 @@ int CompWnd::indexToXPos( string compStr, int idx)
 
 void CompWnd::showCand(void)
 {
+	g_candWnd->setFont( font );
+	g_candWnd->updateSize();
+
 	HIMC hIMC = getIMC();
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
 
-	if( isVisible() )
+	POINT pt = ic->cfCandForm[0].ptCurrentPos;
+	switch( ic->cfCandForm[0].dwStyle )
 	{
-		POINT pt;
-		RECT rc;
-		GetWindowRect( hwnd, &rc );
-		ic->cfCandForm->ptCurrentPos = ic->cfCompForm.ptCurrentPos;
-		ic->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
-		pt = ic->cfCandForm->ptCurrentPos;
+	case CFS_CANDIDATEPOS:
+		break;
+	case CFS_EXCLUDE:
+		{
+			RECT &rc = ic->cfCandForm[0].rcArea;
 
-		ClientToScreen( ic->hWnd, &pt );
-		pt.x += indexToXPos( getDisplayedCompStr(), getDisplayedCursorPos());
-		g_candWnd->Move( pt.x, pt.y );
+			RECT crc;
+			GetWindowRect(hwnd, &crc);
+			int w = crc.right - crc.left;
+			int h = crc.bottom - crc.top;
+
+			RECT wrc;
+			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&wrc, 0 );
+			if( pt.y >= rc.top && pt.y <= rc.bottom )
+			{
+				if( (rc.bottom + h + 1) < wrc.bottom )
+					pt.y = rc.bottom + 1;
+				else if( (rc.top - 1) > h )
+					pt.y = rc.top - h -1;
+			}
+			break;
+		}
+	case CFS_DEFAULT:
+	default:
+		{
+			RECT rc;
+			GetWindowRect( hwnd, &rc );
+			ic->cfCandForm->ptCurrentPos = ic->cfCompForm.ptCurrentPos;
+			ic->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
+			pt = ic->cfCandForm->ptCurrentPos;		
+			pt.x += indexToXPos( getDisplayedCompStr(), getDisplayedCursorPos());
+		}
 	}
-	ImmUnlockIMC(hIMC);
 
-	g_candWnd->setFont( font );
-	g_candWnd->updateSize();
+	ClientToScreen( ic->hWnd, &pt );
+	g_candWnd->Move( pt.x, pt.y );
+
+	ImmUnlockIMC(hIMC);
 	g_candWnd->Show();
 
 }

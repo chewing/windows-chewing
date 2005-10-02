@@ -517,21 +517,37 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 		delete g_candWnd;
 		g_candWnd = NULL;
 		break;
+	case IMN_SETCANDIDATEPOS:
+		{
+			POINT pt = ic->cfCandForm[0].ptCurrentPos;
+			switch( ic->cfCandForm[0].dwStyle )
+			{
+			case CFS_CANDIDATEPOS :
+//				 pt = ic->cfCandForm[0].ptCurrentPos;
+				break;
+			case CFS_DEFAULT:
+				break;
+			case CFS_EXCLUDE:
+				{
+					RECT &rc = ic->cfCandForm[0].rcArea;
+					if( pt.x >= rc.left && pt.x <= rc.right )
+						pt.x = rc.right;
+
+					if( pt.y >= rc.top && pt.y <= rc.bottom )
+						pt.x = rc.bottom;
+					break;
+				}
+			}
+			ClientToScreen(ic->hWnd, &pt);
+			g_candWnd->Move(pt.x, pt.y);
+			break;
+		}
 	case IMN_SETCONVERSIONMODE:
 			break;
 	case IMN_SETSENTENCEMODE:
 		break;
 	case IMN_SETOPENSTATUS:
 		break;
-	case IMN_SETCANDIDATEPOS:
-		{
-			POINT pt = ic->cfCandForm[0].ptCurrentPos;
-//			pt.y = ic->cfCandForm[0].rcArea.bottom;
-			ClientToScreen(ic->hWnd, &pt);
-			g_candWnd->Move(pt.x, pt.y);
-			// lParam = lCandidateList;
-			break;
-		}
 	case IMN_SETCOMPOSITIONFONT:
 		{
 			g_compWnd->setFont( (LOGFONT*)&ic->lfFont );
@@ -593,12 +609,13 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 						pt.y = rc.bottom -= 50;
 					}
 				}
-
 				ClientToScreen( ic->hWnd, &pt );
 				g_compWnd->Move( pt.x, pt.y );
 
-				if( !g_compWnd->isVisible() )
+				if( !g_compWnd->isVisible() && ! cs->isEmpty() )
 					g_compWnd->Show();
+				else
+					g_compWnd->Hide();
 			}
 			if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
 				if( g_compWnd->isVisible() )
