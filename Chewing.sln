@@ -11,6 +11,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libChewing", "..\libchewing
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ime-hack", "ime-hack\ime-hack.vcproj", "{6AE48A55-FBEB-499B-9D79-615933390C27}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -26,6 +30,10 @@ Global
 		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.ActiveCfg = Debug|Win32
 		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Debug.Build.0 = Debug|Win32
 		{AF909FB6-6C9F-4218-B360-4FDBEA1F7062}.Release.ActiveCfg = Release|Win32
+		{6AE48A55-FBEB-499B-9D79-615933390C27}.Debug.ActiveCfg = Debug|Win32
+		{6AE48A55-FBEB-499B-9D79-615933390C27}.Debug.Build.0 = Debug|Win32
+		{6AE48A55-FBEB-499B-9D79-615933390C27}.Release.ActiveCfg = Release|Win32
+		{6AE48A55-FBEB-499B-9D79-615933390C27}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -154,7 +154,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
 	lpIMEInfo->fdwSCSCaps = 0;
 	lpIMEInfo->fdwSelectCaps = SELECT_CAP_CONVERSION;
-	lpIMEInfo->fdwProperty = IME_PROP_IGNORE_UPKEYS|IME_PROP_AT_CARET|/*IME_PROP_KBD_CHAR_FIRST|*/
+	lpIMEInfo->fdwProperty = IME_PROP_IGNORE_UPKEYS|IME_PROP_AT_CARET|IME_PROP_KBD_CHAR_FIRST|
 						#ifdef	UNICODE
 							 IME_PROP_UNICODE|
 						#endif
@@ -233,8 +233,6 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )
 		return TRUE;
 
-	int old_cursor_pos = g_chewing->CursorPos();
-
 	BOOL ret = ProcessKeyEvent( uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
 		return FALSE;
@@ -276,54 +274,48 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 
 	if( g_chewing->CommitReady() )
 	{
-		char* cstr = g_chewing->CommitStr(0);
+		char* cstr = g_chewing->CommitStr();
 		cs->setResultStr(cstr);
+		free(cstr);
+		cs->setCompStr("");
+		cs->setZuin("");
 		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
+		cs->setResultStr("");
 	}
 
 	string comp_str;
 	if( g_chewing->BufferLen() )
 	{
 		char* chibuf = g_chewing->Buffer();
-		comp_str = chibuf;
+		cs->setCompStr(chibuf);
 		free(chibuf);
 	}
+	else
+		cs->setCompStr("");
 
-	const TCHAR* pcompstr = cs->getCompStr();
-	int i;
-	for( i = 0; i < old_cursor_pos && *pcompstr; ++i )
+	int cursorpos = g_chewing->CursorPos();
+	TCHAR* pcompstr = cs->getCompStr();
+	for( int i = 0; i < cursorpos && *pcompstr; ++i )
 		pcompstr = _tcsinc(pcompstr);
-	old_cursor_pos = int(pcompstr - cs->getCompStr());
+	cursorpos = int(pcompstr - cs->getCompStr());
+
+	cs->setCursorPos( cursorpos );
 
 	char* zuin = g_chewing->ZuinStr();
 	if( *zuin )
 	{
-		// Need debugging...
-		if( old_cursor_pos < comp_str.length() )
-			comp_str.insert( old_cursor_pos, zuin );
-		else
-			comp_str += zuin;
+		cs->setZuin(zuin);
 		free(zuin);
 	}
+	else
+		cs->setZuin("");
 
-	if( comp_str != cs->getCompStr() )
-	{
-		cs->setCompStr( comp_str.c_str() );
-		if( !cs->isEmpty() )
-			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_COMPSTR );
-	}
+	cs->beforeGenerateMsg();
 
-	int cursorpos = g_chewing->CursorPos();
-	pcompstr = cs->getCompStr();
-	for( i = 0; i < cursorpos && *pcompstr; ++i )
-		pcompstr = _tcsinc(pcompstr);
-	cursorpos = int(pcompstr - cs->getCompStr());
-
-	if( cursorpos != old_cursor_pos )
-	{
-		cs->setCursorPos( cursorpos );
-		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_CURSORPOS );
-	}
+	GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
+				*(WORD*)cs->getCompStr(),
+				(GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
+				GCS_COMPREADATTR|GCS_CURSORPOS|GCS_DELTASTART) );
 
 	if( cs->isEmpty() )
 		GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
@@ -336,9 +328,6 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 {
-	if( g_isWindowNT )
-		ImmSetOpenStatus( hIMC, fSelect );
-
 	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
 	if(fSelect)
 	{
@@ -401,6 +390,10 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 
 	}
 	ImmUnlockIMC( hIMC );
+
+	if( g_isWindowNT )
+		ImmSetOpenStatus( hIMC, fSelect );
+
 	return TRUE;
 }
 
@@ -416,7 +409,6 @@ BOOL    APIENTRY ImeSetActiveContext(HIMC hIMC, BOOL fFlag)
 
 UINT    APIENTRY ImeToAsciiEx(UINT uVirtKey, UINT uScaCode, CONST LPBYTE lpbKeyState, LPDWORD lpdwTransBuf, UINT fuState, HIMC)
 {
-
 	return FALSE;
 }
 
@@ -526,13 +518,15 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 		g_candWnd = NULL;
 		break;
 	case IMN_SETCONVERSIONMODE:
+			break;
+	case IMN_SETSENTENCEMODE:
 		break;
 	case IMN_SETOPENSTATUS:
 		break;
 	case IMN_SETCANDIDATEPOS:
 		{
 			POINT pt = ic->cfCandForm[0].ptCurrentPos;
-			pt.y = ic->cfCandForm[0].rcArea.bottom;
+//			pt.y = ic->cfCandForm[0].rcArea.bottom;
 			ClientToScreen(ic->hWnd, &pt);
 			g_candWnd->Move(pt.x, pt.y);
 			// lParam = lCandidateList;
@@ -579,35 +573,38 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr );
 
-//			if( lp & GCS_CURSORPOS )
-//				g_compWnd->setCursorPos( cs->getCursorPos() );
-
-			g_compWnd->refresh();
-
-			POINT pt = ic->cfCompForm.ptCurrentPos;
-			if( 0 == ic->cfCompForm.dwStyle )
+			if( lp & GCS_COMPSTR )
 			{
-				RECT rc;
-				if( GetCaretPos( &pt ) )
-				{
-//					GetWindowRect( g_compWnd->getHwnd(), &rc );
-//					pt.y -= (rc.bottom - rc.top);
-				}
-				else
-				{
-					SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
-					pt.x = rc.left + 10;
-					pt.y = rc.bottom -= 50;
-				}
-			}
+				g_compWnd->refresh();
 
-			ClientToScreen( ic->hWnd, &pt );
-			g_compWnd->Move( pt.x, pt.y );
+				POINT pt = ic->cfCompForm.ptCurrentPos;
+				if( 0 == ic->cfCompForm.dwStyle )
+				{
+					RECT rc;
+					if( GetCaretPos( &pt ) )
+					{
+	//					GetWindowRect( g_compWnd->getHwnd(), &rc );
+	//					pt.y -= (rc.bottom - rc.top);
+					}
+					else
+					{
+						SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+						pt.x = rc.left + 10;
+						pt.y = rc.bottom -= 50;
+					}
+				}
+
+				ClientToScreen( ic->hWnd, &pt );
+				g_compWnd->Move( pt.x, pt.y );
+
+				if( !g_compWnd->isVisible() )
+					g_compWnd->Show();
+			}
+			if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
+				if( g_compWnd->isVisible() )
+					g_compWnd->refresh();
 
 			ImmUnlockIMCC( ic->hCompStr );
-
-			if( !g_compWnd->isVisible() )
-				g_compWnd->Show();
 
 			break;
 		}

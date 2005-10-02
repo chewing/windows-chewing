@@ -106,7 +106,7 @@ void CandWnd::OnPaint(PAINTSTRUCT& ps)
 		++num;
 
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d. %s "), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
 
 		int len = _tcslen( cand );
 		SIZE candsz;
@@ -168,7 +168,7 @@ void CandWnd::getSize(int* w, int* h)
 	{
 		++num;
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d. %s "), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
 		int len = _tcslen( cand );
 		SIZE candsz;
 		GetTextExtentPoint32(hDC, cand, len, &candsz);

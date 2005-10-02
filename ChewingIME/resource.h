@@ -1,9 +1,9 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by ChewingIME.rc
 //
+#define IDI_ICON                        5
 #define IDI_ICON1                       101
-#define IDI_ICON                        101
 #define ID_CHI_ENG                      101
 #define IDD_CONFIG                      102
 #define ID_FULL_HALF                    102
