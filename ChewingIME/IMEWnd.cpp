@@ -61,7 +61,6 @@ void IMEWnd::OnLButtonDown(WPARAM wp, LPARAM lp)
 
 void IMEWnd::OnLButtonUp(WPARAM wp, LPARAM lp)
 {
-	POINTS pt = MAKEPOINTS(lp);
 	ReleaseCapture();
 }
 

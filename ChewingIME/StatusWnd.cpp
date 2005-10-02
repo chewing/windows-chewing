@@ -43,7 +43,7 @@ StatusWnd::StatusWnd( HWND imeUIWnd ) : IMEWnd(imeUIWnd, g_status_wnd_class)
 	toolbar = CreateToolbarEx( hwnd, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
 		WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, 
-		10, 3, g_dllInst, 0, 
+		0, 0, g_dllInst, 0, 
 		toolbar_btns, sizeof(toolbar_btns)/sizeof(TBBUTTON), 
 		16, 16, 16, 16, sizeof(TBBUTTON));
 

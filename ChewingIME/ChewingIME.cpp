@@ -18,6 +18,7 @@
 #include <shlobj.h>
 
 HINSTANCE g_dllInst = NULL;
+bool g_isWindowNT = false;
 
 Chewing* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
@@ -148,12 +149,17 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lpszOptions)
 {
 	_tcscpy( lpszUIClass, _T(g_pcman_ime_class) );
-	lpIMEInfo->fdwConversionCaps = IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
+	lpIMEInfo->fdwConversionCaps = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
 	lpIMEInfo->fdwSentenceCaps = IME_SMODE_NONE;
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
 	lpIMEInfo->fdwSCSCaps = 0;
 	lpIMEInfo->fdwSelectCaps = SELECT_CAP_CONVERSION;
-
+	lpIMEInfo->fdwProperty = IME_PROP_IGNORE_UPKEYS|IME_PROP_AT_CARET|/*IME_PROP_KBD_CHAR_FIRST|*/
+						#ifdef	UNICODE
+							 IME_PROP_UNICODE|
+						#endif
+							 IME_PROP_CANDLIST_START_FROM_1|IME_PROP_COMPLETE_ON_UNSELECT
+							 /*|IME_PROP_END_UNLOAD*/;
 	return TRUE;
 }
 
@@ -167,7 +173,7 @@ static BOOL CALLBACK ReloadAllChewingInst(HWND hwnd, LPARAM lp)
 	return TRUE;
 }
 
-void ConfigureChewingIME(HWND parent)
+void DoConfigureChewingIME(HWND parent)
 {
 	TCHAR title[32];
 	LoadString( g_dllInst, IDS_CONFIGTIELE, title, sizeof(title) );
@@ -184,9 +190,15 @@ void ConfigureChewingIME(HWND parent)
 	}
 }
 
+void WINAPI ConfigureChewingIME()
+{
+	DoConfigureChewingIME(HWND_DESKTOP);
+}
+
+
 BOOL    APIENTRY ImeConfigure(HKL hkl, HWND hWnd, DWORD dwMode, LPVOID pRegisterWord)
 {
-	ConfigureChewingIME(hWnd);
+	DoConfigureChewingIME(hWnd);
 	return TRUE;
 }
 
@@ -231,6 +243,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	int pageCount = 0;
 	if( pageCount = g_chewing->Candidate() )
 	{
+//		ImmNotifyIME( hIMC, , , );
+
 		CandList* candList = (CandList*)ImmLockIMCC( ic->hCandInfo );
 		candList->setPageStart( g_chewing->CurrentPage() * g_chewing->ChoicePerPage() );
 		candList->setPageSize( g_chewing->ChoicePerPage() );
@@ -276,7 +290,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	}
 
 	const TCHAR* pcompstr = cs->getCompStr();
-	for( int i = 0; i < old_cursor_pos && *pcompstr; ++i )
+	int i;
+	for( i = 0; i < old_cursor_pos && *pcompstr; ++i )
 		pcompstr = _tcsinc(pcompstr);
 	old_cursor_pos = int(pcompstr - cs->getCompStr());
 
@@ -300,7 +315,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 
 	int cursorpos = g_chewing->CursorPos();
 	pcompstr = cs->getCompStr();
-	for( int i = 0; i < cursorpos && *pcompstr; ++i )
+	for( i = 0; i < cursorpos && *pcompstr; ++i )
 		pcompstr = _tcsinc(pcompstr);
 	cursorpos = int(pcompstr - cs->getCompStr());
 
@@ -321,7 +336,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 {
-	ImmSetOpenStatus( hIMC, fSelect );
+	if( g_isWindowNT )
+		ImmSetOpenStatus( hIMC, fSelect );
 
 	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
 	if(fSelect)
@@ -361,20 +377,21 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 	else
 	{
 		CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
-		if( ! cs->isEmpty() )	// Has composition string
+		if( !cs->isEmpty() )
 		{
-			// Ugly hack!
-			g_chewing->Enter();
-			char* cstr = g_chewing->CommitStr(0);
-			if( cstr )
+			g_chewing->Enter();	// Commit
+			if( g_chewing->CommitReady() )
 			{
-	//			cs->setCompStr("");
-	//			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_COMPSTR );
+				char* cstr = g_chewing->CommitStr();
 				cs->setResultStr(cstr);
 				free(cstr);
-				GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
-				GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
 			}
+			else
+				cs->setResultStr( cs->getCompStr() );
+			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
+			cs->setCompStr("");
+			cs->setCursorPos(0);
+			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION );
 		}
 		cs->~CompStr();	// delete cs;
 		ImmUnlockIMCC( ic->hCompStr );
@@ -400,12 +417,31 @@ BOOL    APIENTRY ImeSetActiveContext(HIMC hIMC, BOOL fFlag)
 UINT    APIENTRY ImeToAsciiEx(UINT uVirtKey, UINT uScaCode, CONST LPBYTE lpbKeyState, LPDWORD lpdwTransBuf, UINT fuState, HIMC)
 {
 
-	return TRUE;
+	return FALSE;
 }
 
-BOOL    APIENTRY NotifyIME(HIMC, DWORD, DWORD, DWORD)
+BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwValue )
 {
-	return TRUE;
+	switch( dwAction )
+	{
+	case NI_OPENCANDIDATE:
+		break;
+	case NI_CLOSECANDIDATE:
+		break;
+	case NI_SELECTCANDIDATESTR:
+		break;
+	case NI_CHANGECANDIDATELIST:
+		break;
+	case NI_SETCANDIDATE_PAGESTART:
+		break;
+	case NI_SETCANDIDATE_PAGESIZE:
+		break;
+	case NI_CONTEXTUPDATED:
+		break;
+	case NI_COMPOSITIONSTR:
+		break;
+	}
+	return FALSE;
 }
 
 BOOL    APIENTRY ImeRegisterWord(LPCTSTR, DWORD, LPCTSTR)
@@ -446,12 +482,15 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 	{
 	case IMN_CLOSESTATUSWINDOW:
 		{
-			RECT rc;
-			GetWindowRect( g_statusWnd->getHwnd(), &rc );
-			g_statusWndPos.x = rc.left;
-			g_statusWndPos.y = rc.top;
-			delete g_statusWnd;
-			g_statusWnd = NULL;
+			if(g_statusWnd)
+			{
+				RECT rc;
+				GetWindowRect( g_statusWnd->getHwnd(), &rc );
+				g_statusWndPos.x = rc.left;
+				g_statusWndPos.y = rc.top;
+				delete g_statusWnd;
+				g_statusWnd = NULL;
+			}
 			break;
 		}
 	case IMN_OPENSTATUSWINDOW:
@@ -598,6 +637,9 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			g_compWnd = new CompWnd(hwnd);
 			g_candWnd = new CandWnd(hwnd);
+
+//			This line is only used to debug.
+//			PostMessage( hwnd, WM_IME_NOTIFY, IMN_OPENSTATUSWINDOW, 0 );
 			break;
 		}
 	case WM_DESTROY:
@@ -655,6 +697,8 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 		{
 			DisableThreadLibraryCalls((HMODULE)hModule);
 			g_dllInst = (HINSTANCE)hModule;
+
+			g_isWindowNT = (GetVersion() < 0x80000000);
 
 			INITCOMMONCONTROLSEX iccex;
 			iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);

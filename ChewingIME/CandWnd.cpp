@@ -84,7 +84,6 @@ void CandWnd::OnPaint(PAINTSTRUCT& ps)
 	HDC hDC = ps.hdc;
 	HFONT oldFont;
 	RECT rc;
-	DWORD i;
 
 	oldFont = (HFONT)SelectObject(hDC, font);
 
@@ -107,7 +106,7 @@ void CandWnd::OnPaint(PAINTSTRUCT& ps)
 		++num;
 
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		wsprintf ( cand, _T("%d. %s "), (i - candList->getPageStart() + 1), candList->getCand(i) );
 
 		int len = _tcslen( cand );
 		SIZE candsz;
@@ -154,8 +153,6 @@ void CandWnd::getSize(int* w, int* h)
 
 	HDC hDC = GetDC(hwnd);
 	HFONT oldFont;
-	RECT rc;
-	DWORD i;
 
 	oldFont = (HFONT)SelectObject(hDC, font);
 
@@ -171,7 +168,7 @@ void CandWnd::getSize(int* w, int* h)
 	{
 		++num;
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		wsprintf ( cand, _T("%d. %s "), (i - candList->getPageStart() + 1), candList->getCand(i) );
 		int len = _tcslen( cand );
 		SIZE candsz;
 		GetTextExtentPoint32(hDC, cand, len, &candsz);

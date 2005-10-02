@@ -13,10 +13,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	char path[MAX_PATH];
-	GetSystemDirectory(path, MAX_PATH);
-	SetCurrentDirectory(path);
-
 	HKL kl;
 
 	HKEY hk = NULL;
@@ -62,7 +58,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 	else
 	{
-		kl = ImmInstallIME( "Chewing.ime", "中文 (繁體) - 新酷音輸入法" );
+		char path[MAX_PATH];
+		GetSystemDirectory(path, MAX_PATH);
+
+		lstrcat( path, "\\Chewing.ime" );
+		kl = ImmInstallIME( path, "中文 (繁體) - 新酷音輸入法" );
 		if( hk )
 			RegSetValueEx( hk, "KeyboardLayout", 0, REG_DWORD, (LPBYTE)&kl, sizeof(DWORD) );
 	}

@@ -7,6 +7,8 @@
 #include "ChewingPP.h"
 
 extern HINSTANCE g_dllInst;
+extern bool g_isWindowNT;
+
 const LPCTSTR g_pcman_ime_class = _T("ChewingIME");
 const LPCTSTR g_comp_wnd_class = _T("PCIMEComp");
 const LPCTSTR g_cand_wnd_class = _T("PCIMECand");

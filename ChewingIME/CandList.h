@@ -20,10 +20,10 @@ public:
 protected:
     CANDIDATEINFO  ci;
     CANDIDATELIST  cl;
-    DWORD offset[50];
+    DWORD offset[240];
 #ifdef	UNICODE
-    TCHAR candStr[80][16];
+    TCHAR candStr[240][8];
 #else
-    TCHAR candStr[80][32];
+    TCHAR candStr[240][16];
 #endif
 };

@@ -216,13 +216,15 @@ void Chewing::Dump() {
   fprintf(stderr,"nCommitStr = %d\n",co->nCommitStr);
   
   fprintf(stderr,"zuin: ");
-  for(int i=0;i<ZUIN_SIZE;i++) 
+
+  int i;
+  for(i=0;i<ZUIN_SIZE;i++) 
     if(co->zuinBuf[i].s)
       fprintf(stderr,"%s",co->zuinBuf[i].s);
   fprintf(stderr,"\n");
   
   fprintf(stderr,"commit: ");
-  for(int i=0;i<co->nCommitStr;i++) 
+  for(i=0;i<co->nCommitStr;i++) 
     fprintf(stderr,"%s",co->commitStr[i].s);
   fprintf(stderr,"\n");
   fprintf(stderr,"-----\n");
