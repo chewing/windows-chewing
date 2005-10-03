@@ -1,16 +1,21 @@
-#include "candwnd.h"
+#include ".\candwnd.h"
+#include "IMCLock.h"
 #include "ChewingIME.h"
 #include "DrawUtil.h"
 #include "CandList.h"
 #include "imm.h"
-#include ".\candwnd.h"
+#include "IMCLock.h"
+#include "IMEData.h"
+
 #include <tchar.h>
 
-static CandWnd* g_thisCandWnd = NULL;
-CandWnd::CandWnd( HWND imeUIWnd ) : IMEWnd(imeUIWnd, g_cand_wnd_class)
+CandWnd::CandWnd()
 {
-	g_thisCandWnd = this;
 	font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+	LOGFONT lf;
+	GetObject( font, sizeof(lf), &lf);
+	lf.lfHeight = 16;
+	font = CreateFontIndirect( &lf );
 }
 
 CandWnd::~CandWnd(void)
@@ -42,13 +47,19 @@ BOOL CandWnd::RegisterClass(void)
 
 LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
+	HIMC hIMC = getIMC(hwnd);
+	IMCLock imc( hIMC );
+	IMEData* data = imc.getData();
+	if( !data )
+		return 0;
+
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_thisCandWnd->OnPaint(ps);
+				data->candWnd.OnPaint(imc, ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -56,13 +67,13 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			return TRUE;
 			break;
 		case WM_LBUTTONDOWN:
-			g_thisCandWnd->OnLButtonDown(wp, lp);
+			data->candWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_thisCandWnd->OnMouseMove(wp, lp);
+			data->candWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_thisCandWnd->OnLButtonUp(wp, lp);
+			data->candWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -73,17 +84,11 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 	return 0;
 }
 
-void CandWnd::OnPaint(PAINTSTRUCT& ps)
+void CandWnd::OnPaint(IMCLock& imc, PAINTSTRUCT& ps)
 {
-	HIMC hIMC = getIMC();
-	if(!hIMC)
+	CandList* candList = imc.getCandList();
+	if( !candList )
 		return;
-	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
-	if( !ic )
-		return;
-	CandList* candList = (CandList*)ImmLockIMCC(ic->hCandInfo);
-
-// Begin paint
 
 	HDC hDC = ps.hdc;
 	HFONT oldFont;
@@ -141,11 +146,6 @@ void CandWnd::OnPaint(PAINTSTRUCT& ps)
 
 	Draw3DBorder( hDC, &rc, GetSysColor(COLOR_3DFACE), 0);
 	SelectObject( hDC, oldFont );
-
-// End paint
-
-	ImmUnlockIMCC(ic->hCandInfo);
-	ImmUnlockIMC(hIMC);
 }
 
 void CandWnd::getSize(int* w, int* h)
@@ -213,4 +213,70 @@ void CandWnd::updateSize(void)
 	int w, h;
 	getSize(&w, &h);
 	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER);
+}
+
+bool CandWnd::create(HWND imeUIWnd)
+{
+	hwnd = CreateWindowEx(0, g_cand_wnd_class, NULL,
+					WS_POPUP|WS_CLIPCHILDREN,
+					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+	return !!hwnd;
+}
+
+void CandWnd::show(void)
+{
+	HIMC hIMC = getIMC();
+	IMCLock imc(hIMC);
+	IMEData* data = NULL;
+	if( !hIMC || ! (data = imc.getData()) )
+		return;
+
+	setFont( font );
+	updateSize();
+
+	if( !imc.getIC() )
+		return;
+
+	POINT pt = imc.getIC()->cfCandForm[0].ptCurrentPos;
+	switch( imc.getIC()->cfCandForm[0].dwStyle )
+	{
+	case CFS_CANDIDATEPOS:
+		break;
+	case CFS_EXCLUDE:
+		{
+			RECT &rc = imc.getIC()->cfCandForm[0].rcArea;
+
+			RECT crc;
+			GetWindowRect(hwnd, &crc);
+			int w = crc.right - crc.left;
+			int h = crc.bottom - crc.top;
+
+			RECT wrc;
+			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&wrc, 0 );
+			if( pt.y >= rc.top && pt.y <= rc.bottom )
+			{
+				if( (rc.bottom + h + 1) < wrc.bottom )
+					pt.y = rc.bottom + 1;
+				else if( (rc.top - 1) > h )
+					pt.y = rc.top - h -1;
+			}
+			break;
+		}
+	case CFS_DEFAULT:
+	default:
+		{
+			RECT rc;
+			GetWindowRect( data->compWnd.getHwnd(), &rc );
+			imc.getIC()->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
+			imc.getIC()->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
+			pt = imc.getIC()->cfCandForm->ptCurrentPos;
+			pt.x += data->compWnd.indexToXPos( data->compWnd.getDisplayedCompStr(),
+				data->compWnd.getDisplayedCursorPos());
+		}
+	}
+
+	ClientToScreen( imc.getIC()->hWnd, &pt );
+	data->candWnd.Move( pt.x, pt.y );
+
+	data->candWnd.Show();
 }

@@ -3,12 +3,11 @@
 #include "DrawUtil.h"
 #include "CandWnd.h"
 #include "CompStr.h"
+#include "IMCLock.h"
+#include "IMEData.h"
 
-static CompWnd* g_thisCompWnd = NULL;
-
-CompWnd::CompWnd( HWND imeUIWnd ) : IMEWnd(imeUIWnd, g_comp_wnd_class)
+CompWnd::CompWnd(void)
 {
-	g_thisCompWnd = this;
 	font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	LOGFONT lf;
 	GetObject( font, sizeof(lf), &lf);
@@ -44,40 +43,33 @@ BOOL CompWnd::RegisterClass(void)
 
 LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
+	HIMC hIMC = getIMC(hwnd);
+	IMCLock imc( hIMC );
+	IMEData* data = imc.getData();
+	if( !data )
+		return 0;
+
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_thisCompWnd->OnPaint(ps);
+				data->compWnd.OnPaint( imc, ps );
 				EndPaint(hwnd, &ps);
 				break;
 			}
 		case WM_ERASEBKGND:
 			return TRUE;
 			break;
-/*		case WM_SETCURSOR:
-		case WM_MOUSEMOVE:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			DragUI(hWnd, NULL, msg, wp, lp, TRUE);
-			if ((msg == WM_SETCURSOR) &&
-					(HIWORD(lp) != WM_LBUTTONDOWN) &&
-					(HIWORD(lp) != WM_RBUTTONDOWN))
-				return DefWindowProc(hWnd, msg, wp, lp);
-			if ((msg == WM_LBUTTONUP) || (msg == WM_RBUTTONUP))
-				SetWindowLong(hWnd, FIGWL_MOUSE, 0L);
-			break;
-*/
 		case WM_LBUTTONDOWN:
-			g_thisCompWnd->OnLButtonDown(wp, lp);
+			data->compWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_thisCompWnd->OnMouseMove(wp, lp);
+			data->compWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_thisCompWnd->OnLButtonUp(wp, lp);
+			data->compWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -90,10 +82,10 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 
 
 
-void CompWnd::OnPaint(PAINTSTRUCT& ps)
+void CompWnd::OnPaint(IMCLock& imc, PAINTSTRUCT& ps)
 {
-	string compStr = getDisplayedCompStr();
-	int cursorPos = getDisplayedCursorPos();
+	string compStr = getDisplayedCompStr(imc);
+	int cursorPos = getDisplayedCursorPos(imc);
 
 	HFONT oldFont;
 	RECT rc;
@@ -192,96 +184,32 @@ int CompWnd::indexToXPos( string compStr, int idx)
 	return size.cx + 2;
 }
 
-void CompWnd::showCand(void)
+
+
+string CompWnd::getDisplayedCompStr(IMCLock& imc)
 {
-	g_candWnd->setFont( font );
-	g_candWnd->updateSize();
-
-	HIMC hIMC = getIMC();
-	if( !hIMC )
-		return;
-	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
-	if( !ic )
-		return;
-
-	POINT pt = ic->cfCandForm[0].ptCurrentPos;
-	switch( ic->cfCandForm[0].dwStyle )
-	{
-	case CFS_CANDIDATEPOS:
-		break;
-	case CFS_EXCLUDE:
-		{
-			RECT &rc = ic->cfCandForm[0].rcArea;
-
-			RECT crc;
-			GetWindowRect(hwnd, &crc);
-			int w = crc.right - crc.left;
-			int h = crc.bottom - crc.top;
-
-			RECT wrc;
-			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&wrc, 0 );
-			if( pt.y >= rc.top && pt.y <= rc.bottom )
-			{
-				if( (rc.bottom + h + 1) < wrc.bottom )
-					pt.y = rc.bottom + 1;
-				else if( (rc.top - 1) > h )
-					pt.y = rc.top - h -1;
-			}
-			break;
-		}
-	case CFS_DEFAULT:
-	default:
-		{
-			RECT rc;
-			GetWindowRect( hwnd, &rc );
-			ic->cfCandForm->ptCurrentPos = ic->cfCompForm.ptCurrentPos;
-			ic->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
-			pt = ic->cfCandForm->ptCurrentPos;		
-			pt.x += indexToXPos( getDisplayedCompStr(), getDisplayedCursorPos());
-		}
-	}
-
-	ClientToScreen( ic->hWnd, &pt );
-	g_candWnd->Move( pt.x, pt.y );
-
-	ImmUnlockIMC(hIMC);
-	g_candWnd->Show();
-
+	CompStr* compStr = imc.getCompStr();
+	if( compStr )
+		return string( compStr->getCompStr() );
+	return string("");
 }
 
-string CompWnd::getDisplayedCompStr(void)
+int CompWnd::getDisplayedCursorPos(IMCLock& imc)
 {
-	string comp_str;
-	HIMC hIMC = getIMC();
-	if(hIMC)
-	{
-		INPUTCONTEXT* ic = ImmLockIMC(hIMC);
-		if( ic )
-		{
-			CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
-
-			comp_str = compStr->getCompStr();
-
-			ImmUnlockIMCC(ic->hCompStr);
-		}
-		ImmUnlockIMC(hIMC);
-	}
-	return comp_str;
-}
-
-int CompWnd::getDisplayedCursorPos(void)
-{
-	HIMC hIMC = getIMC();
-	if(! hIMC )
-		return 0;
-	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	INPUTCONTEXT* ic = imc.getIC();
 	if( !ic )
 		return 0;
-	CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
-
+	CompStr* compStr = imc.getCompStr();
+	if( !compStr )
+		return 0;
 	int cursorPos = compStr->getCursorPos();
-
-	ImmUnlockIMCC(ic->hCompStr);
-	ImmUnlockIMC(hIMC);
 	return cursorPos;
+}
+
+bool CompWnd::create(HWND imeUIWnd)
+{
+	hwnd = CreateWindowEx(0, g_comp_wnd_class, NULL,
+					WS_POPUP|WS_CLIPCHILDREN,
+					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+	return !!hwnd;
 }

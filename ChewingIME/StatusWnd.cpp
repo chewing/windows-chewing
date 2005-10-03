@@ -4,10 +4,11 @@
 #include "resource.h"
 
 #include "CompStr.h"
+#include "IMCLock.h"
+#include "IMEData.h"
 
 #include <commctrl.h>
 
-StatusWnd* g_thisStatusWnd = NULL;
 
 //	SendMessage( toolbar, TB_GETMAXSIZE, 0, LPARAM(&sz));
 //  This standard toolbar message provided by Windows has some known bugs.
@@ -33,35 +34,8 @@ static TBBUTTON toolbar_btns[]={
 	{4, ID_CONFIG, TBSTATE_ENABLED ,TBSTYLE_BUTTON, {0}, 0, 0 },
 };
 
-StatusWnd::StatusWnd( HWND imeUIWnd ) : IMEWnd(imeUIWnd, g_status_wnd_class)
+StatusWnd::StatusWnd(void)
 {
-	g_thisStatusWnd = this;
-
-	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
-	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
-
-	toolbar = CreateToolbarEx( hwnd, 
-		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
-		WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, 
-		0, 0, g_dllInst, 0, 
-		toolbar_btns, sizeof(toolbar_btns)/sizeof(TBBUTTON), 
-		16, 16, 16, 16, sizeof(TBBUTTON));
-
-	HIMAGELIST himl = ImageList_Create( 16, 16, ILC_COLOR24|ILC_MASK, 7, 0);
-	HBITMAP htbbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUS_TB) );
-	ImageList_RemoveAll(himl);
-	ImageList_AddMasked( himl, htbbmp, RGB(192, 192, 192) );
-	DeleteObject(htbbmp);
-	himl = (HIMAGELIST)SendMessage( toolbar, TB_SETIMAGELIST, 0, LPARAM(himl));
-	if( himl )
-		ImageList_Destroy( himl );
-
-	int w, h;
-	getToolbarSize(&w, &h);
-	SetWindowPos( toolbar, NULL, 12, 3, w, h, SWP_NOACTIVATE|SWP_NOZORDER );
-
-	getSize(&w, &h);
-	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
 }
 
 StatusWnd::~StatusWnd(void)
@@ -93,35 +67,40 @@ BOOL StatusWnd::RegisterClass(void)
 
 LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 {
+	HIMC hIMC = getIMC(hwnd);
+	IMCLock imc( hIMC );
+	IMEData* data = imc.getData();
+	if( !data )
+		return 0;
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_thisStatusWnd->OnPaint(ps);
+				data->statusWnd.OnPaint(ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
 		case WM_COMMAND:
 			{
 				DWORD conv, sentence;
-				HIMC imc = g_thisStatusWnd->getIMC();
 				switch(LOWORD(wp))
 				{
 				case ID_CHI_ENG:
 					{
-						ImmGetConversionStatus( imc, &conv, &sentence);
-						g_isChinese = !!(conv & IME_CMODE_NATIVE);
-						if( g_isChinese )
+						ImmGetConversionStatus( hIMC, &conv, &sentence);
+						data->isChinese = !!(conv & IME_CMODE_NATIVE);
+						if( data->isChinese )
 							conv &= ~IME_CMODE_NATIVE;
 						else
 							conv |= IME_CMODE_NATIVE;
-						ImmSetConversionStatus( imc, conv, sentence);
+						ImmSetConversionStatus( hIMC, conv, sentence);
 
-						g_isChinese = !g_isChinese;
-						SendMessage( g_thisStatusWnd->toolbar, TB_CHANGEBITMAP, 
-							ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
+						data->isChinese = !data->isChinese;
+						HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
+						SendMessage( toolbar, TB_CHANGEBITMAP, 
+							ID_CHI_ENG, MAKELPARAM(data->isChinese ? 0 : 1, 0));
 
 						if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
 							g_chewing->Capslock();
@@ -130,16 +109,17 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 					}
 				case ID_FULL_HALF:
 					{
-						ImmGetConversionStatus( imc, &conv, &sentence);
+						ImmGetConversionStatus( hIMC, &conv, &sentence);
 						DWORD isFull = conv & IME_CMODE_FULLSHAPE;
 						if( isFull )
 							conv &= ~IME_CMODE_FULLSHAPE;
 						else
 							conv |= IME_CMODE_FULLSHAPE;
-						ImmSetConversionStatus( imc, conv, sentence);
+						ImmSetConversionStatus( hIMC, conv, sentence);
 						isFull = !isFull;
 
-						SendMessage( g_thisStatusWnd->toolbar, TB_CHANGEBITMAP, 
+						HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
+						SendMessage( toolbar, TB_CHANGEBITMAP, 
 							ID_FULL_HALF, MAKELPARAM(isFull ? 2 : 3, 0));
 						break;
 					}
@@ -166,13 +146,13 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			}
 			break;
 		case WM_LBUTTONDOWN:
-			g_thisStatusWnd->OnLButtonDown(wp, lp);
+			data->statusWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_thisStatusWnd->OnMouseMove(wp, lp);
+			data->statusWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_thisStatusWnd->OnLButtonUp(wp, lp);
+			data->statusWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -214,4 +194,50 @@ void StatusWnd::getToolbarSize(int* w, int* h)
 		::GetToolbarSize( toolbar, &sz );
 	*w = sz.cx;
 	*h = sz.cy;
+}
+
+bool StatusWnd::create(HWND imeUIWnd)
+{
+	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
+	IMCLock imc(hIMC);
+	IMEData* data = imc.getData();
+	if( !data )
+		return false;
+
+	hwnd = CreateWindowEx(0, g_status_wnd_class, NULL,
+					WS_POPUP|WS_CLIPCHILDREN,
+					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+	if( !hwnd )
+		return false;
+
+	toolbar_btns[0].iBitmap = data->isChinese ? 0 : 1;
+	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
+
+	toolbar = CreateToolbarEx( hwnd, 
+		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
+		WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, 
+		IDC_STATUS_TB, 0, g_dllInst, 0, 
+		toolbar_btns, sizeof(toolbar_btns)/sizeof(TBBUTTON), 
+		16, 16, 16, 16, sizeof(TBBUTTON));
+
+	if( !toolbar )
+		return false;
+
+	HIMAGELIST himl = ImageList_Create( 16, 16, ILC_COLOR24|ILC_MASK, 7, 0);
+	HBITMAP htbbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUS_TB) );
+	ImageList_RemoveAll(himl);
+	ImageList_AddMasked( himl, htbbmp, RGB(192, 192, 192) );
+	DeleteObject(htbbmp);
+	himl = (HIMAGELIST)SendMessage( toolbar, TB_SETIMAGELIST, 0, LPARAM(himl));
+	if( himl )
+		ImageList_Destroy( himl );
+
+	int w, h;
+	getToolbarSize(&w, &h);
+	SetWindowPos( toolbar, NULL, 12, 3, w, h, SWP_NOACTIVATE|SWP_NOZORDER );
+
+	getSize(&w, &h);
+	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
+
+	return true;
 }

@@ -2,19 +2,11 @@
 #include "ChewingIME.h"
 #include ".\imewnd.h"
 
-IMEWnd::IMEWnd( HWND imeUIWnd, LPCTSTR classname )
+IMEWnd::IMEWnd()
 {
-	hwnd = CreateWindowEx(0, classname, NULL,
-					WS_POPUP|WS_CLIPCHILDREN,
-					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
-	this->assocWndObj();
 }
 
-IMEWnd::IMEWnd( HWND existing )
-{
-	hwnd = existing;
-	this->assocWndObj();
-}
+
 
 IMEWnd::~IMEWnd(void)
 {

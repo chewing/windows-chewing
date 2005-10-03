@@ -158,7 +158,10 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\DrawUtil.cpp">
 			</File>
 			<File
-				RelativePath=".\IMEUIWnd.cpp">
+				RelativePath=".\IMCLock.cpp">
+			</File>
+			<File
+				RelativePath=".\IMEData.cpp">
 			</File>
 			<File
 				RelativePath=".\IMEWnd.cpp">
@@ -193,7 +196,10 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\DrawUtil.h">
 			</File>
 			<File
-				RelativePath=".\IMEUIWnd.h">
+				RelativePath=".\IMCLock.h">
+			</File>
+			<File
+				RelativePath=".\IMEData.h">
 			</File>
 			<File
 				RelativePath=".\IMEWnd.h">

@@ -5,11 +5,8 @@
 
 #include "CompStr.h"
 #include "CandList.h"
-
-#include "IMEUIWnd.h"
-#include "CompWnd.h"
-#include "CandWnd.h"
-#include "StatusWnd.h"
+#include "IMCLock.h"
+#include "IMEData.h"
 
 #include "resource.h"
 
@@ -24,13 +21,7 @@ Chewing* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 
-bool g_isChinese = true;
-
-CompWnd* g_compWnd = NULL;
-CandWnd* g_candWnd = NULL;
-StatusWnd* g_statusWnd = NULL;
-
-POINT g_statusWndPos = {0xffffffff, 0xffffffff};
+BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
 
 void LoadConfig()
 {
@@ -52,11 +43,8 @@ void LoadConfig()
 	{
 		DWORD size = sizeof(g_keyboardLayout);
 		DWORD type = REG_DWORD;
-		RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&g_keyboardLayout, &size );
-		g_chewing->SetKeyboardLayout( int(g_keyboardLayout) );
-		
+		RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&g_keyboardLayout, &size );		
 		RegQueryValueEx( hk, "CandPerRow", 0, &type, (LPBYTE)&g_candPerRow, &size );
-
 		RegCloseKey( hk );
 	}
 }
@@ -164,6 +152,11 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 						#endif
 							 IME_PROP_CANDLIST_START_FROM_1|IME_PROP_COMPLETE_ON_UNSELECT
 							 /*|IME_PROP_END_UNLOAD*/;
+/*	if(g_isWindowsNT && (DWORD(lpszOptions) & IME_SYSTEMINFO_WINLOGON ))
+	{
+		// Configuration should be disabled.
+	}
+*/
 	return TRUE;
 }
 
@@ -230,17 +223,20 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 {
 	if( !hIMC )
 		return FALSE;
-	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
-	if(!ic)
+	IMCLock imc(hIMC);
+	INPUTCONTEXT* ic = imc.getIC();
+	IMEData* data = imc.getData();
+	if( ! data || !ic )
 		return FALSE;
 
 	if( GetKeyInfo(lParam).isKeyUp )	// Key up
 		return FALSE;
 
+	// IME Toggle key : Ctrl + Space
 	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )
 		return TRUE;
 
-	BOOL ret = ProcessKeyEvent( uVirKey, GetKeyInfo(lParam), lpbKeyState );
+	BOOL ret = FilterKeyByChewing( imc, uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
 		return FALSE;
 
@@ -248,9 +244,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	int pageCount = 0;
 	if( pageCount = g_chewing->Candidate() )
 	{
-//		ImmNotifyIME( hIMC, , , );
-
-		CandList* candList = (CandList*)ImmLockIMCC( ic->hCandInfo );
+		CandList* candList = imc.getCandList();
+//		DWORD old_page_start = candList->getPageStart();
 		candList->setPageStart( g_chewing->CurrentPage() * g_chewing->ChoicePerPage() );
 		candList->setPageSize( g_chewing->ChoicePerPage() );
 
@@ -264,18 +259,17 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 				free(cand);
 			}
 		}
-		g_candWnd->updateSize();
-		g_candWnd->refresh();
-		if( ! g_candWnd->isVisible() )
-			g_compWnd->showCand();
-		ImmUnlockIMCC( ic->hCandInfo );
-		ImmUnlockIMC( hIMC );
+		if( !data->candWnd.isWindow() || !data->candWnd.isVisible() )
+			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_OPENCANDIDATE, 0 );
+		else /* if( old_page_start != candList->getPageStart() ) */
+			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CHANGECANDIDATE, 0 );
+
 		return TRUE;
 	}
-	else if( g_candWnd->isVisible() )
-		g_candWnd->Hide();
+	else if( data->candWnd.isVisible() )
+		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 0 );
 
-	CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
+	CompStr* cs = imc.getCompStr();
 	if( cs->isEmpty() && ret )	// No composition string
 		GenerateIMEMessage( hIMC, WM_IME_STARTCOMPOSITION );
 
@@ -326,21 +320,64 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	if( cs->isEmpty() )
 		GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
 
-	ImmUnlockIMCC( ic->hCompStr );
-	ImmUnlockIMC( hIMC );
-
 	return TRUE;
+}
+
+Chewing* LoadChewingEngine()
+{
+	TCHAR datadir[MAX_PATH];
+	TCHAR hashdir[MAX_PATH];
+	LPCTSTR phashdir = datadir;
+	GetSystemDirectory( datadir, MAX_PATH );
+	_tcscat( datadir, _T("\\IME\\Chewing") );
+
+	LPITEMIDLIST pidl;
+	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
+	{
+		SHGetPathFromIDList(pidl, hashdir);
+		_tcscat( hashdir, _T("\\Chewing") );
+		CreateDirectory( hashdir, NULL );
+		phashdir = hashdir;
+		IMalloc* palloc = NULL;
+		if( NOERROR == SHGetMalloc(&palloc) )
+			palloc->Free(pidl);
+	}
+	return new Chewing( datadir, hashdir, int(g_keyboardLayout) );
 }
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 {
-	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
+	IMCLock imc( hIMC );
+	if( !imc.getIC() )
+		return FALSE;
+
 	if(fSelect)
 	{
+		if( !g_chewing )
+			g_chewing = LoadChewingEngine();
+		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
+		CompStr* cs = imc.getCompStr();
+		if(!cs)
+			return FALSE;
+		cs = new (cs) CompStr;	// placement new
+
+		ImmReSizeIMCC( imc.getIC()->hCandInfo, sizeof(CandList) );
+		CandList* cl = imc.getCandList();
+		if(!cl)
+			return FALSE;
+		cl = new (cl) CandList;	// placement new
+
+		ImmReSizeIMCC( imc.getIC()->hPrivate, sizeof(IMEData) );
+		IMEData* data = imc.getData();
+		if(!data)
+			return FALSE;
+		data = new (data) IMEData;	// placement new
+
+	// Set Chinese or English mode
 		DWORD conv, sentence;
 		ImmGetConversionStatus( hIMC, &conv, &sentence);
 //	BEGIN UGLY HACK
-		if( g_isChinese )
+		if( data->isChinese )
 		{
 			if( g_chewing->ChineseMode() )
 			{
@@ -358,27 +395,14 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		}
 //	END UGLY HACK
 		ImmSetConversionStatus( hIMC, conv, sentence);
-
-		ImmReSizeIMCC( ic->hCompStr, sizeof(CompStr) );
-		CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr );
-		cs = new (cs) CompStr;	// placement new
-		ImmUnlockIMCC( ic->hCompStr );
-
-		ImmReSizeIMCC( ic->hCandInfo, sizeof(CandList) );
-		CandList* cl = (CandList*)ImmLockIMCC( ic->hCandInfo );
-		cl = new (cl) CandList;	// placement new
-		ImmUnlockIMCC( ic->hCandInfo );
 	}
 	else
 	{
-		CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
+		CompStr* cs = imc.getCompStr();
 		cs->~CompStr();	// delete cs;
-		ImmUnlockIMCC( ic->hCompStr );
-		CandList* cl = (CandList*)ImmLockIMCC( ic->hCandInfo );
+		CandList* cl = imc.getCandList();
 		cl->~CandList();	// delete cl;
-		ImmUnlockIMCC( ic->hCandInfo );
 	}
-	ImmUnlockIMC( hIMC );
 
 	// FIXME: I don't know why this is needed, but without this
 	//        action, the IME cannot work normally under Win 2000/XP.
@@ -505,59 +529,77 @@ BOOL    APIENTRY ImeSetCompositionString(HIMC, DWORD dwIndex, LPCVOID lpComp, DW
 }
 
 
-LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
+LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 {
+	IMEData* data = imc.getData();
 	switch(wp)
 	{
 	case IMN_CLOSESTATUSWINDOW:
 		{
-			if(g_statusWnd)
+			if( !data )
+				break;
+			if( data->statusWnd.isWindow() )
 			{
 				RECT rc;
-				GetWindowRect( g_statusWnd->getHwnd(), &rc );
-				g_statusWndPos.x = rc.left;
-				g_statusWndPos.y = rc.top;
-				delete g_statusWnd;
-				g_statusWnd = NULL;
+				GetWindowRect( data->statusWnd.getHwnd(), &rc );
+				data->statusWndPos.x = rc.left;
+				data->statusWndPos.y = rc.top;
 			}
 			break;
 		}
 	case IMN_OPENSTATUSWINDOW:
-		if( !g_statusWnd )
-			g_statusWnd = new StatusWnd( hwnd );
-		if( !g_statusWnd )
+		if( !data )
 			break;
-		if( g_statusWndPos.x != 0xffffffff && g_statusWndPos.y != 0xffffffff )
-			g_statusWnd->Move( g_statusWndPos.x, g_statusWndPos.y );
+		if( !data->statusWnd.isWindow() )
+			data->statusWnd.create(hwnd);
+
+		if( data->statusWndPos.x != 0xffffffff && data->statusWndPos.y != 0xffffffff )
+			data->statusWnd.Move( data->statusWndPos.x, data->statusWndPos.y );
 		else
 		{
 			RECT rc;
 			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
 			int w, h;
-			g_statusWnd->getSize(&w, &h);
-			g_statusWnd->Move( rc.right - w, rc.bottom - h - 32 );
+			data->statusWnd.getSize(&w, &h);
+			data->statusWnd.Move( rc.right - w, rc.bottom - h - 32 );
 		}
-		g_statusWnd->Show();
+		data->statusWnd.Show();
 		break;
 	case IMN_OPENCANDIDATE:
-		g_candWnd = new CandWnd(hwnd);
-//		ImmGetCandidateCount();
-//		ImmGetCandidateList();
-		//Display candidate list
+		if( !data )
+			break;
+		if( !data->candWnd.isWindow() )
+			data->candWnd.create(hwnd);
+
+		data->candWnd.updateSize();
+
+		if( data->candWnd.isVisible() )
+			data->candWnd.refresh();
+		else
+			data->candWnd.show();
 		break;
 	case IMN_CHANGECANDIDATE:
-	// The IMN_CHANGECANDIDATE message is sent when an IME is about to change the 
-	// content of a candidate window. An application then processes this message to 
-	// display the candidate window itself. */
-	// lParam = lCandidateList;
-
+		if( !data )
+			break;
+//		data->candWnd.updateSize();
+		data->candWnd.refresh();
+		data->candWnd.show();
+		// The IMN_CHANGECANDIDATE message is sent when an IME is about to change the 
+		// content of a candidate window. An application then processes this message to 
+		// display the candidate window itself. */
+		// lParam = lCandidateList;
 		break;
 	case IMN_CLOSECANDIDATE:
-		delete g_candWnd;
-		g_candWnd = NULL;
+		if( !data )
+			break;
+		data->candWnd.Hide();
 		break;
 	case IMN_SETCANDIDATEPOS:
 		{
+			INPUTCONTEXT* ic = imc.getIC();
+			if( !ic )
+				break;
+
 			POINT pt = ic->cfCandForm[0].ptCurrentPos;
 			switch( ic->cfCandForm[0].dwStyle )
 			{
@@ -578,7 +620,6 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 				}
 			}
 			ClientToScreen(ic->hWnd, &pt);
-			g_candWnd->Move(pt.x, pt.y);
 			break;
 		}
 	case IMN_SETCONVERSIONMODE:
@@ -589,7 +630,8 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 		break;
 	case IMN_SETCOMPOSITIONFONT:
 		{
-			g_compWnd->setFont( (LOGFONT*)&ic->lfFont );
+			if(imc.getIC())
+				data->compWnd.setFont( (LOGFONT*)&imc.getIC()->lfFont );
 		}
 		break;
 	case IMN_SETCOMPOSITIONWINDOW:
@@ -616,35 +658,39 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	HIMC hIMC = (HIMC)GetWindowLong(hwnd, IMMGWL_IMC);
-	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
+	IMCLock imc(hIMC);
+
 	switch(msg)
 	{
 	case WM_IME_NOTIFY:
-		OnImeNotify( ic, hwnd, wp, lp );
+		OnImeNotify( imc, hwnd, wp, lp );
 		break;
 	case WM_IME_STARTCOMPOSITION:
 		break;
 	case WM_IME_COMPOSITION:
 		{
-			if(!ic)
-				break;
-			if( !g_compWnd )
+			if( !imc.getIC() )
 				break;
 
-			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr );
+			CompStr* cs = imc.getCompStr();
+			IMEData* data = imc.getData();
+
+			if( !data )
+				break;
+
+			if( !data->compWnd.isWindow() )
+				data->compWnd.create(hwnd);
 
 			if( lp & GCS_COMPSTR )
 			{
-				g_compWnd->refresh();
+				data->compWnd.refresh();
 
-				POINT pt = ic->cfCompForm.ptCurrentPos;
-				if( 0 == ic->cfCompForm.dwStyle )
+				POINT pt = imc.getIC()->cfCompForm.ptCurrentPos;
+				if( 0 == imc.getIC()->cfCompForm.dwStyle )
 				{
 					RECT rc;
 					if( GetCaretPos( &pt ) )
 					{
-	//					GetWindowRect( g_compWnd->getHwnd(), &rc );
-	//					pt.y -= (rc.bottom - rc.top);
 					}
 					else
 					{
@@ -653,82 +699,58 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 						pt.y = rc.bottom -= 50;
 					}
 				}
-				ic->cfCompForm.ptCurrentPos = pt;
-				ClientToScreen( ic->hWnd, &pt );
-				g_compWnd->Move( pt.x, pt.y );
+				imc.getIC()->cfCompForm.ptCurrentPos = pt;
+				ClientToScreen( imc.getIC()->hWnd, &pt );
+				data->compWnd.Move( pt.x, pt.y );
 
 				if( ! cs->isEmpty() )
 				{
-					if( !g_compWnd->isVisible() )
-						g_compWnd->Show();
+					if( !data->compWnd.isVisible() )
+						data->compWnd.Show();
 				}
 				else
-					g_compWnd->Hide();
+					data->compWnd.Hide();
 			}
 			if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
-				if( g_compWnd->isVisible() )
-					g_compWnd->refresh();
-
-			ImmUnlockIMCC( ic->hCompStr );
-
+				if( data->compWnd.isVisible() )
+					data->compWnd.refresh();
 			break;
 		}
 	case WM_IME_ENDCOMPOSITION:
-		if( g_compWnd )
-			g_compWnd->Hide();
-		break;
+		{
+			IMEData* data = imc.getData();
+			if( data )
+				data->compWnd.Hide();
+			break;
+		}
 	case WM_IME_SETCONTEXT:
-		if( wp && g_compWnd )
 		{
-			if(hIMC && (lp & ISC_SHOWUICOMPOSITIONWINDOW)
-				&& ! g_compWnd->getDisplayedCompStr().empty() )
-					g_compWnd->Show();
+			IMEData* data = imc.getData();
+			if( wp && data )
+			{
+				if( hIMC && (lp & ISC_SHOWUICOMPOSITIONWINDOW)
+					&& ! data->compWnd.getDisplayedCompStr().empty() )
+						data->compWnd.Show();
+				else
+					data->compWnd.Hide();
+			}
 			else
-				g_compWnd->Hide();
-/*
-			if(hIMC && lp & ISC_SHOWUICANDIDATEWINDOW && g_chewing->Candidate() )
-				g_candWnd->Show();
-			else
-				g_candWnd->Hide();
-*/
+			{
+			}
+			break;
 		}
-		else
-		{
-		
-		}
-		break;
 	case WM_IME_RELOADCONFIG:
 		LoadConfig();
 		break;
 	case WM_CREATE:
 		{
-			g_compWnd = new CompWnd(hwnd);
-			g_candWnd = new CandWnd(hwnd);
-
 //			This line is only used to debug.
 //			PostMessage( hwnd, WM_IME_NOTIFY, IMN_OPENSTATUSWINDOW, 0 );
 			break;
 		}
 	case WM_DESTROY:
-		if( g_compWnd )
-		{
-			delete g_compWnd;
-			g_compWnd = NULL;
-		}
-		if( g_compWnd )
-		{
-			delete g_candWnd;
-			g_candWnd = NULL;
-		}
-		if( g_statusWnd )
-		{
-			delete g_statusWnd;
-			g_statusWnd = NULL;
-		}
-		return 0;
 		break;
 	}
-	ImmUnlockIMC( hIMC );
 
 	if( IsImeMessage(msg) )
 		return 0;
@@ -784,26 +806,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			if( !RegisterUIClasses() )
 				return FALSE;
 
-			TCHAR datadir[MAX_PATH];
-			TCHAR hashdir[MAX_PATH];
-			LPCTSTR phashdir = datadir;
-			GetSystemDirectory( datadir, MAX_PATH );
-			_tcscat( datadir, _T("\\IME\\Chewing") );
-
-			LPITEMIDLIST pidl;
-			if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
-			{
-				SHGetPathFromIDList(pidl, hashdir);
-				_tcscat( hashdir, _T("\\Chewing") );
-				CreateDirectory( hashdir, NULL );
-				phashdir = hashdir;
-				IMalloc* palloc = NULL;
-				if( NOERROR == SHGetMalloc(&palloc) )
-					palloc->Free(pidl);
-			}
-
-			g_chewing = new Chewing( datadir, hashdir );
-
 			LoadConfig();
 
 			break;
@@ -826,7 +828,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
-BOOL ProcessKeyEvent( UINT key, KeyInfo ki, const BYTE* keystate )
+BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate )
 {
 	switch( key )
 	{
@@ -874,10 +876,13 @@ BOOL ProcessKeyEvent( UINT key, KeyInfo ki, const BYTE* keystate )
 		g_chewing->Tab();
 		break;
 	case VK_CAPITAL:
-		if( g_isChinese )
-			g_chewing->Capslock();
-		else
-			return FALSE;
+		{
+			IMEData* data = imc.getData();
+			if( data && data->isChinese )
+				g_chewing->Capslock();
+			else
+				return FALSE;
+		}
 		break;
 //	case VK_NUMLOCK:
 //		break;
@@ -893,6 +898,10 @@ BOOL ProcessKeyEvent( UINT key, KeyInfo ki, const BYTE* keystate )
 				g_chewing->CtrlNum( key );
 			else
 			{
+				IMEData* data = imc.getData();
+				if( !data )
+					return FALSE;
+
 				char ascii[2];
 				int ret = ToAscii( key, ki.scanCode, keystate, (LPWORD)ascii, 0);
 				if( ret )
@@ -900,7 +909,7 @@ BOOL ProcessKeyEvent( UINT key, KeyInfo ki, const BYTE* keystate )
 				else
 					return FALSE;
 
-				if( g_isChinese && IsKeyToggled( keystate[VK_CAPITAL] ) )
+				if( data->isChinese && IsKeyToggled( keystate[VK_CAPITAL] ) )
 				{
 					if( key >= 'A' && key <= 'Z' )
 						key = tolower(key);

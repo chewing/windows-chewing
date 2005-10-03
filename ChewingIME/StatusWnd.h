@@ -5,7 +5,7 @@
 class StatusWnd : public IMEWnd
 {
 public:
-	StatusWnd( HWND imeUIWnd );
+	StatusWnd(void);
 	~StatusWnd(void);
 	static BOOL RegisterClass(void);
 protected:
@@ -17,4 +17,6 @@ public:
 	void getSize(int* w, int* h);
 protected:
 	void getToolbarSize(int* w, int* h);
+public:
+	bool create(HWND imeUIWnd);
 };
