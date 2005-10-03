@@ -48,18 +48,13 @@ BOOL CandWnd::RegisterClass(void)
 LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
 	HIMC hIMC = getIMC(hwnd);
-	IMCLock imc( hIMC );
-	IMEData* data = imc.getData();
-	if( !data )
-		return 0;
-
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				data->candWnd.OnPaint(imc, ps);
+				g_candWnd.OnPaint(hIMC, ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -67,13 +62,13 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			return TRUE;
 			break;
 		case WM_LBUTTONDOWN:
-			data->candWnd.OnLButtonDown(wp, lp);
+			g_candWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			data->candWnd.OnMouseMove(wp, lp);
+			g_candWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			data->candWnd.OnLButtonUp(wp, lp);
+			g_candWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -84,8 +79,9 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 	return 0;
 }
 
-void CandWnd::OnPaint(IMCLock& imc, PAINTSTRUCT& ps)
+void CandWnd::OnPaint(HIMC hIMC, PAINTSTRUCT& ps)
 {
+	IMCLock imc( hIMC );
 	CandList* candList = imc.getCandList();
 	if( !candList )
 		return;
@@ -227,8 +223,7 @@ void CandWnd::show(void)
 {
 	HIMC hIMC = getIMC();
 	IMCLock imc(hIMC);
-	IMEData* data = NULL;
-	if( !hIMC || ! (data = imc.getData()) )
+	if( !hIMC )
 		return;
 
 	setFont( font );
@@ -266,17 +261,17 @@ void CandWnd::show(void)
 	default:
 		{
 			RECT rc;
-			GetWindowRect( data->compWnd.getHwnd(), &rc );
+			GetWindowRect( g_compWnd.getHwnd(), &rc );
 			imc.getIC()->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
 			imc.getIC()->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
 			pt = imc.getIC()->cfCandForm->ptCurrentPos;
-			pt.x += data->compWnd.indexToXPos( data->compWnd.getDisplayedCompStr(),
-				data->compWnd.getDisplayedCursorPos());
+			pt.x += g_compWnd.indexToXPos( g_compWnd.getDisplayedCompStr(),
+				g_compWnd.getDisplayedCursorPos());
 		}
 	}
 
 	ClientToScreen( imc.getIC()->hWnd, &pt );
-	data->candWnd.Move( pt.x, pt.y );
+	g_candWnd.Move( pt.x, pt.y );
 
-	data->candWnd.Show();
+	g_candWnd.Show();
 }

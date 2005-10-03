@@ -69,16 +69,13 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 {
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
-	IMEData* data = imc.getData();
-	if( !data )
-		return 0;
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				data->statusWnd.OnPaint(ps);
+				g_statusWnd.OnPaint(ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -146,13 +143,13 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			}
 			break;
 		case WM_LBUTTONDOWN:
-			data->statusWnd.OnLButtonDown(wp, lp);
+			g_statusWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			data->statusWnd.OnMouseMove(wp, lp);
+			g_statusWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			data->statusWnd.OnLButtonUp(wp, lp);
+			g_statusWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -208,9 +205,6 @@ bool StatusWnd::create(HWND imeUIWnd)
 {
 	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
 	IMCLock imc(hIMC);
-	IMEData* data = imc.getData();
-	if( !data )
-		return false;
 
 	hwnd = CreateWindowEx(0, g_status_wnd_class, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
@@ -220,6 +214,7 @@ bool StatusWnd::create(HWND imeUIWnd)
 
 	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
 	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
+	toolbar_btns[0].fsState = 0;	// Temporarily disable ChiEng switch
 
 	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|

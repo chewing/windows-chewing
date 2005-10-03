@@ -24,7 +24,11 @@ Chewing* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 
-BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
+CompWnd g_compWnd;
+CandWnd g_candWnd;
+StatusWnd g_statusWnd;
+
+BOOL FilterKeyByChewing( UINT key, KeyInfo ki, const BYTE* keystate );
 
 void LoadConfig()
 {
@@ -228,8 +232,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 		return FALSE;
 	IMCLock imc(hIMC);
 	INPUTCONTEXT* ic = imc.getIC();
-	IMEData* data = imc.getData();
-	if( ! data || !ic )
+	if( !ic )
 		return FALSE;
 
 	if( GetKeyInfo(lParam).isKeyUp )	// Key up
@@ -239,7 +242,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )
 		return TRUE;
 
-	BOOL ret = FilterKeyByChewing( imc, uVirKey, GetKeyInfo(lParam), lpbKeyState );
+	BOOL ret = FilterKeyByChewing( uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
 		return FALSE;
 
@@ -262,14 +265,14 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 				free(cand);
 			}
 		}
-		if( !data->candWnd.isWindow() || !data->candWnd.isVisible() )
+		if( !g_candWnd.isWindow() || !g_candWnd.isVisible() )
 			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_OPENCANDIDATE, 0 );
 		else /* if( old_page_start != candList->getPageStart() ) */
 			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CHANGECANDIDATE, 0 );
 
 		return TRUE;
 	}
-	else if( data->candWnd.isVisible() )
+	else if( g_candWnd.isVisible() )
 		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 0 );
 
 	CompStr* cs = imc.getCompStr();
@@ -356,9 +359,6 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 
 	if(fSelect)
 	{
-		if( !g_chewing )
-			g_chewing = LoadChewingEngine();
-
 		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
 		CompStr* cs = imc.getCompStr();
 		if(!cs)
@@ -372,16 +372,12 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		cl = new (cl) CandList;	// placement new
 
 		ImmReSizeIMCC( imc.getIC()->hPrivate, sizeof(IMEData) );
-		IMEData* data = imc.getData();
-		if(!data)
-			return FALSE;
-		data = new (data) IMEData;	// placement new
 
 	// Set Chinese or English mode
 		DWORD conv, sentence;
 		ImmGetConversionStatus( hIMC, &conv, &sentence);
 //	BEGIN UGLY HACK
-		if( g_isChinese )
+/*		if( g_isChinese )
 		{
 			if( g_chewing->ChineseMode() )
 			{
@@ -397,6 +393,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		{
 			conv &= ~IME_CMODE_NATIVE;
 		}
+*/
 //	END UGLY HACK
 		ImmSetConversionStatus( hIMC, conv, sentence);
 	}
@@ -406,8 +403,6 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		cs->~CompStr();	// delete cs;
 		CandList* cl = imc.getCandList();
 		cl->~CandList();	// delete cl;
-		IMEData* data = imc.getData();
-		data->~IMEData();	// delete data;
 	}
 
 	// FIXME: I don't know why this is needed, but without this
@@ -457,10 +452,10 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 		break;
 	case NI_COMPOSITIONSTR:
 		{
-			INPUTCONTEXT* ic = ImmLockIMC( hIMC );
-			if( !ic )
+			IMCLock imc( hIMC );
+			CompStr* cs = imc.getCompStr();
+			if( !cs )
 				return FALSE;
-			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
 			switch( dwIndex )
 			{
 			case CPS_COMPLETE:
@@ -495,8 +490,6 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 				cs->setZuin("");
 				break;
 			}
-			ImmUnlockIMCC( ic->hCompStr );
-			ImmUnlockIMC(hIMC);
 		}
 		break;
 	}
@@ -535,68 +528,59 @@ BOOL    APIENTRY ImeSetCompositionString(HIMC, DWORD dwIndex, LPCVOID lpComp, DW
 }
 
 
-LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
+LRESULT OnImeNotify( HIMC hIMC, HWND hwnd, WPARAM wp , LPARAM lp )
 {
-	IMEData* data = imc.getData();
 	switch(wp)
 	{
 	case IMN_CLOSESTATUSWINDOW:
-		{
-			if( !data )
-				break;
-			if( data->statusWnd.isWindow() )
-				data->statusWnd.destroy();
+	 	{
+			if( g_statusWnd.isWindow() )
+				g_statusWnd.destroy();
 			break;
 		}
 	case IMN_OPENSTATUSWINDOW:
-		if( !data )
-			break;
-		if( !data->statusWnd.isWindow() )
-			data->statusWnd.create(hwnd);
+		if( !g_statusWnd.isWindow() )
+			g_statusWnd.create(hwnd);
 
 		if( g_statusWndPos.x != 0xffffffff && g_statusWndPos.y != 0xffffffff )
-			data->statusWnd.Move( g_statusWndPos.x, g_statusWndPos.y );
+			g_statusWnd.Move( g_statusWndPos.x, g_statusWndPos.y );
 		else
 		{
 			RECT rc;
 			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
 			int w, h;
-			data->statusWnd.getSize(&w, &h);
-			data->statusWnd.Move( rc.right - w, rc.bottom - h - 32 );
+			g_statusWnd.getSize(&w, &h);
+			g_statusWnd.Move( rc.right - w, rc.bottom - h - 32 );
 		}
-		data->statusWnd.Show();
+		g_statusWnd.Show();
 		break;
 	case IMN_OPENCANDIDATE:
-		if( !data )
-			break;
-		if( !data->candWnd.isWindow() )
-			data->candWnd.create(hwnd);
+		if( !g_candWnd.isWindow() )
+			g_candWnd.create(hwnd);
 
-		data->candWnd.updateSize();
+		g_candWnd.updateSize();
 
-		if( data->candWnd.isVisible() )
-			data->candWnd.refresh();
+		if( g_candWnd.isVisible() )
+			g_candWnd.refresh();
 		else
-			data->candWnd.show();
+			g_candWnd.show();
 		break;
 	case IMN_CHANGECANDIDATE:
-		if( !data )
-			break;
-//		data->candWnd.updateSize();
-		data->candWnd.refresh();
-		data->candWnd.show();
+//		g_candWnd.updateSize();
+		g_candWnd.refresh();
+		g_candWnd.show();
 		// The IMN_CHANGECANDIDATE message is sent when an IME is about to change the 
 		// content of a candidate window. An application then processes this message to 
 		// display the candidate window itself. */
 		// lParam = lCandidateList;
 		break;
 	case IMN_CLOSECANDIDATE:
-		if( !data )
-			break;
-		data->candWnd.destroy();
+		g_candWnd.destroy();
 		break;
 	case IMN_SETCANDIDATEPOS:
 		{
+			IMCLock imc(hIMC);
+
 			INPUTCONTEXT* ic = imc.getIC();
 			if( !ic )
 				break;
@@ -631,8 +615,9 @@ LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 		break;
 	case IMN_SETCOMPOSITIONFONT:
 		{
+			IMCLock imc(hIMC);
 			if(imc.getIC())
-				data->compWnd.setFont( (LOGFONT*)&imc.getIC()->lfFont );
+				g_compWnd.setFont( (LOGFONT*)&imc.getIC()->lfFont );
 		}
 		break;
 	case IMN_SETCOMPOSITIONWINDOW:
@@ -659,32 +644,28 @@ LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	HIMC hIMC = (HIMC)GetWindowLong(hwnd, IMMGWL_IMC);
-	IMCLock imc(hIMC);
 
 	switch(msg)
 	{
 	case WM_IME_NOTIFY:
-		OnImeNotify( imc, hwnd, wp, lp );
+		OnImeNotify( hIMC, hwnd, wp, lp );
 		break;
 	case WM_IME_STARTCOMPOSITION:
 		break;
 	case WM_IME_COMPOSITION:
 		{
+			IMCLock imc(hIMC);
 			if( !imc.getIC() )
 				break;
 
 			CompStr* cs = imc.getCompStr();
-			IMEData* data = imc.getData();
 
-			if( !data )
-				break;
-
-			if( !data->compWnd.isWindow() )
-				data->compWnd.create(hwnd);
+			if( !g_compWnd.isWindow() )
+				g_compWnd.create(hwnd);
 
 			if( lp & GCS_COMPSTR )
 			{
-				data->compWnd.refresh();
+				g_compWnd.refresh();
 
 				POINT pt = imc.getIC()->cfCompForm.ptCurrentPos;
 				if( 0 == imc.getIC()->cfCompForm.dwStyle )
@@ -702,38 +683,35 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 				}
 				imc.getIC()->cfCompForm.ptCurrentPos = pt;
 				ClientToScreen( imc.getIC()->hWnd, &pt );
-				data->compWnd.Move( pt.x, pt.y );
+				g_compWnd.Move( pt.x, pt.y );
 
 				if( ! cs->isEmpty() )
 				{
-					if( !data->compWnd.isVisible() )
-						data->compWnd.Show();
+					if( !g_compWnd.isVisible() )
+						g_compWnd.Show();
 				}
 				else
-					data->compWnd.Hide();
+					g_compWnd.Hide();
 			}
 			if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
-				if( data->compWnd.isVisible() )
-					data->compWnd.refresh();
+				if( g_compWnd.isVisible() )
+					g_compWnd.refresh();
 			break;
 		}
 	case WM_IME_ENDCOMPOSITION:
 		{
-			IMEData* data = imc.getData();
-			if( data )
-				data->compWnd.Hide();
+			g_compWnd.Hide();
 			break;
 		}
 	case WM_IME_SETCONTEXT:
 		{
-			IMEData* data = imc.getData();
-			if( wp && data )
+			if( wp )
 			{
 				if( hIMC && (lp & ISC_SHOWUICOMPOSITIONWINDOW)
-					&& ! data->compWnd.getDisplayedCompStr().empty() )
-						data->compWnd.Show();
+					&& ! g_compWnd.getDisplayedCompStr().empty() )
+						g_compWnd.Show();
 				else
-					data->compWnd.Hide();
+					g_compWnd.Hide();
 			}
 			else
 			{
@@ -751,12 +729,11 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		}
 	case WM_DESTROY:
 		break;
+	default:
+		if( !IsImeMessage(msg) )
+			return DefWindowProc(hwnd, msg, wp, lp);
 	}
-
-	if( IsImeMessage(msg) )
-		return 0;
-
-	return DefWindowProc(hwnd, msg, wp, lp);
+	return 0;
 }
 
 BOOL RegisterUIClasses()
@@ -829,8 +806,14 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
-BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate )
+BOOL FilterKeyByChewing( UINT key, KeyInfo ki, const BYTE* keystate )
 {
+	if( !g_chewing )
+	{
+		if( ! (g_chewing = LoadChewingEngine()) )
+			return FALSE;
+	}
+
 	switch( key )
 	{
 	case VK_LEFT:
@@ -877,13 +860,10 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		g_chewing->Tab();
 		break;
 	case VK_CAPITAL:
-		{
-			IMEData* data = imc.getData();
-			if( data && g_isChinese )
-				g_chewing->Capslock();
-			else
-				return FALSE;
-		}
+		if( g_isChinese )
+			g_chewing->Capslock();
+		else
+			return FALSE;
 		break;
 //	case VK_NUMLOCK:
 //		break;
@@ -899,10 +879,6 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				g_chewing->CtrlNum( key );
 			else
 			{
-				IMEData* data = imc.getData();
-				if( !data )
-					return FALSE;
-
 				char ascii[2];
 				int ret = ToAscii( key, ki.scanCode, keystate, (LPWORD)ascii, 0);
 				if( ret )

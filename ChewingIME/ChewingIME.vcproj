@@ -161,9 +161,6 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\IMCLock.cpp">
 			</File>
 			<File
-				RelativePath=".\IMEData.cpp">
-			</File>
-			<File
 				RelativePath=".\IMEWnd.cpp">
 			</File>
 			<File
@@ -197,9 +194,6 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			</File>
 			<File
 				RelativePath=".\IMCLock.h">
-			</File>
-			<File
-				RelativePath=".\IMEData.h">
 			</File>
 			<File
 				RelativePath=".\IMEWnd.h">

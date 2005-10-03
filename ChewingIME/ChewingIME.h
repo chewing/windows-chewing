@@ -21,8 +21,11 @@ extern bool g_isChinese;
 extern POINT g_statusWndPos;
 
 class CompWnd;
+extern CompWnd g_compWnd;
 class CandWnd;
+extern CandWnd g_candWnd;
 class StatusWnd;
+extern StatusWnd g_statusWnd;
 
 extern Chewing* g_chewing;
 

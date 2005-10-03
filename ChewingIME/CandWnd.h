@@ -13,7 +13,7 @@ public:
 	void setFont( HFONT f){	font = f;	}
 protected:
 	static LRESULT WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
-	void OnPaint(IMCLock& imc, PAINTSTRUCT& ps);
+	void OnPaint(HIMC hIMC, PAINTSTRUCT& ps);
 public:
 	void getSize(int* w, int* h);
 	void updateSize(void);

@@ -45,9 +45,6 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
-	IMEData* data = imc.getData();
-	if( !data )
-		return 0;
 
 	switch (msg)
 	{
@@ -55,7 +52,7 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				data->compWnd.OnPaint( imc, ps );
+				g_compWnd.OnPaint( imc, ps );
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -63,13 +60,13 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			return TRUE;
 			break;
 		case WM_LBUTTONDOWN:
-			data->compWnd.OnLButtonDown(wp, lp);
+			g_compWnd.OnLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			data->compWnd.OnMouseMove(wp, lp);
+			g_compWnd.OnMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			data->compWnd.OnLButtonUp(wp, lp);
+			g_compWnd.OnLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
