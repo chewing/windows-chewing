@@ -156,7 +156,7 @@ END
 // Bitmap
 //
 
-IDB_STATUS_TB           BITMAP                  "status_bar24.bmp"
+IDB_STATUS_TB           BITMAP                  "status_bar256.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

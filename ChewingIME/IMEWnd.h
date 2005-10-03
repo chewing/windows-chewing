@@ -34,4 +34,5 @@ protected:
 	void OnMouseMove(WPARAM wp, LPARAM lp);
 public:
 	virtual bool create(HWND imeUIWnd) = 0;
+	void destroy(void);
 };

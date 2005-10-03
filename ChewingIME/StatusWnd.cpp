@@ -90,17 +90,17 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 				case ID_CHI_ENG:
 					{
 						ImmGetConversionStatus( hIMC, &conv, &sentence);
-						data->isChinese = !!(conv & IME_CMODE_NATIVE);
-						if( data->isChinese )
+						g_isChinese = !!(conv & IME_CMODE_NATIVE);
+						if( g_isChinese )
 							conv &= ~IME_CMODE_NATIVE;
 						else
 							conv |= IME_CMODE_NATIVE;
 						ImmSetConversionStatus( hIMC, conv, sentence);
 
-						data->isChinese = !data->isChinese;
+						g_isChinese = !g_isChinese;
 						HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
 						SendMessage( toolbar, TB_CHANGEBITMAP, 
-							ID_CHI_ENG, MAKELPARAM(data->isChinese ? 0 : 1, 0));
+							ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
 
 						if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
 							g_chewing->Capslock();
@@ -156,6 +156,14 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
+		case WM_DESTROY:
+			{
+				RECT rc;
+				GetWindowRect( hwnd, &rc );
+				g_statusWndPos.x = rc.left;
+				g_statusWndPos.y = rc.top;
+			}
+			break;
 		default:
 			return DefWindowProc(hwnd, msg, wp, lp);
 	}
@@ -210,27 +218,34 @@ bool StatusWnd::create(HWND imeUIWnd)
 	if( !hwnd )
 		return false;
 
-	toolbar_btns[0].iBitmap = data->isChinese ? 0 : 1;
+	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
 	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
 
-	toolbar = CreateToolbarEx( hwnd, 
+	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
 		WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, 
-		IDC_STATUS_TB, 0, g_dllInst, 0, 
-		toolbar_btns, sizeof(toolbar_btns)/sizeof(TBBUTTON), 
-		16, 16, 16, 16, sizeof(TBBUTTON));
+		0, 0, 0, 0, hwnd, NULL, g_dllInst, NULL);
 
 	if( !toolbar )
 		return false;
 
-	HIMAGELIST himl = ImageList_Create( 16, 16, ILC_COLOR24|ILC_MASK, 7, 0);
+	SetWindowLong( toolbar, GWL_ID, IDC_STATUS_TB );
+
+/*	HIMAGELIST himl = ImageList_Create( 16, 16, ILC_COLOR24|ILC_MASK, 5, 0);
 	HBITMAP htbbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUS_TB) );
-	ImageList_RemoveAll(himl);
 	ImageList_AddMasked( himl, htbbmp, RGB(192, 192, 192) );
+	ImageList_Add( himl, htbbmp, NULL );
 	DeleteObject(htbbmp);
 	himl = (HIMAGELIST)SendMessage( toolbar, TB_SETIMAGELIST, 0, LPARAM(himl));
 	if( himl )
 		ImageList_Destroy( himl );
+*/
+	SendMessage(toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM) sizeof(TBBUTTON), 0); 
+	SendMessage( toolbar, TB_ADDBUTTONS, sizeof(toolbar_btns)/sizeof(TBBUTTON), LPARAM(toolbar_btns));
+	TBADDBITMAP abm;
+	abm.hInst = g_dllInst;
+	abm.nID = IDB_STATUS_TB;
+	SendMessage( toolbar, TB_ADDBITMAP, 5,LPARAM(&abm) );
 
 	int w, h;
 	getToolbarSize(&w, &h);

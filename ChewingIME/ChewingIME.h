@@ -17,6 +17,8 @@ const LPCTSTR g_status_wnd_class = _T("ChewingStatus");
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
 extern DWORD g_keyboardLayout;
 extern DWORD g_candPerRow;
+extern bool g_isChinese;
+extern POINT g_statusWndPos;
 
 class CompWnd;
 class CandWnd;

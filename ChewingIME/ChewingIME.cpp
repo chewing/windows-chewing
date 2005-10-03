@@ -17,6 +17,9 @@
 HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
 
+bool g_isChinese = true;
+POINT g_statusWndPos = { -1, -1 };
+
 Chewing* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
@@ -355,6 +358,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 	{
 		if( !g_chewing )
 			g_chewing = LoadChewingEngine();
+
 		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
 		CompStr* cs = imc.getCompStr();
 		if(!cs)
@@ -377,7 +381,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		DWORD conv, sentence;
 		ImmGetConversionStatus( hIMC, &conv, &sentence);
 //	BEGIN UGLY HACK
-		if( data->isChinese )
+		if( g_isChinese )
 		{
 			if( g_chewing->ChineseMode() )
 			{
@@ -402,6 +406,8 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		cs->~CompStr();	// delete cs;
 		CandList* cl = imc.getCandList();
 		cl->~CandList();	// delete cl;
+		IMEData* data = imc.getData();
+		data->~IMEData();	// delete data;
 	}
 
 	// FIXME: I don't know why this is needed, but without this
@@ -539,12 +545,7 @@ LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 			if( !data )
 				break;
 			if( data->statusWnd.isWindow() )
-			{
-				RECT rc;
-				GetWindowRect( data->statusWnd.getHwnd(), &rc );
-				data->statusWndPos.x = rc.left;
-				data->statusWndPos.y = rc.top;
-			}
+				data->statusWnd.destroy();
 			break;
 		}
 	case IMN_OPENSTATUSWINDOW:
@@ -553,8 +554,8 @@ LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 		if( !data->statusWnd.isWindow() )
 			data->statusWnd.create(hwnd);
 
-		if( data->statusWndPos.x != 0xffffffff && data->statusWndPos.y != 0xffffffff )
-			data->statusWnd.Move( data->statusWndPos.x, data->statusWndPos.y );
+		if( g_statusWndPos.x != 0xffffffff && g_statusWndPos.y != 0xffffffff )
+			data->statusWnd.Move( g_statusWndPos.x, g_statusWndPos.y );
 		else
 		{
 			RECT rc;
@@ -592,7 +593,7 @@ LRESULT OnImeNotify( IMCLock& imc, HWND hwnd, WPARAM wp , LPARAM lp )
 	case IMN_CLOSECANDIDATE:
 		if( !data )
 			break;
-		data->candWnd.Hide();
+		data->candWnd.destroy();
 		break;
 	case IMN_SETCANDIDATEPOS:
 		{
@@ -878,7 +879,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	case VK_CAPITAL:
 		{
 			IMEData* data = imc.getData();
-			if( data && data->isChinese )
+			if( data && g_isChinese )
 				g_chewing->Capslock();
 			else
 				return FALSE;
@@ -909,7 +910,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				else
 					return FALSE;
 
-				if( data->isChinese && IsKeyToggled( keystate[VK_CAPITAL] ) )
+				if( g_isChinese && IsKeyToggled( keystate[VK_CAPITAL] ) )
 				{
 					if( key >= 'A' && key <= 'Z' )
 						key = tolower(key);

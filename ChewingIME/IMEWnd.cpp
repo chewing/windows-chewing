@@ -10,7 +10,7 @@ IMEWnd::IMEWnd()
 
 IMEWnd::~IMEWnd(void)
 {
-	DestroyWindow(hwnd);
+	destroy();
 }
 
 void IMEWnd::assocWndObj(void)
@@ -86,4 +86,11 @@ void IMEWnd::Move(int x, int y)
 		y = rc.bottom - h;
 
 	MoveWindow( hwnd, x, y, w, h, TRUE );
+}
+
+void IMEWnd::destroy(void)
+{
+	if( hwnd )
+		DestroyWindow(hwnd);
+	hwnd = NULL;
 }
