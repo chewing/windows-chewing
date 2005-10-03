@@ -198,7 +198,11 @@ void CompWnd::showCand(void)
 	g_candWnd->updateSize();
 
 	HIMC hIMC = getIMC();
+	if( !hIMC )
+		return;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	if( !ic )
+		return;
 
 	POINT pt = ic->cfCandForm[0].ptCurrentPos;
 	switch( ic->cfCandForm[0].dwStyle )
@@ -247,22 +251,32 @@ void CompWnd::showCand(void)
 
 string CompWnd::getDisplayedCompStr(void)
 {
+	string comp_str;
 	HIMC hIMC = getIMC();
-	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
-	CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
+	if(hIMC)
+	{
+		INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+		if( ic )
+		{
+			CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
 
-	string comp_str = compStr->getCompStr();
+			comp_str = compStr->getCompStr();
 
-	ImmUnlockIMCC(ic->hCompStr);
-	ImmUnlockIMC(hIMC);
-
+			ImmUnlockIMCC(ic->hCompStr);
+		}
+		ImmUnlockIMC(hIMC);
+	}
 	return comp_str;
 }
 
 int CompWnd::getDisplayedCursorPos(void)
 {
 	HIMC hIMC = getIMC();
+	if(! hIMC )
+		return 0;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	if( !ic )
+		return 0;
 	CompStr* compStr = (CompStr*)ImmLockIMCC(ic->hCompStr);
 
 	int cursorPos = compStr->getCursorPos();

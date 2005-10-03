@@ -122,8 +122,12 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 {
+	if(!hIMC)
+		return FALSE;
 	BOOL success = FALSE;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	if(!ic)
+		return FALSE;
 	HIMCC hbuf = ImmReSizeIMCC( ic->hMsgBuf, sizeof(TRANSMSG) * (ic->dwNumMsgBuf + 1) );
 	if( hbuf )
 	{
@@ -224,7 +228,11 @@ LRESULT APIENTRY ImeEscape(HIMC, UINT, LPVOID)
 BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState
 )
 {
+	if( !hIMC )
+		return FALSE;
 	INPUTCONTEXT* ic = ImmLockIMC( hIMC );
+	if(!ic)
+		return FALSE;
 
 	if( GetKeyInfo(lParam).isKeyUp )	// Key up
 		return FALSE;
@@ -398,6 +406,9 @@ UINT    APIENTRY ImeToAsciiEx(UINT uVirtKey, UINT uScaCode, CONST LPBYTE lpbKeyS
 
 BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwValue )
 {
+	if( !hIMC )
+		return FALSE;
+
 	switch( dwAction )
 	{
 	case NI_OPENCANDIDATE:
@@ -417,6 +428,8 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 	case NI_COMPOSITIONSTR:
 		{
 			INPUTCONTEXT* ic = ImmLockIMC( hIMC );
+			if( !ic )
+				return FALSE;
 			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr);
 			switch( dwIndex )
 			{
@@ -512,6 +525,8 @@ LRESULT OnImeNotify( INPUTCONTEXT *ic, HWND hwnd, WPARAM wp , LPARAM lp )
 	case IMN_OPENSTATUSWINDOW:
 		if( !g_statusWnd )
 			g_statusWnd = new StatusWnd( hwnd );
+		if( !g_statusWnd )
+			break;
 		if( g_statusWndPos.x != 0xffffffff && g_statusWndPos.y != 0xffffffff )
 			g_statusWnd->Move( g_statusWndPos.x, g_statusWndPos.y );
 		else
@@ -611,6 +626,11 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		break;
 	case WM_IME_COMPOSITION:
 		{
+			if(!ic)
+				break;
+			if( !g_compWnd )
+				break;
+
 			CompStr* cs = (CompStr*)ImmLockIMCC( ic->hCompStr );
 
 			if( lp & GCS_COMPSTR )
@@ -654,10 +674,11 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 			break;
 		}
 	case WM_IME_ENDCOMPOSITION:
-		g_compWnd->Hide();
+		if( g_compWnd )
+			g_compWnd->Hide();
 		break;
 	case WM_IME_SETCONTEXT:
-		if( wp )
+		if( wp && g_compWnd )
 		{
 			if(hIMC && (lp & ISC_SHOWUICOMPOSITIONWINDOW)
 				&& ! g_compWnd->getDisplayedCompStr().empty() )
@@ -690,11 +711,20 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		}
 	case WM_DESTROY:
 		if( g_compWnd )
+		{
 			delete g_compWnd;
+			g_compWnd = NULL;
+		}
 		if( g_compWnd )
+		{
 			delete g_candWnd;
+			g_candWnd = NULL;
+		}
 		if( g_statusWnd )
+		{
 			delete g_statusWnd;
+			g_statusWnd = NULL;
+		}
 		return 0;
 		break;
 	}

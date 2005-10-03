@@ -76,7 +76,11 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 void CandWnd::OnPaint(PAINTSTRUCT& ps)
 {
 	HIMC hIMC = getIMC();
+	if(!hIMC)
+		return;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	if( !ic )
+		return;
 	CandList* candList = (CandList*)ImmLockIMCC(ic->hCandInfo);
 
 // Begin paint
@@ -148,7 +152,11 @@ void CandWnd::getSize(int* w, int* h)
 {
 	*w = 0; *h = 0;
 	HIMC hIMC = getIMC();
+	if( !hIMC )
+		return;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
+	if( !ic )
+		return;
 	CandList* candList = (CandList*)ImmLockIMCC(ic->hCandInfo);
 
 	HDC hDC = GetDC(hwnd);
