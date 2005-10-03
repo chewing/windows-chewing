@@ -282,7 +282,6 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 		cs->setResultStr("");
 	}
 
-	string comp_str;
 	if( g_chewing->BufferLen() )
 	{
 		char* chibuf = g_chewing->Buffer();
@@ -634,6 +633,7 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 						pt.y = rc.bottom -= 50;
 					}
 				}
+				ic->cfCompForm.ptCurrentPos = pt;
 				ClientToScreen( ic->hWnd, &pt );
 				g_compWnd->Move( pt.x, pt.y );
 

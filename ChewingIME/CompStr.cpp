@@ -50,7 +50,7 @@ void CompStr::setResultStr(LPCTSTR resultstr)
 void CompStr::setCursorPos(int pos)
 {
 	TCHAR* next = _tcsinc( &compStr[cs.dwCursorPos] );
-	memset( &compAttr[pos], ATTR_CONVERTED, (next - &compStr[pos]) );
+	memset( &compAttr[cs.dwCursorPos], ATTR_CONVERTED, (next - &compStr[cs.dwCursorPos]) );
 
 	cs.dwCursorPos = pos;
 
