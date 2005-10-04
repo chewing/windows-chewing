@@ -5,7 +5,6 @@
 
 #include "CompStr.h"
 #include "IMCLock.h"
-#include "IMEData.h"
 
 #include <commctrl.h>
 

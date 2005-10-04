@@ -49,8 +49,13 @@ void CompStr::setResultStr(LPCTSTR resultstr)
 
 void CompStr::setCursorPos(int pos)
 {
+	// ATTR_INPUT 	Character currently being entered.
+	// ATTR_TARGET_CONVERTED 	Character currently being converted (already converted).
+	// ATTR_CONVERTED 	Character given from the conversion.
+	// ATTR_TARGET_NOTCONVERTED 	Character currently being converted (yet to be converted).
+
 	TCHAR* next = _tcsinc( &compStr[cs.dwCursorPos] );
-	memset( &compAttr[cs.dwCursorPos], ATTR_CONVERTED, (next - &compStr[cs.dwCursorPos]) );
+	memset( &compAttr[cs.dwCursorPos], ATTR_TARGET_CONVERTED, (next - &compStr[cs.dwCursorPos]) );
 
 	cs.dwCursorPos = pos;
 

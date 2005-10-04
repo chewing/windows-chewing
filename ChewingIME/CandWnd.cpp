@@ -5,7 +5,7 @@
 #include "CandList.h"
 #include "imm.h"
 #include "IMCLock.h"
-#include "IMEData.h"
+#include "CompWnd.h"
 
 #include <tchar.h>
 

@@ -227,5 +227,8 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="ChewingIME.rc"/>
 	</Globals>
 </VisualStudioProject>

@@ -20,4 +20,6 @@ public:
 	CompStr* getCompStr(void);
 	CandList* getCandList(void);
 	INPUTCONTEXT* getIC(){	return ic;	}
+	bool lock(void);
+	void unlock(void);
 };

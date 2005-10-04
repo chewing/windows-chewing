@@ -4,7 +4,6 @@
 #include "CandWnd.h"
 #include "CompStr.h"
 #include "IMCLock.h"
-#include "IMEData.h"
 
 CompWnd::CompWnd(void)
 {

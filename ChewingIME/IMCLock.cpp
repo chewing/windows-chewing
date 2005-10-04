@@ -1,20 +1,14 @@
 #include ".\imclock.h"
 
-IMCLock::IMCLock(HIMC hIMC) : himc(hIMC), compStr(NULL), candList(NULL)
+IMCLock::IMCLock(HIMC hIMC)
+ : himc(hIMC), ic(NULL), compStr(NULL), candList(NULL)
 {
-	ic = himc ? ImmLockIMC(himc) : NULL;
+	lock();
 }
 
 IMCLock::~IMCLock(void)
 {
-	if( ic )
-	{
-		if( compStr )
-			ImmUnlockIMCC(ic->hCompStr);
-		if( candList )
-			ImmUnlockIMCC(ic->hCandInfo);
-		ImmUnlockIMC(himc);
-	}
+	unlock();
 }
 
 CompStr* IMCLock::getCompStr(void)
@@ -35,3 +29,29 @@ CandList* IMCLock::getCandList(void)
 	return NULL;
 }
 
+
+bool IMCLock::lock(void)
+{
+	if( !ic )
+		ic = himc ? ImmLockIMC(himc) : NULL;
+	return !!ic;
+}
+
+void IMCLock::unlock(void)
+{
+	if( ic )
+	{
+		if( compStr )
+		{
+			ImmUnlockIMCC(ic->hCompStr);
+			compStr = NULL;
+		}
+		if( candList )
+		{
+			ImmUnlockIMCC(ic->hCandInfo);
+			candList = NULL;
+		}
+		ImmUnlockIMC(himc);
+		ic = NULL;
+	}
+}

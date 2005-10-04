@@ -6,13 +6,16 @@
 #include "CompStr.h"
 #include "CandList.h"
 #include "IMCLock.h"
-#include "IMEData.h"
 
 #include "resource.h"
 
 #include <commctrl.h>
 #include <winreg.h>
 #include <shlobj.h>
+
+#include "CompWnd.h"
+#include "CandWnd.h"
+#include "StatusWnd.h"
 
 HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
@@ -371,8 +374,6 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			return FALSE;
 		cl = new (cl) CandList;	// placement new
 
-		ImmReSizeIMCC( imc.getIC()->hPrivate, sizeof(IMEData) );
-
 	// Set Chinese or English mode
 		DWORD conv, sentence;
 		ImmGetConversionStatus( hIMC, &conv, &sentence);
@@ -475,6 +476,8 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 					cs->setCompStr("");
 					cs->setCursorPos(0);
 					cs->setZuin("");
+					imc.unlock();
+
 					GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
 						0,
 						(GCS_RESULTSTR|GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
