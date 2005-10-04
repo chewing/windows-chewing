@@ -55,7 +55,7 @@ void CompStr::setCursorPos(int pos)
 	// ATTR_TARGET_NOTCONVERTED 	Character currently being converted (yet to be converted).
 
 	TCHAR* next = _tcsinc( &compStr[cs.dwCursorPos] );
-	memset( &compAttr[cs.dwCursorPos], ATTR_TARGET_CONVERTED, (next - &compStr[cs.dwCursorPos]) );
+	memset( &compAttr[cs.dwCursorPos], ATTR_CONVERTED, (next - &compStr[cs.dwCursorPos]) );
 
 	cs.dwCursorPos = pos;
 
@@ -70,7 +70,7 @@ void CompStr::setZuin(const char* zuin)
 
 	cs.dwCompReadAttrLen = cs.dwCompReadStrLen;
 	if(cs.dwCompReadStrLen)
-		memset( (char*)readAttr, ATTR_TARGET_CONVERTED, cs.dwCompReadStrLen );
+		memset( (char*)readAttr, ATTR_TARGET_NOTCONVERTED, cs.dwCompReadStrLen );
 }
 
 void CompStr::beforeGenerateMsg(void)

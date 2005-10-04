@@ -212,8 +212,8 @@ bool StatusWnd::create(HWND imeUIWnd)
 		return false;
 
 	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
+	toolbar_btns[0].fsState = 0;	// Temporarily disable Chinese/English toggle
 	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
-	toolbar_btns[0].fsState = 0;	// Temporarily disable ChiEng switch
 
 	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
@@ -249,4 +249,9 @@ bool StatusWnd::create(HWND imeUIWnd)
 	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
 
 	return true;
+}
+
+void StatusWnd::enableChiEng(bool enable)
+{
+	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
 }

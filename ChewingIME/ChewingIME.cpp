@@ -21,6 +21,8 @@ HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
 
 bool g_isChinese = true;
+long g_shiftPressedTime = -1;
+
 POINT g_statusWndPos = { -1, -1 };
 
 Chewing* g_chewing = NULL;
@@ -156,7 +158,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
 	lpIMEInfo->fdwSCSCaps = 0;
 	lpIMEInfo->fdwSelectCaps = SELECT_CAP_CONVERSION;
-	lpIMEInfo->fdwProperty = IME_PROP_IGNORE_UPKEYS|IME_PROP_AT_CARET|IME_PROP_KBD_CHAR_FIRST|
+	lpIMEInfo->fdwProperty = /*IME_PROP_IGNORE_UPKEYS|*/IME_PROP_AT_CARET|IME_PROP_KBD_CHAR_FIRST|
 						#ifdef	UNICODE
 							 IME_PROP_UNICODE|
 						#endif
@@ -228,8 +230,7 @@ LRESULT APIENTRY ImeEscape(HIMC, UINT, LPVOID)
 }
 
 
-BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState
-)
+BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState )
 {
 	if( !hIMC )
 		return FALSE;
@@ -240,6 +241,16 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 
 	if( GetKeyInfo(lParam).isKeyUp )	// Key up
 		return FALSE;
+
+	if( uVirKey == VK_SHIFT && ! IsKeyDown( lpbKeyState[VK_CONTROL] )  )
+	{
+		if( g_shiftPressedTime < 0 )
+		{
+			SYSTEMTIME t;
+			GetSystemTime( &t );
+			g_shiftPressedTime = t.wMilliseconds;
+		}
+	}
 
 	// IME Toggle key : Ctrl + Space
 	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )

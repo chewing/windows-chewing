@@ -221,6 +221,9 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			<File
 				RelativePath=".\status_bar24.bmp">
 			</File>
+			<File
+				RelativePath=".\status_bar256.bmp">
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt">

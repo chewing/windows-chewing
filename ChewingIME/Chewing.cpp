@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "Chewingpp.h"
+#include ".\chewingpp.h"
 
 Chewing::Chewing(char *dataDir, char *hashDir, int keyLayout) {
     cf = (ChewingConf *) calloc( 1, sizeof( ChewingConf ) );
@@ -229,3 +230,4 @@ void Chewing::Dump() {
   fprintf(stderr,"\n");
   fprintf(stderr,"-----\n");
 }
+

@@ -19,4 +19,6 @@ protected:
 	void getToolbarSize(int* w, int* h);
 public:
 	bool create(HWND imeUIWnd);
+	void enableChiEng(bool enable=true);
+	void disableChiEng(){	enableChiEng(false);	}
 };

@@ -81,7 +81,6 @@ class Chewing
 
   // Return the i-th selection wchar, i >= 0.
   char* Selection(int i);
-
 };
 
 #endif /* _CHEWING_H */
