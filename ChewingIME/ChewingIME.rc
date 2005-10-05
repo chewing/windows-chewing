@@ -165,8 +165,8 @@ IDB_STATUS_TB           BITMAP                  "status_bar256.bmp"
 
 STRINGTABLE 
 BEGIN
-    ID_CHI_ENG              "い璣ゅち传"
-    ID_FULL_HALF            "ち传"
+    ID_CHI_ENG              "い璣ゅち传 ( Shift )"
+    ID_FULL_HALF            "ち传 ( Shift + Space )"
     ID_CONFIG               "砞﹚穝慌块猭"
     IDS_CONFIGTIELE         "穝慌块猭砞﹚"
 END

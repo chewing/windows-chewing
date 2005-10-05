@@ -20,6 +20,7 @@ public:
 	CompStr* getCompStr(void);
 	CandList* getCandList(void);
 	INPUTCONTEXT* getIC(){	return ic;	}
+	HIMC getHIMC(){	return himc;	}
 	bool lock(void);
 	void unlock(void);
 };

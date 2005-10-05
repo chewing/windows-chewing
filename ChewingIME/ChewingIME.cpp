@@ -21,6 +21,7 @@ HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
 
 bool g_isChinese = true;
+bool g_isFullShape = false;
 long g_shiftPressedTime = -1;
 
 POINT g_statusWndPos = { -1, -1 };
@@ -269,9 +270,9 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	else if( g_shiftPressedTime > 0 )
 		g_shiftPressedTime = -1;
 
-
-	// IME Toggle key : Ctrl + Space
-	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )
+	// IME Toggle key : Ctrl + Space & Shift + Space
+	if( LOWORD(uVirKey) == VK_SPACE && 
+		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) )
 		return TRUE;	// Eat the message
 
 	BOOL ret = FilterKeyByChewing( uVirKey, GetKeyInfo(lParam), lpbKeyState );
@@ -391,6 +392,11 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 
 	if(fSelect)
 	{
+		// FIXME: I don't know why this is needed, but without this
+		//        action, the IME cannot work normally under Win 2000/XP.
+		//        It seems that Windows 98/ME don't have this problem.		if( g_isWindowNT )
+		imc.getIC()->fOpen = TRUE;
+
 		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
 		CompStr* cs = imc.getCompStr();
 		if(!cs)
@@ -434,13 +440,6 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		CandList* cl = imc.getCandList();
 		cl->~CandList();	// delete cl;
 	}
-
-	// FIXME: I don't know why this is needed, but without this
-	//        action, the IME cannot work normally under Win 2000/XP.
-	//        It seems that Windows 98/ME don't have this problem.
-	if( g_isWindowNT )
-		ImmSetOpenStatus( hIMC, fSelect );
-
 	return TRUE;
 }
 
@@ -457,6 +456,39 @@ BOOL    APIENTRY ImeSetActiveContext(HIMC hIMC, BOOL fFlag)
 UINT    APIENTRY ImeToAsciiEx(UINT uVirtKey, UINT uScaCode, CONST LPBYTE lpbKeyState, LPDWORD lpdwTransBuf, UINT fuState, HIMC)
 {
 	return FALSE;
+}
+
+BOOL CommitBuffer( IMCLock& imc )
+{
+	CompStr* cs = imc.getCompStr();
+	if( !cs )
+		return FALSE;
+
+	if( !cs->isEmpty() )
+	{
+		// FIXME: If candidate window is opened, this
+		//        will cause problems.
+		g_chewing->Enter();	// Commit
+		if( g_chewing->CommitReady() )
+		{
+			char* cstr = g_chewing->CommitStr();
+			cs->setResultStr(cstr);
+			free(cstr);
+		}
+		else
+			cs->setResultStr( cs->getCompStr() );
+		cs->setCompStr("");
+		cs->setCursorPos(0);
+		cs->setZuin("");
+
+		GenerateIMEMessage( imc.getHIMC(), WM_IME_COMPOSITION, 
+			0,
+			(GCS_RESULTSTR|GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
+			GCS_COMPREADATTR|GCS_CURSORPOS|GCS_DELTASTART) );
+
+		GenerateIMEMessage( imc.getHIMC(), WM_IME_ENDCOMPOSITION );
+	}
+	return TRUE;
 }
 
 BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwValue )
@@ -479,7 +511,30 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 	case NI_SETCANDIDATE_PAGESIZE:
 		break;
 	case NI_CONTEXTUPDATED:
-		break;
+		{
+			switch(dwValue)
+			{
+			case IMC_SETCANDIDATEPOS:
+				break;
+			case IMC_SETCOMPOSITIONFONT:
+				break;
+			case IMC_SETCOMPOSITIONWINDOW:
+				break;
+			case IMC_SETCONVERSIONMODE:
+				{
+					DWORD conv, sentence;
+					ImmGetConversionStatus( hIMC, &conv, &sentence);
+					g_isFullShape = !!(conv & IME_CMODE_FULLSHAPE);
+					g_statusWnd.updateIcons();
+					break;
+				}
+			case IMC_SETSENTENCEMODE:
+				break;
+			case IMC_SETOPENSTATUS :
+				break;
+			}
+			break;
+		}
 	case NI_COMPOSITIONSTR:
 		{
 			IMCLock imc( hIMC );
@@ -489,31 +544,7 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 			switch( dwIndex )
 			{
 			case CPS_COMPLETE:
-				if( !cs->isEmpty() )
-				{
-					// FIXME: If candidate window is opened, this
-					//        will cause problems.
-					g_chewing->Enter();	// Commit
-					if( g_chewing->CommitReady() )
-					{
-						char* cstr = g_chewing->CommitStr();
-						cs->setResultStr(cstr);
-						free(cstr);
-					}
-					else
-						cs->setResultStr( cs->getCompStr() );
-					cs->setCompStr("");
-					cs->setCursorPos(0);
-					cs->setZuin("");
-					imc.unlock();
-
-					GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
-						0,
-						(GCS_RESULTSTR|GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
-						GCS_COMPREADATTR/*|GCS_CURSORPOS|GCS_DELTASTART*/) );
-
-					GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
-				}
+				return CommitBuffer( imc );
 				break;
 			case CPS_CONVERT:
 				break;
@@ -739,14 +770,23 @@ LRESULT CALLBACK UIWndProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			if( wp )
 			{
-				if( hIMC && (lp & ISC_SHOWUICOMPOSITIONWINDOW)
+				if( hIMC )
+				{
+					if( (lp & ISC_SHOWUICOMPOSITIONWINDOW)
 					&& ! g_compWnd.getDisplayedCompStr().empty() )
 						g_compWnd.Show();
+					g_statusWnd.Show();
+				}
 				else
+				{
 					g_compWnd.Hide();
+					g_statusWnd.Hide();
+				}
 			}
 			else
 			{
+				g_compWnd.Hide();
+				g_statusWnd.Hide();
 			}
 			break;
 		}
@@ -845,7 +885,10 @@ BOOL FilterKeyByChewing( UINT key, KeyInfo ki, const BYTE* keystate )
 	{
 		if( ! (g_chewing = LoadChewingEngine()) )
 			return FALSE;
+		if( ! g_isChinese )
+			g_chewing->Capslock();	// switch to English mode
 	}
+	g_chewing->SetFullShape(g_isFullShape);
 
 	switch( key )
 	{
@@ -892,21 +935,24 @@ BOOL FilterKeyByChewing( UINT key, KeyInfo ki, const BYTE* keystate )
 	case VK_TAB:
 		g_chewing->Tab();
 		break;
+	case VK_SPACE:
+		g_chewing->Space();
+		break;
 	case VK_CAPITAL:
-		if( g_isChinese )
-			g_chewing->Capslock();
-		else
+//		if( g_isChinese )
+//			g_chewing->Capslock();
+//		else
 			return FALSE;
 		break;
 //	case VK_NUMLOCK:
 //		break;
 	default:
 		{
-			if( key == VK_SPACE && IsKeyDown( keystate[VK_SHIFT] ) )
-			{
-				g_chewing->ShiftSpace();
-				break;
-			}
+//			if( key == VK_SPACE && IsKeyDown( keystate[VK_SHIFT] ) )
+//			{
+//				g_chewing->ShiftSpace();
+//				break;
+//			}
 
 			if( IsKeyDown( keystate[VK_CONTROL] ) )
 			{

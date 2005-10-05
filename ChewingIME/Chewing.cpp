@@ -231,3 +231,12 @@ void Chewing::Dump() {
   fprintf(stderr,"-----\n");
 }
 
+void Chewing::SetFullShape(bool full)
+{
+	::SetShapeMode( cd, full ? FULLSHAPE_MODE : HALFSHAPE_MODE );
+}
+
+bool Chewing::GetFullShape(void)
+{
+	return cd->bFullShape;
+}

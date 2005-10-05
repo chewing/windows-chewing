@@ -18,6 +18,7 @@ const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 extern DWORD g_keyboardLayout;
 extern DWORD g_candPerRow;
 extern bool g_isChinese;
+extern bool g_isFullShape;
 extern POINT g_statusWndPos;
 
 class CompWnd;

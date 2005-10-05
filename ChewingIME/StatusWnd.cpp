@@ -87,21 +87,8 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 					g_statusWnd.toggleChiEngMode(hIMC);
 					break;
 				case ID_FULL_HALF:
-					{
-						ImmGetConversionStatus( hIMC, &conv, &sentence);
-						DWORD isFull = conv & IME_CMODE_FULLSHAPE;
-						if( isFull )
-							conv &= ~IME_CMODE_FULLSHAPE;
-						else
-							conv |= IME_CMODE_FULLSHAPE;
-						ImmSetConversionStatus( hIMC, conv, sentence);
-						isFull = !isFull;
-
-						HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
-						SendMessage( toolbar, TB_CHANGEBITMAP, 
-							ID_FULL_HALF, MAKELPARAM(isFull ? 2 : 3, 0));
-						break;
-					}
+					g_statusWnd.toggleShapeMode(hIMC);
+					break;
 				case ID_CONFIG:
 //					ConfigureChewingIME(HWND_DESKTOP);
 					::ShellExecute( HWND_DESKTOP, "open", "rundll32.exe", "chewing.ime,ConfigureChewingIME", NULL, SW_SHOW );
@@ -195,7 +182,7 @@ bool StatusWnd::create(HWND imeUIWnd)
 		return false;
 
 	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
-	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
+	toolbar_btns[1].iBitmap = g_isFullShape ? 2 : 3;
 
 	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
@@ -251,10 +238,35 @@ void StatusWnd::toggleChiEngMode(HIMC hIMC)
 	ImmSetConversionStatus( hIMC, conv, sentence);
 
 	g_isChinese = !g_isChinese;
+
+	if( g_chewing )
+		g_chewing->Capslock();
+//	if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
+//		g_chewing->Capslock();
+	updateIcons();
+}
+
+void StatusWnd::toggleShapeMode(HIMC hIMC)
+{
+	DWORD conv, sentence;
+	ImmGetConversionStatus( hIMC, &conv, &sentence);
+	g_isFullShape = !!(conv & IME_CMODE_FULLSHAPE);
+	if( g_isFullShape )
+		conv &= ~IME_CMODE_FULLSHAPE;
+	else
+		conv |= IME_CMODE_FULLSHAPE;
+	ImmSetConversionStatus( hIMC, conv, sentence);
+
+	updateIcons();
+}
+
+void StatusWnd::updateIcons(void)
+{
 	HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
+
 	SendMessage( toolbar, TB_CHANGEBITMAP, 
 		ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
 
-//	if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
-//		g_chewing->Capslock();
+	SendMessage( toolbar, TB_CHANGEBITMAP, 
+		ID_FULL_HALF, MAKELPARAM(g_isFullShape ? 2 : 3, 0));
 }

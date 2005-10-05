@@ -36,7 +36,7 @@
 				AdditionalDependencies="imm32.lib libchewing.lib comctl32.lib shell32.lib"
 				OutputFile="$(OutDir)/Chewing.ime"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Release"
+				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Debug"
 				ModuleDefinitionFile="ChewingIME.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
