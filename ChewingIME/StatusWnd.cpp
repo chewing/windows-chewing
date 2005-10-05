@@ -53,7 +53,7 @@ BOOL StatusWnd::RegisterClass(void)
 	wc.hCursor        = LoadCursor( NULL, IDC_SIZEALL );
 	wc.hIcon          = NULL;
 	wc.lpszMenuName   = (LPTSTR)NULL;
-	wc.lpszClassName  = g_status_wnd_class;
+	wc.lpszClassName  = g_statusWndClass;
 	wc.hbrBackground  = NULL;
 	wc.hIconSm        = NULL;
 
@@ -84,25 +84,8 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 				switch(LOWORD(wp))
 				{
 				case ID_CHI_ENG:
-					{
-						ImmGetConversionStatus( hIMC, &conv, &sentence);
-						g_isChinese = !!(conv & IME_CMODE_NATIVE);
-						if( g_isChinese )
-							conv &= ~IME_CMODE_NATIVE;
-						else
-							conv |= IME_CMODE_NATIVE;
-						ImmSetConversionStatus( hIMC, conv, sentence);
-
-						g_isChinese = !g_isChinese;
-						HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
-						SendMessage( toolbar, TB_CHANGEBITMAP, 
-							ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
-
-						if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
-							g_chewing->Capslock();
-
-						break;
-					}
+					g_statusWnd.toggleChiEngMode(hIMC);
+					break;
 				case ID_FULL_HALF:
 					{
 						ImmGetConversionStatus( hIMC, &conv, &sentence);
@@ -205,14 +188,13 @@ bool StatusWnd::create(HWND imeUIWnd)
 	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
 	IMCLock imc(hIMC);
 
-	hwnd = CreateWindowEx(0, g_status_wnd_class, NULL,
+	hwnd = CreateWindowEx(0, g_statusWndClass, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
 					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	if( !hwnd )
 		return false;
 
 	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
-	toolbar_btns[0].fsState = 0;	// Temporarily disable Chinese/English toggle
 	toolbar_btns[1].fsState = 0;	// Temporarily disable Fullshape
 
 	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
@@ -254,4 +236,25 @@ bool StatusWnd::create(HWND imeUIWnd)
 void StatusWnd::enableChiEng(bool enable)
 {
 	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
+}
+
+void StatusWnd::toggleChiEngMode(HIMC hIMC)
+{
+	DWORD conv, sentence;
+
+	ImmGetConversionStatus( hIMC, &conv, &sentence);
+	g_isChinese = !!(conv & IME_CMODE_NATIVE);
+	if( g_isChinese )
+		conv &= ~IME_CMODE_NATIVE;
+	else
+		conv |= IME_CMODE_NATIVE;
+	ImmSetConversionStatus( hIMC, conv, sentence);
+
+	g_isChinese = !g_isChinese;
+	HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
+	SendMessage( toolbar, TB_CHANGEBITMAP, 
+		ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
+
+//	if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
+//		g_chewing->Capslock();
 }

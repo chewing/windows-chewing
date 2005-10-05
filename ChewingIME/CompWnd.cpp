@@ -31,7 +31,7 @@ BOOL CompWnd::RegisterClass(void)
 	wc.hCursor			= LoadCursor( NULL, IDC_ARROW );
 	wc.hIcon			= NULL;
 	wc.lpszMenuName		= (LPTSTR)NULL;
-	wc.lpszClassName	= g_comp_wnd_class;
+	wc.lpszClassName	= g_compWndClass;
 	wc.hbrBackground	= NULL;
 	wc.hIconSm			= NULL;
 	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
@@ -204,7 +204,7 @@ int CompWnd::getDisplayedCursorPos(IMCLock& imc)
 
 bool CompWnd::create(HWND imeUIWnd)
 {
-	hwnd = CreateWindowEx(0, g_comp_wnd_class, NULL,
+	hwnd = CreateWindowEx(0, g_compWndClass, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
 					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	return !!hwnd;

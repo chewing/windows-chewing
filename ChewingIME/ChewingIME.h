@@ -9,10 +9,10 @@
 extern HINSTANCE g_dllInst;
 extern bool g_isWindowNT;
 
-const LPCTSTR g_pcman_ime_class = _T("ChewingIME");
-const LPCTSTR g_comp_wnd_class = _T("ChewingComp");
-const LPCTSTR g_cand_wnd_class = _T("ChewingCand");
-const LPCTSTR g_status_wnd_class = _T("ChewingStatus");
+const LPCTSTR g_pcmanIMEClass = _T("ChewingIME");
+const LPCTSTR g_compWndClass = _T("ChewingComp");
+const LPCTSTR g_cnadWndClass = _T("ChewingCand");
+const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
 extern DWORD g_keyboardLayout;

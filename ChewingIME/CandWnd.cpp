@@ -35,7 +35,7 @@ BOOL CandWnd::RegisterClass(void)
 	wc.hCursor        = LoadCursor( NULL, IDC_ARROW );
 	wc.hIcon          = NULL;
 	wc.lpszMenuName   = (LPTSTR)NULL;
-	wc.lpszClassName  = g_cand_wnd_class;
+	wc.lpszClassName  = g_cnadWndClass;
 	wc.hbrBackground  = NULL;
 	wc.hIconSm        = NULL;
 
@@ -213,7 +213,7 @@ void CandWnd::updateSize(void)
 
 bool CandWnd::create(HWND imeUIWnd)
 {
-	hwnd = CreateWindowEx(0, g_cand_wnd_class, NULL,
+	hwnd = CreateWindowEx(0, g_cnadWndClass, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
 					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	return !!hwnd;

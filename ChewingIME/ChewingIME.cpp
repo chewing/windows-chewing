@@ -28,6 +28,7 @@ POINT g_statusWndPos = { -1, -1 };
 Chewing* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
+DWORD g_defaultEnglish = false;
 
 CompWnd g_compWnd;
 CandWnd g_candWnd;
@@ -57,6 +58,7 @@ void LoadConfig()
 		DWORD type = REG_DWORD;
 		RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&g_keyboardLayout, &size );		
 		RegQueryValueEx( hk, "CandPerRow", 0, &type, (LPBYTE)&g_candPerRow, &size );
+		RegQueryValueEx( hk, "DefaultEnglish", 0, &type, (LPBYTE)&g_defaultEnglish, &size );
 		RegCloseKey( hk );
 	}
 }
@@ -70,6 +72,7 @@ void SaveConfig()
 	{
 		RegSetValueEx( hk, _T("KeyboardLayout"), 0, REG_DWORD, (LPBYTE)&g_keyboardLayout, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("CandPerRow"), 0, REG_DWORD, (LPBYTE)&g_candPerRow, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("DefaultEnglish"), 0, REG_DWORD, (LPBYTE)&g_defaultEnglish, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -152,7 +155,7 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 
 BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lpszOptions)
 {
-	_tcscpy( lpszUIClass, _T(g_pcman_ime_class) );
+	_tcscpy( lpszUIClass, _T(g_pcmanIMEClass) );
 	lpIMEInfo->fdwConversionCaps = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
 	lpIMEInfo->fdwSentenceCaps = IME_SMODE_NONE;
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
@@ -177,7 +180,7 @@ static BOOL CALLBACK ReloadAllChewingInst(HWND hwnd, LPARAM lp)
 {
 	TCHAR tmp[12];
 	GetClassName( hwnd, tmp, 11 );
-	if( 0 == _tcscmp( tmp, g_pcman_ime_class ) )
+	if( 0 == _tcscmp( tmp, g_pcmanIMEClass ) )
 		SendMessage( hwnd, WM_IME_RELOADCONFIG, 0, 0 );
 	return TRUE;
 }
@@ -230,6 +233,8 @@ LRESULT APIENTRY ImeEscape(HIMC, UINT, LPVOID)
 }
 
 
+
+
 BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState )
 {
 	if( !hIMC )
@@ -240,21 +245,34 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 		return FALSE;
 
 	if( GetKeyInfo(lParam).isKeyUp )	// Key up
-		return FALSE;
-
-	if( uVirKey == VK_SHIFT && ! IsKeyDown( lpbKeyState[VK_CONTROL] )  )
 	{
-		if( g_shiftPressedTime < 0 )
+		if( g_shiftPressedTime > 0 )
 		{
-			SYSTEMTIME t;
-			GetSystemTime( &t );
-			g_shiftPressedTime = t.wMilliseconds;
+			if( (GetTickCount() - g_shiftPressedTime) <= 400 )
+			{
+				// Toggle Chinese/English mode.
+				g_statusWnd.toggleChiEngMode(hIMC);
+			}
+			g_shiftPressedTime = -1;
+		}
+		return FALSE;
+	}
+
+	if( uVirKey == VK_SHIFT  )
+	{
+		if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
+		{
+			g_shiftPressedTime = GetTickCount();
+			return TRUE;
 		}
 	}
+	else if( g_shiftPressedTime > 0 )
+		g_shiftPressedTime = -1;
+
 
 	// IME Toggle key : Ctrl + Space
 	if( IsKeyDown( lpbKeyState[VK_CONTROL]) && LOWORD(uVirKey) == VK_SPACE )
-		return TRUE;
+		return TRUE;	// Eat the message
 
 	BOOL ret = FilterKeyByChewing( uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
@@ -389,23 +407,23 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		DWORD conv, sentence;
 		ImmGetConversionStatus( hIMC, &conv, &sentence);
 //	BEGIN UGLY HACK
-/*		if( g_isChinese )
+		if( g_isChinese )
 		{
-			if( g_chewing->ChineseMode() )
+/*			if( g_chewing->ChineseMode() )
 			{
 				if(  LOBYTE(GetKeyState(VK_CAPITAL)) )
 					g_chewing->Capslock();
 			}
 			else if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
 				g_chewing->Capslock();
-
+*/
 			conv |= IME_CMODE_NATIVE;
 		}
 		else
 		{
 			conv &= ~IME_CMODE_NATIVE;
 		}
-*/
+
 //	END UGLY HACK
 		ImmSetConversionStatus( hIMC, conv, sentence);
 	}
@@ -762,7 +780,7 @@ BOOL RegisterUIClasses()
 	wc.hCursor			= LoadCursor( NULL, IDC_ARROW );
 	wc.hIcon			= NULL;
 	wc.lpszMenuName		= (LPTSTR)NULL;
-	wc.lpszClassName	= g_pcman_ime_class;
+	wc.lpszClassName	= g_pcmanIMEClass;
 	wc.hbrBackground	= NULL;
 	wc.hIconSm			= NULL;
 	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
@@ -799,15 +817,16 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 				return FALSE;
 
 			LoadConfig();
+			g_isChinese = ! g_defaultEnglish;
 
 			break;
 		}
 
 	case DLL_PROCESS_DETACH:
-		UnregisterClass(g_pcman_ime_class, (HINSTANCE)hModule);
-		UnregisterClass(g_cand_wnd_class, (HINSTANCE)hModule);
-		UnregisterClass(g_comp_wnd_class, (HINSTANCE)hModule);
-		UnregisterClass(g_status_wnd_class, (HINSTANCE)hModule);
+		UnregisterClass(g_pcmanIMEClass, (HINSTANCE)hModule);
+		UnregisterClass(g_cnadWndClass, (HINSTANCE)hModule);
+		UnregisterClass(g_compWndClass, (HINSTANCE)hModule);
+		UnregisterClass(g_statusWndClass, (HINSTANCE)hModule);
 
 		if( g_chewing )
 			delete g_chewing;
@@ -889,8 +908,13 @@ BOOL FilterKeyByChewing( UINT key, KeyInfo ki, const BYTE* keystate )
 				break;
 			}
 
-			if( key >= '0' && key <= '9' &&  IsKeyDown( keystate[VK_CONTROL] ) )
-				g_chewing->CtrlNum( key );
+			if( IsKeyDown( keystate[VK_CONTROL] ) )
+			{
+				if(  key >= '0' && key <= '9' )
+					g_chewing->CtrlNum( key );
+				else
+					return FALSE;
+			}
 			else
 			{
 				char ascii[2];

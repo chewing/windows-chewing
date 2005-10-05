@@ -21,4 +21,5 @@ public:
 	bool create(HWND imeUIWnd);
 	void enableChiEng(bool enable=true);
 	void disableChiEng(){	enableChiEng(false);	}
+	void toggleChiEngMode(HIMC hIMC);
 };
