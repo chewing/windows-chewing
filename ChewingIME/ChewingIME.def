@@ -17,5 +17,3 @@ ImeGetRegisterWordStyle
 ImeEnumRegisterWord
 ImeSetCompositionString
 ImeGetImeMenuItems
-UIWndProc
-ConfigureChewingIME

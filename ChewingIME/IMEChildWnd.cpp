@@ -1,25 +1,26 @@
-#include "imewnd.h"
+#include "IMEChildWnd.h"
 #include "ChewingIME.h"
-#include ".\imewnd.h"
+#include ".\IMEChildWnd.h"
 
-IMEWnd::IMEWnd()
+IMEChildWnd::IMEChildWnd()
 {
 }
 
 
 
-IMEWnd::~IMEWnd(void)
+IMEChildWnd::~IMEChildWnd(void)
 {
 	destroy();
 }
 
-void IMEWnd::assocWndObj(void)
+/*
+void IMEChildWnd::assocWndObj(void)
 {
-	if( sizeof(IMEWnd*) > sizeof(LONG) )	// pointer size > 32 bit (64 bit environment)
+	if( sizeof(IMEChildWnd*) > sizeof(LONG) )	// pointer size > 32 bit (64 bit environment)
 	{
 		void* ptr = this;
 		LONG ptrparts[] = {0, 0};
-		memcpy( ptrparts, &ptr, sizeof(IMEWnd*) );
+		memcpy( ptrparts, &ptr, sizeof(IMEChildWnd*) );
 		SetWindowLong( hwnd, GWL_USERDATA, ptrparts[0] );
 		SetWindowLong( hwnd, IMMGWL_PRIVATE, ptrparts[1] );		
 	}
@@ -27,36 +28,36 @@ void IMEWnd::assocWndObj(void)
 		SetWindowLong( hwnd, GWL_USERDATA, (LONG)this );
 }
 
-IMEWnd* IMEWnd::getAssocWndObj(HWND hwnd)
+IMEChildWnd* IMEChildWnd::getAssocWndObj(HWND hwnd)
 {
 	if( sizeof(void*) > sizeof(LONG) )	// pointer size > 32 bit (64 bit environment)
 	{
-		IMEWnd* ptr = NULL;
+		IMEChildWnd* ptr = NULL;
 		LONG ptrparts[] = {0, 0};
 		ptrparts[0] = GetWindowLong( hwnd, GWL_USERDATA  );
 		ptrparts[1] = GetWindowLong( hwnd, IMMGWL_PRIVATE );		
-		memcpy( &ptr, ptrparts, sizeof(IMEWnd*) );
+		memcpy( &ptr, ptrparts, sizeof(IMEChildWnd*) );
 		return ptr;
 	}
 	else
-		return (IMEWnd*)GetWindowLong( hwnd, GWL_USERDATA );
+		return (IMEChildWnd*)GetWindowLong( hwnd, GWL_USERDATA );
 
 	return NULL;
 }
+*/
 
-
-void IMEWnd::OnLButtonDown(WPARAM wp, LPARAM lp)
+void IMEChildWnd::onLButtonDown(WPARAM wp, LPARAM lp)
 {
 	oldPos = MAKEPOINTS(lp);
 	SetCapture(hwnd);
 }
 
-void IMEWnd::OnLButtonUp(WPARAM wp, LPARAM lp)
+void IMEChildWnd::onLButtonUp(WPARAM wp, LPARAM lp)
 {
 	ReleaseCapture();
 }
 
-void IMEWnd::OnMouseMove(WPARAM wp, LPARAM lp)
+void IMEChildWnd::onMouseMove(WPARAM wp, LPARAM lp)
 {
 	if( GetCapture() != hwnd )
 		return;
@@ -65,10 +66,10 @@ void IMEWnd::OnMouseMove(WPARAM wp, LPARAM lp)
 	GetWindowRect( hwnd, &rc );
 	OffsetRect( &rc, (pt.x - oldPos.x), (pt.y - oldPos.y) );
 //	MoveWindow( hwnd, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, TRUE );
-	Move(rc.left, rc.top);
+	move(rc.left, rc.top);
 }
 
-void IMEWnd::Move(int x, int y)
+void IMEChildWnd::move(int x, int y)
 {
 	int w, h;
 	getSize(&w, &h);
@@ -88,7 +89,7 @@ void IMEWnd::Move(int x, int y)
 	MoveWindow( hwnd, x, y, w, h, TRUE );
 }
 
-void IMEWnd::destroy(void)
+void IMEChildWnd::destroy(void)
 {
 	if( hwnd )
 		DestroyWindow(hwnd);

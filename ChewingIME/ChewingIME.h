@@ -17,16 +17,6 @@ const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
 extern DWORD g_keyboardLayout;
 extern DWORD g_candPerRow;
-extern bool g_isChinese;
-extern bool g_isFullShape;
-extern POINT g_statusWndPos;
-
-class CompWnd;
-extern CompWnd g_compWnd;
-class CandWnd;
-extern CandWnd g_candWnd;
-class StatusWnd;
-extern StatusWnd g_statusWnd;
 
 extern Chewing* g_chewing;
 
@@ -36,7 +26,13 @@ inline BOOL IsImeMessage(UINT msg)
 			|| (msg >= WM_IME_SETCONTEXT && msg <= WM_IME_KEYUP) );
 }
 
+void LoadConfig();
+void ToggleChiEngMode(HIMC hIMC);
+void ToggleFullShapeMode(HIMC hIMC);
+
 BOOL GenerateIMEMessage(HIMC hIMC, UINT msg, WPARAM wp=0, LPARAM lp=0);
+
+void ToggleChiEngMode(HIMC hIMC);
 
 void ConfigureChewingIME(HWND parent);
 

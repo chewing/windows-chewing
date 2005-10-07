@@ -5,9 +5,13 @@
 #include "CandList.h"
 #include "imm.h"
 #include "IMCLock.h"
+#include "IMEUI.h"
+#include "IMEUILock.h"
+
 #include "CompWnd.h"
 
 #include <tchar.h>
+#include <windows.h>
 
 CandWnd::CandWnd()
 {
@@ -23,12 +27,12 @@ CandWnd::~CandWnd(void)
 }
 
 
-BOOL CandWnd::RegisterClass(void)
+BOOL CandWnd::registerClass(void)
 {
 	WNDCLASSEX wc;
 	wc.cbSize         = sizeof(WNDCLASSEX);
 	wc.style          = CS_IME;
-	wc.lpfnWndProc    = (WNDPROC)CandWnd::WndProc;
+	wc.lpfnWndProc    = (WNDPROC)CandWnd::wndProc;
 	wc.cbClsExtra     = 0;
 	wc.cbWndExtra     = 0;
 	wc.hInstance      = g_dllInst;
@@ -45,16 +49,20 @@ BOOL CandWnd::RegisterClass(void)
 	return TRUE;
 }
 
-LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
+LRESULT CandWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
 	HIMC hIMC = getIMC(hwnd);
+	IMEUILock lock( GetParent( hwnd ) );
+	IMEUI* ui = lock.getIMEUI();
+
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_candWnd.OnPaint(hIMC, ps);
+				if(ui)
+					ui->candWnd.onPaint(hIMC, ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -62,13 +70,16 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			return TRUE;
 			break;
 		case WM_LBUTTONDOWN:
-			g_candWnd.OnLButtonDown(wp, lp);
+			if(ui)
+				ui->candWnd.onLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_candWnd.OnMouseMove(wp, lp);
+			if(ui)
+				ui->candWnd.onMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_candWnd.OnLButtonUp(wp, lp);
+			if(ui)
+				ui->candWnd.onLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -79,7 +90,7 @@ LRESULT CandWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 	return 0;
 }
 
-void CandWnd::OnPaint(HIMC hIMC, PAINTSTRUCT& ps)
+void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 {
 	IMCLock imc( hIMC );
 	CandList* candList = imc.getCandList();
@@ -260,18 +271,16 @@ void CandWnd::show(void)
 	case CFS_DEFAULT:
 	default:
 		{
-			RECT rc;
-			GetWindowRect( g_compWnd.getHwnd(), &rc );
-			imc.getIC()->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
-			imc.getIC()->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
-			pt = imc.getIC()->cfCandForm->ptCurrentPos;
-			pt.x += g_compWnd.indexToXPos( g_compWnd.getDisplayedCompStr(),
-				g_compWnd.getDisplayedCursorPos());
+			IMEUILock lock( GetParent(hwnd) );
+			IMEUI* ui = lock.getIMEUI();
+			if( ! ui )
+				break;
+			ui->compWnd.getCandPos(imc, &pt);
 		}
 	}
 
 	ClientToScreen( imc.getIC()->hWnd, &pt );
-	g_candWnd.Move( pt.x, pt.y );
 
-	g_candWnd.Show();
+	move( pt.x, pt.y );
+	IMEChildWnd::show();
 }

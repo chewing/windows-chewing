@@ -1,17 +1,18 @@
 #pragma once
 
-#include "IMEWnd.h"
+#include "IMEChildWnd.h"
 
-class StatusWnd : public IMEWnd
+class StatusWnd : public IMEChildWnd
 {
 public:
 	StatusWnd(void);
 	~StatusWnd(void);
-	static BOOL RegisterClass(void);
+	static BOOL registerClass(void);
 protected:
 	HWND toolbar;
-	static LRESULT WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
-	void OnPaint(PAINTSTRUCT& ps);
+	HBITMAP bgbmp;
+	static LRESULT wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
+	void onPaint(PAINTSTRUCT& ps);
 
 public:
 	void getSize(int* w, int* h);
@@ -23,5 +24,5 @@ public:
 	void disableChiEng(){	enableChiEng(false);	}
 	void toggleChiEngMode(HIMC hIMC);
 	void toggleShapeMode(HIMC hIMC);
-	void updateIcons(void);
+	void updateIcons(HIMC hIMC);
 };

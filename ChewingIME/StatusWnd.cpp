@@ -5,6 +5,8 @@
 
 #include "CompStr.h"
 #include "IMCLock.h"
+#include "IMEUI.h"
+#include "IMEUILock.h"
 
 #include <commctrl.h>
 
@@ -41,12 +43,12 @@ StatusWnd::~StatusWnd(void)
 {
 }
 
-BOOL StatusWnd::RegisterClass(void)
+BOOL StatusWnd::registerClass(void)
 {
 	WNDCLASSEX wc;
 	wc.cbSize         = sizeof(WNDCLASSEX);
 	wc.style          = CS_IME;
-	wc.lpfnWndProc    = (WNDPROC)StatusWnd::WndProc;
+	wc.lpfnWndProc    = (WNDPROC)StatusWnd::wndProc;
 	wc.cbClsExtra     = 0;
 	wc.cbWndExtra     = 0;
 	wc.hInstance      = g_dllInst;
@@ -64,34 +66,45 @@ BOOL StatusWnd::RegisterClass(void)
 }
 
 
-LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
+LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 {
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
+	IMEUILock lock( GetParent(hwnd) );
+	IMEUI* ui = lock.getIMEUI();
+
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_statusWnd.OnPaint(ps);
+				if( ui )
+					ui->statusWnd.onPaint(ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
 		case WM_COMMAND:
 			{
-				DWORD conv, sentence;
 				switch(LOWORD(wp))
 				{
 				case ID_CHI_ENG:
-					g_statusWnd.toggleChiEngMode(hIMC);
+					if( ui )
+						ui->statusWnd.toggleChiEngMode(hIMC);
 					break;
 				case ID_FULL_HALF:
-					g_statusWnd.toggleShapeMode(hIMC);
+					if( ui )
+						ui->statusWnd.toggleShapeMode(hIMC);
 					break;
 				case ID_CONFIG:
-//					ConfigureChewingIME(HWND_DESKTOP);
-					::ShellExecute( HWND_DESKTOP, "open", "rundll32.exe", "chewing.ime,ConfigureChewingIME", NULL, SW_SHOW );
+					{
+						HWND top = ui->hwnd;
+						HWND desktop = GetDesktopWindow(), parent = NULL;
+						while( (parent=GetParent(top)) != desktop && parent )
+							top = parent;
+
+						ConfigureChewingIME(top);
+					}
 					break;
 				}
 				break;
@@ -112,22 +125,42 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			}
 			break;
 		case WM_LBUTTONDOWN:
-			g_statusWnd.OnLButtonDown(wp, lp);
+			if( ui )
+				ui->statusWnd.onLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_statusWnd.OnMouseMove(wp, lp);
+			if( ui )
+				ui->statusWnd.onMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_statusWnd.OnLButtonUp(wp, lp);
+			if( ui )
+				ui->statusWnd.onLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
+		case WM_SHOWWINDOW:
+			if( ! wp )
+			{
+				RECT rc;
+				GetWindowRect( hwnd, &rc );
+				INPUTCONTEXT* ic = imc.getIC();
+				if( ic )
+				{
+					ic->ptStatusWndPos.x = rc.left;
+					ic->ptStatusWndPos.y = rc.top;
+				}
+			}
+			break;
 		case WM_DESTROY:
 			{
 				RECT rc;
 				GetWindowRect( hwnd, &rc );
-				g_statusWndPos.x = rc.left;
-				g_statusWndPos.y = rc.top;
+				INPUTCONTEXT* ic = imc.getIC();
+				if( ic )
+				{
+					ic->ptStatusWndPos.x = rc.left;
+					ic->ptStatusWndPos.y = rc.top;
+				}
 			}
 			break;
 		default:
@@ -136,12 +169,19 @@ LRESULT StatusWnd::WndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 	return 0;
 }
 
-void StatusWnd::OnPaint(PAINTSTRUCT& ps)
+void StatusWnd::onPaint(PAINTSTRUCT& ps)
 {
 	RECT rc;
 	GetClientRect(hwnd,&rc);
 
 	FillSolidRect( ps.hdc, &rc, GetSysColor(COLOR_BTNFACE));
+
+/*	HDC memdc = CreateCompatibleDC( ps.hdc );
+	HGDIOBJ oldobj = SelectObject( memdc, bgbmp );
+	StretchBlt( ps.hdc, 62, 0, 100, 26, memdc, 60, 0, 2, 26, SRCCOPY);
+	BitBlt( ps.hdc, 0, 0, 62, 26, memdc, 0, 0, SRCCOPY);
+	SelectObject( memdc, oldobj );
+*/
 
 	Draw3DBorder( ps.hdc, &rc, GetSysColor(COLOR_BTNHILIGHT), 0/*GetSysColor(COLOR_BTNSHADOW)*/);
 
@@ -181,8 +221,8 @@ bool StatusWnd::create(HWND imeUIWnd)
 	if( !hwnd )
 		return false;
 
-	toolbar_btns[0].iBitmap = g_isChinese ? 0 : 1;
-	toolbar_btns[1].iBitmap = g_isFullShape ? 2 : 3;
+	toolbar_btns[0].iBitmap = imc.isChinese() ? 0 : 1;
+	toolbar_btns[1].iBitmap = imc.isFullShape() ? 2 : 3;
 
 	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
 		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
@@ -217,6 +257,13 @@ bool StatusWnd::create(HWND imeUIWnd)
 	getSize(&w, &h);
 	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
 
+/*	HDC dc = GetDC(hwnd);
+	bgbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUSBG) );
+	BYTE buf[8192];
+	long len = GetBitmapBits( bgbmp, sizeof(buf), buf );
+	SetBitmapBits(bgbmp, len,buf);
+	ReleaseDC(hwnd, dc );
+*/
 	return true;
 }
 
@@ -227,46 +274,25 @@ void StatusWnd::enableChiEng(bool enable)
 
 void StatusWnd::toggleChiEngMode(HIMC hIMC)
 {
-	DWORD conv, sentence;
-
-	ImmGetConversionStatus( hIMC, &conv, &sentence);
-	g_isChinese = !!(conv & IME_CMODE_NATIVE);
-	if( g_isChinese )
-		conv &= ~IME_CMODE_NATIVE;
-	else
-		conv |= IME_CMODE_NATIVE;
-	ImmSetConversionStatus( hIMC, conv, sentence);
-
-	g_isChinese = !g_isChinese;
-
-	if( g_chewing )
-		g_chewing->Capslock();
-//	if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
-//		g_chewing->Capslock();
-	updateIcons();
+	ToggleChiEngMode(hIMC);
+	updateIcons(hIMC);
 }
 
 void StatusWnd::toggleShapeMode(HIMC hIMC)
 {
-	DWORD conv, sentence;
-	ImmGetConversionStatus( hIMC, &conv, &sentence);
-	g_isFullShape = !!(conv & IME_CMODE_FULLSHAPE);
-	if( g_isFullShape )
-		conv &= ~IME_CMODE_FULLSHAPE;
-	else
-		conv |= IME_CMODE_FULLSHAPE;
-	ImmSetConversionStatus( hIMC, conv, sentence);
-
-	updateIcons();
+	ToggleFullShapeMode( hIMC );
+	updateIcons(hIMC);
 }
 
-void StatusWnd::updateIcons(void)
+void StatusWnd::updateIcons(HIMC hIMC)
 {
 	HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
 
-	SendMessage( toolbar, TB_CHANGEBITMAP, 
-		ID_CHI_ENG, MAKELPARAM(g_isChinese ? 0 : 1, 0));
+	IMCLock imc(hIMC);
 
 	SendMessage( toolbar, TB_CHANGEBITMAP, 
-		ID_FULL_HALF, MAKELPARAM(g_isFullShape ? 2 : 3, 0));
+		ID_CHI_ENG, MAKELPARAM(imc.isChinese() ? 0 : 1, 0));
+
+	SendMessage( toolbar, TB_CHANGEBITMAP, 
+		ID_FULL_HALF, MAKELPARAM(imc.isFullShape() ? 2 : 3, 0));
 }

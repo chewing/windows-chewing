@@ -55,3 +55,21 @@ void IMCLock::unlock(void)
 		ic = NULL;
 	}
 }
+
+bool IMCLock::isChinese(void)
+{
+	INPUTCONTEXT* ic = getIC();
+	if(ic)
+		return !!(ic->fdwConversion & IME_CMODE_CHINESE );
+	return false;
+}
+
+bool IMCLock::isFullShape(void)
+{
+	INPUTCONTEXT* ic = getIC();
+	if(ic)
+		return !!(ic->fdwConversion & IME_CMODE_FULLSHAPE );
+
+	return false;
+}
+

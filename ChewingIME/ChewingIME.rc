@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,7,1
- PRODUCTVERSION 0,0,0,0
+ FILEVERSION 0,0,8,0
+ PRODUCTVERSION 0,0,8,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 0, 7, 1"
+            VALUE "FileVersion", "0, 0, 8, 0"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 0, 7, 1"
+            VALUE "ProductVersion", "0, 0, 8, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -120,15 +120,22 @@ BEGIN
                     75,10
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,15,117,75,
                     10
-    EDITTEXT        IDC_CAND_PER_ROW,175,19,25,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_CAND_PER_ROW,173,15,27,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_CAND_PER_ROW_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS,197,18,10,14
+                    UDS_ARROWKEYS,197,14,10,14
     DEFPUSHBUTTON   "確定",IDOK,103,121,50,14
     PUSHBUTTON      "取消",IDCANCEL,157,121,50,14
     GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,128
-    GROUPBOX        "候選字視窗",IDC_STATIC,99,7,108,36
-    LTEXT           "每列顯示候選字個數",IDC_STATIC,107,22,63,8
+    GROUPBOX        "候選字視窗",IDC_STATIC,99,7,108,43
+    LTEXT           "每列顯示候選字個數",IDC_STATIC,105,18,63,8
+    CONTROL         "預設以英文模式啟動",IDC_DEFAULT_ENG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,99,55,108,10
+    LTEXT           "選字鍵",IDC_STATIC,105,33,22,8,WS_DISABLED
+    COMBOBOX        IDC_COMBO1,134,32,66,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,99,68,108,10
 END
 
 

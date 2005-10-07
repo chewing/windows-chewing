@@ -3,17 +3,17 @@
 #include <windows.h>
 #include "imm.h"
 
-class IMEWnd
+class IMEChildWnd
 {
 public:
-	IMEWnd();
-	virtual ~IMEWnd(void);
-	void Show()
+	IMEChildWnd();
+	virtual ~IMEChildWnd(void);
+	void show()
 	{
 		if( hwnd )
 			ShowWindow(hwnd, SW_SHOWNA);
 	}
-	void Hide(){ ShowWindow(hwnd, SW_HIDE); }
+	void hide(){ ShowWindow(hwnd, SW_HIDE); }
 	BOOL isWindow(){ return IsWindow(hwnd); }
 	void refresh()	{	InvalidateRect( hwnd, NULL, FALSE );	}
 	virtual void getSize(int* w, int* h){	*w=0; *h=0;	}
@@ -21,17 +21,17 @@ public:
 	static HIMC getIMC(HWND hwnd){	return (HIMC)GetWindowLong( GetParent(hwnd), IMMGWL_IMC );	}
 	HWND getHwnd(){	return hwnd;	}
 	BOOL isVisible(){ return IsWindowVisible(hwnd); }
+	void move(int x, int y);
+//	static IMEChildWnd* getAssocWndObj(HWND hwnd);
 protected:
 	HWND hwnd;
 	POINTS oldPos;
-	void assocWndObj(void);
+//	void assocWndObj(void);
 public:
-	static IMEWnd* getAssocWndObj(HWND hwnd);
-	void Move(int x, int y);
 protected:
-	void OnLButtonDown(WPARAM wp, LPARAM lp);
-	void OnLButtonUp(WPARAM wp, LPARAM lp);
-	void OnMouseMove(WPARAM wp, LPARAM lp);
+	void onLButtonDown(WPARAM wp, LPARAM lp);
+	void onLButtonUp(WPARAM wp, LPARAM lp);
+	void onMouseMove(WPARAM wp, LPARAM lp);
 public:
 	virtual bool create(HWND imeUIWnd) = 0;
 	void destroy(void);

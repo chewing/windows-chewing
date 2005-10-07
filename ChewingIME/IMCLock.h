@@ -23,4 +23,6 @@ public:
 	HIMC getHIMC(){	return himc;	}
 	bool lock(void);
 	void unlock(void);
+	bool isChinese(void);
+	bool isFullShape(void);
 };

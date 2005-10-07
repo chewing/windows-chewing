@@ -4,6 +4,8 @@
 #include "CandWnd.h"
 #include "CompStr.h"
 #include "IMCLock.h"
+#include "IMEUI.h"
+#include "IMEUILock.h"
 
 CompWnd::CompWnd(void)
 {
@@ -19,12 +21,12 @@ CompWnd::~CompWnd(void)
 	DeleteObject( font );
 }
 
-BOOL CompWnd::RegisterClass(void)
+BOOL CompWnd::registerClass(void)
 {
 	WNDCLASSEX wc;
 	wc.cbSize			= sizeof(WNDCLASSEX);
 	wc.style			= CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS| CS_IME;
-	wc.lpfnWndProc		= (WNDPROC)CompWnd::WndProc;
+	wc.lpfnWndProc		= (WNDPROC)CompWnd::wndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
 	wc.hInstance		= g_dllInst;
@@ -40,18 +42,20 @@ BOOL CompWnd::RegisterClass(void)
 	return TRUE;
 }
 
-LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
+LRESULT CompWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
-
+	IMEUILock lock( GetParent(hwnd) );
+	IMEUI* ui = lock.getIMEUI();
 	switch (msg)
 	{
 		case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				g_compWnd.OnPaint( imc, ps );
+				if( ui )
+					ui->compWnd.onPaint( imc, ps );
 				EndPaint(hwnd, &ps);
 				break;
 			}
@@ -59,13 +63,16 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 			return TRUE;
 			break;
 		case WM_LBUTTONDOWN:
-			g_compWnd.OnLButtonDown(wp, lp);
+			if( ui )
+				ui->compWnd.onLButtonDown(wp, lp);
 			break;
 		case WM_MOUSEMOVE:
-			g_compWnd.OnMouseMove(wp, lp);
+			if( ui )
+				ui->compWnd.onMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			g_compWnd.OnLButtonUp(wp, lp);
+			if( ui )
+				ui->compWnd.onLButtonUp(wp, lp);
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -78,7 +85,7 @@ LRESULT CompWnd::WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 
 
 
-void CompWnd::OnPaint(IMCLock& imc, PAINTSTRUCT& ps)
+void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 {
 	string compStr = getDisplayedCompStr(imc);
 	int cursorPos = getDisplayedCursorPos(imc);
@@ -208,4 +215,19 @@ bool CompWnd::create(HWND imeUIWnd)
 					WS_POPUP|WS_CLIPCHILDREN,
 					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	return !!hwnd;
+}
+
+void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
+{
+	RECT rc;
+	GetWindowRect(hwnd, &rc );
+	INPUTCONTEXT* ic = imc.getIC();
+	if(!ic)
+		return;
+	ic->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
+	ic->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
+	*pt = imc.getIC()->cfCandForm->ptCurrentPos;
+	string compstr = imc.getCompStr()->getCompStr();
+	pt->x += indexToXPos( compstr, getDisplayedCursorPos());
+
 }

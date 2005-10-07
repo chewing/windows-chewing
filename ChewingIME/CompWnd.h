@@ -1,21 +1,22 @@
 #pragma once
 
-#include "IMEWnd.h"
+#include "IMEChildWnd.h"
 #include "IMCLock.h"
 
 #include <string>
 
 using namespace std;
 
-class CompWnd : public IMEWnd
+class CompWnd : public IMEChildWnd
 {
 public:
 	CompWnd(void);
 	~CompWnd(void);
-	static BOOL RegisterClass(void);
+	static BOOL registerClass(void);
 protected:
-	static LRESULT WndProc(HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
-	void OnPaint(IMCLock& imc, PAINTSTRUCT& ps);
+	static LRESULT wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp);
+	int indexToXPos( string compStr, int idx);
+	void onPaint(IMCLock& imc, PAINTSTRUCT& ps);
 	HFONT font;
 public:
 	void setFont(LOGFONT* lf);
@@ -25,7 +26,7 @@ public:
 	int getDisplayedCursorPos(IMCLock& imc);
 	string getDisplayedCompStr(){	return getDisplayedCompStr(IMCLock(getIMC()));	}
 	int getDisplayedCursorPos(){	return getDisplayedCursorPos(IMCLock(getIMC()));	}
-	int indexToXPos( string compStr, int idx);
 public:
 	bool create(HWND imeUIWnd);
+	void getCandPos(IMCLock& imc, POINT* pt);
 };

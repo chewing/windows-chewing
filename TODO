@@ -6,7 +6,8 @@
 6. Add notification window?
 7. Enable English mode by default or not should be an option.
 8. Add a toggle key to switch between Chinese and English, 
-   may be we can use Shift key.
+   may be we can use Shift key. --- Done
 9. Better installer and uninstaller.
 10.Save the position of status window.
 11.The built-in phrases of libchewing should be fixed.
+12.Type numbers directly using numpad.
