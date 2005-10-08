@@ -100,7 +100,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					{
 						g_keyboardLayout = (id - IDC_KB1);
 						HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-						g_candPerRow = ::SendMessage( spin, UDM_GETPOS32, 0, 0 );
+						g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS32, 0, 0 );
 						break;
 					}
 				}
@@ -444,17 +444,23 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			return FALSE;
 		cl = new (cl) CandList;	// placement new
 
-		if( ! (ic->fdwInit & (INIT_STATUSWNDPOS|INIT_CONVERSION)) )		// Initialize
+		if( ! (ic->fdwInit & INIT_CONVERSION) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
-			ic->ptStatusWndPos.x = ic->ptStatusWndPos.y = -1;
 			ic->lfFont;
-			ic->fdwInit = INIT_STATUSWNDPOS|INIT_CONVERSION|INIT_LOGFONT;
-
+			ic->fdwInit |= INIT_STATUSWNDPOS;
+		}
+		if( ! (ic->fdwInit & INIT_CONVERSION) )
+		{
 			RECT rc;
 			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
-			ic->ptStatusWndPos.x = rc.right - (9+20*3+4) - 100;
+			ic->ptStatusWndPos.x = rc.right - (9+20*3+4) - 150;
 			ic->ptStatusWndPos.y = rc.bottom - 26;
+			ic->fdwInit |= INIT_STATUSWNDPOS;
+		}
+		if( ! (ic->fdwInit & INIT_LOGFONT) )
+		{
+			// TODO: initialize font here
 		}
 
 		// Set Chinese or English mode
