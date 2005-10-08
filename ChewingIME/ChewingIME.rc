@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,9,0
- PRODUCTVERSION 0,0,9,0
+ FILEVERSION 0,0,9,1
+ PRODUCTVERSION 0,0,9,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 0, 9, 0"
+            VALUE "FileVersion", "0, 0, 9, 1"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 0, 9, 0"
+            VALUE "ProductVersion", "0, 0, 9, 1"
         END
     END
     BLOCK "VarFileInfo"

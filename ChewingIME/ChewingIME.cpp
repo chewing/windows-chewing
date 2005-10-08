@@ -683,6 +683,13 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		if( IsKeyToggled( keystate[VK_CAPITAL]) )
 			g_chewing->Capslock();	// switch to English mode
 	}
+	else if( !isChinese )	// Chewing has been loaded but in English mode
+	{
+		CompStr* cs = imc.getCompStr();
+		// Bypass chewing if there is no composition string
+		if( cs->isEmpty() )
+			return FALSE;
+	}
 	g_chewing->SetFullShape(imc.isFullShape());
 
 	switch( key )
