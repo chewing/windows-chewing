@@ -447,10 +447,9 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		if( ! (ic->fdwInit & INIT_CONVERSION) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
-			ic->lfFont;
-			ic->fdwInit |= INIT_STATUSWNDPOS;
+			ic->fdwInit |= INIT_CONVERSION;
 		}
-		if( ! (ic->fdwInit & INIT_CONVERSION) )
+		if( ! (ic->fdwInit & INIT_STATUSWNDPOS) )
 		{
 			RECT rc;
 			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
@@ -461,6 +460,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		if( ! (ic->fdwInit & INIT_LOGFONT) )
 		{
 			// TODO: initialize font here
+			ic->lfFont;
 		}
 
 		// Set Chinese or English mode
