@@ -8,39 +8,31 @@
 #include "IMEUI.h"
 #include "IMEUILock.h"
 
+#include "XPToolbar.h"
+
 #include <commctrl.h>
 
-
-//	SendMessage( toolbar, TB_GETMAXSIZE, 0, LPARAM(&sz));
-//  This standard toolbar message provided by Windows has some known bugs.
-//  So I implemented a new function myself to prevent the problem.
-static void GetToolbarSize(HWND toolbar, SIZE *sz)
+BOOL AboutDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	sz->cx = sz->cy = 0;
-	int c = SendMessage( toolbar, TB_BUTTONCOUNT, 0, 0);
-	for( int i = 0; i < c ; ++i )
+	if( msg == WM_COMMAND )
 	{
-		RECT itemrc;
-		SendMessage( toolbar, TB_GETITEMRECT, i, LPARAM(&itemrc));
-		sz->cx += (itemrc.right - itemrc.left);
-		itemrc.bottom -= itemrc.top;
-		if( itemrc.bottom > sz->cy )
-			sz->cy = itemrc.bottom;
+		EndDialog( hwnd, LOWORD(wp) );
+		return TRUE;
 	}
+	return FALSE;
 }
 
-static TBBUTTON toolbar_btns[]={
-	{0, ID_CHI_ENG, TBSTATE_ENABLED ,TBSTYLE_BUTTON, {0}, 0, 0 },
-	{3, ID_FULL_HALF, TBSTATE_ENABLED ,TBSTYLE_BUTTON, {0}, 0, 0 },
-	{4, ID_CONFIG, TBSTATE_ENABLED ,TBSTYLE_BUTTON, {0}, 0, 0 },
-};
-
-StatusWnd::StatusWnd(void)
+StatusWnd::StatusWnd() : XPToolbar(9, 20, 26), dragging(false)
 {
 }
 
 StatusWnd::~StatusWnd(void)
 {
+	DestroyIcon( iconChi );
+	DestroyIcon( iconEng );
+	DestroyIcon( iconFull );
+	DestroyIcon( iconHalf );
+	DestroyIcon( iconConfig );
 }
 
 BOOL StatusWnd::registerClass(void)
@@ -68,10 +60,78 @@ BOOL StatusWnd::registerClass(void)
 
 LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 {
-	HIMC hIMC = getIMC(hwnd);
-	IMCLock imc( hIMC );
 	IMEUILock lock( GetParent(hwnd) );
 	IMEUI* ui = lock.getIMEUI();
+	if( ui && ui->statusWnd.getHwnd() )
+		return ui->statusWnd.wndProc( msg, wp, lp );
+	return DefWindowProc(hwnd, msg, wp, lp);
+}
+
+bool StatusWnd::create(HWND imeUIWnd)
+{
+	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
+	IMCLock imc(hIMC);
+
+	hwnd = CreateWindowEx(0, g_statusWndClass, NULL,
+					WS_POPUP|WS_CLIPCHILDREN,
+					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+	if( !hwnd )
+		return false;
+
+	TCHAR bmppath[MAX_PATH];
+	GetSystemDirectory( bmppath, MAX_PATH );
+	_tcscat( bmppath, _T("\\IME\\Chewing\\statuswnd.bmp") );
+	HBITMAP tbbmp = (HBITMAP)LoadImage( NULL, bmppath, IMAGE_BITMAP, 
+		0, 0, LR_DEFAULTCOLOR|LR_LOADFROMFILE);
+
+	this->setTheme(tbbmp);
+	iconChi = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_CHI), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR );
+	iconEng = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_ENG), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
+	iconFull = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_FULL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
+	iconHalf = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_HALF), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
+	iconConfig = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_CONFIG), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
+
+	addBtn( ID_CHI_ENG, imc.isChinese() ? iconChi : iconEng );
+	addBtn( ID_FULL_HALF, imc.isFullShape() ? iconFull : iconHalf );
+	addBtn( ID_MENU, iconConfig );
+	setCmdTarget(hwnd);
+
+	int w, h;
+	XPToolbar::getSize(&w, &h);
+	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
+
+	return true;
+}
+
+void StatusWnd::enableChiEng(bool enable)
+{
+	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
+}
+
+void StatusWnd::toggleChiEngMode(HIMC hIMC)
+{
+	ToggleChiEngMode(hIMC);
+	updateIcons(hIMC);
+}
+
+void StatusWnd::toggleShapeMode(HIMC hIMC)
+{
+	ToggleFullShapeMode( hIMC );
+	updateIcons(hIMC);
+}
+
+void StatusWnd::updateIcons(HIMC hIMC)
+{
+	IMCLock imc(hIMC);
+
+	this->setBtnImage( 0, imc.isChinese() ? iconChi : iconEng );
+	this->setBtnImage( 1, imc.isFullShape() ? iconFull : iconHalf );
+}
+
+LRESULT StatusWnd::wndProc(UINT msg, WPARAM wp, LPARAM lp)
+{
+	HIMC hIMC = getIMC(hwnd);
+	IMCLock imc( hIMC );
 
 	switch (msg)
 	{
@@ -79,36 +139,13 @@ LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			{
 				PAINTSTRUCT ps;
 				BeginPaint( hwnd, &ps );
-				if( ui )
-					ui->statusWnd.onPaint(ps);
+				XPToolbar::onPaint(ps);
 				EndPaint(hwnd, &ps);
 				break;
 			}
 		case WM_COMMAND:
-			{
-				switch(LOWORD(wp))
-				{
-				case ID_CHI_ENG:
-					if( ui )
-						ui->statusWnd.toggleChiEngMode(hIMC);
-					break;
-				case ID_FULL_HALF:
-					if( ui )
-						ui->statusWnd.toggleShapeMode(hIMC);
-					break;
-				case ID_CONFIG:
-					{
-						HWND top = ui->hwnd;
-						HWND desktop = GetDesktopWindow(), parent = NULL;
-						while( (parent=GetParent(top)) != desktop && parent )
-							top = parent;
-
-						ConfigureChewingIME(top);
-					}
-					break;
-				}
-				break;
-			}
+			onCommand( LOWORD(wp), hIMC );
+			break;
 		case WM_NOTIFY:
 			{
 				switch( ((NMHDR*)lp)->code ) 
@@ -125,16 +162,22 @@ LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 			}
 			break;
 		case WM_LBUTTONDOWN:
-			if( ui )
-				ui->statusWnd.onLButtonDown(wp, lp);
+			if( !XPToolbar::onLButtonDown(wp, lp) )
+			{
+				dragging = true;
+				IMEChildWnd::onLButtonDown(wp, lp);
+			}
 			break;
 		case WM_MOUSEMOVE:
-			if( ui )
-				ui->statusWnd.onMouseMove(wp, lp);
+			if( dragging || !XPToolbar::onMouseMove(wp, lp) )
+				IMEChildWnd::onMouseMove(wp, lp);
 			break;
 		case WM_LBUTTONUP:
-			if( ui )
-				ui->statusWnd.onLButtonUp(wp, lp);
+			if( dragging || !XPToolbar::onLButtonUp(wp, lp) )
+			{
+				dragging = false;
+				IMEChildWnd::onLButtonUp(wp, lp);
+			}
 			break;
 		case WM_MOUSEACTIVATE:
 			return MA_NOACTIVATE;
@@ -161,138 +204,80 @@ LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 					ic->ptStatusWndPos.x = rc.left;
 					ic->ptStatusWndPos.y = rc.top;
 				}
+//				DeleteObject(tbbmp);
 			}
 			break;
+		case WM_CAPTURECHANGED:
+			onCaptureChanged(lp);
+			break;
+
 		default:
 			return DefWindowProc(hwnd, msg, wp, lp);
 	}
 	return 0;
 }
 
-void StatusWnd::onPaint(PAINTSTRUCT& ps)
+void StatusWnd::getSize(int *w, int *h)
 {
-	RECT rc;
-	GetClientRect(hwnd,&rc);
-
-	FillSolidRect( ps.hdc, &rc, GetSysColor(COLOR_BTNFACE));
-
-/*	HDC memdc = CreateCompatibleDC( ps.hdc );
-	HGDIOBJ oldobj = SelectObject( memdc, bgbmp );
-	StretchBlt( ps.hdc, 62, 0, 100, 26, memdc, 60, 0, 2, 26, SRCCOPY);
-	BitBlt( ps.hdc, 0, 0, 62, 26, memdc, 0, 0, SRCCOPY);
-	SelectObject( memdc, oldobj );
-*/
-
-	Draw3DBorder( ps.hdc, &rc, GetSysColor(COLOR_BTNHILIGHT), 0/*GetSysColor(COLOR_BTNSHADOW)*/);
-
-	InflateRect( &rc, -3, -3 );
-	rc.left++;
-	rc.right = rc.left + 3;
-	Draw3DBorder( ps.hdc, &rc, GetSysColor(COLOR_BTNHILIGHT), GetSysColor(COLOR_BTNSHADOW));
-	OffsetRect( &rc, 4, 0);
-	Draw3DBorder( ps.hdc, &rc, GetSysColor(COLOR_BTNHILIGHT), GetSysColor(COLOR_BTNSHADOW));
+	XPToolbar::getSize(w, h);
 }
 
-void StatusWnd::getSize(int* w, int* h)
+void StatusWnd::onCommand(UINT id, HIMC hIMC)
 {
-	int tw, th;
-	getToolbarSize(&tw, &th);
-	*w = tw + 12 + 4;
-	*h = th + 6;
-}
-
-void StatusWnd::getToolbarSize(int* w, int* h)
-{
-	static SIZE sz = {-1, -1};
-	if( sz.cx == -1 && sz.cy == -1 )
-		::GetToolbarSize( toolbar, &sz );
-	*w = sz.cx;
-	*h = sz.cy;
-}
-
-bool StatusWnd::create(HWND imeUIWnd)
-{
-	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
-	IMCLock imc(hIMC);
-
-	hwnd = CreateWindowEx(0, g_statusWndClass, NULL,
-					WS_POPUP|WS_CLIPCHILDREN,
-					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
-	if( !hwnd )
-		return false;
-
-	toolbar_btns[0].iBitmap = imc.isChinese() ? 0 : 1;
-	toolbar_btns[1].iBitmap = imc.isFullShape() ? 2 : 3;
-
-	toolbar = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, 
-		TBSTYLE_FLAT|TBSTYLE_TOOLTIPS/*|TBSTYLE_LIST*/|CCS_NODIVIDER|CCS_NORESIZE|
-		WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, 
-		0, 0, 0, 0, hwnd, NULL, g_dllInst, NULL);
-
-	if( !toolbar )
-		return false;
-
-	SetWindowLong( toolbar, GWL_ID, IDC_STATUS_TB );
-
-/*	HIMAGELIST himl = ImageList_Create( 16, 16, ILC_COLOR24|ILC_MASK, 5, 0);
-	HBITMAP htbbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUS_TB) );
-	ImageList_AddMasked( himl, htbbmp, RGB(192, 192, 192) );
-	ImageList_Add( himl, htbbmp, NULL );
-	DeleteObject(htbbmp);
-	himl = (HIMAGELIST)SendMessage( toolbar, TB_SETIMAGELIST, 0, LPARAM(himl));
-	if( himl )
-		ImageList_Destroy( himl );
-*/
-	SendMessage(toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM) sizeof(TBBUTTON), 0); 
-	SendMessage( toolbar, TB_ADDBUTTONS, sizeof(toolbar_btns)/sizeof(TBBUTTON), LPARAM(toolbar_btns));
-	TBADDBITMAP abm;
-	abm.hInst = g_dllInst;
-	abm.nID = IDB_STATUS_TB;
-	SendMessage( toolbar, TB_ADDBITMAP, 5,LPARAM(&abm) );
-
-	int w, h;
-	getToolbarSize(&w, &h);
-	SetWindowPos( toolbar, NULL, 12, 3, w, h, SWP_NOACTIVATE|SWP_NOZORDER );
-
-	getSize(&w, &h);
-	SetWindowPos( hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOZORDER );
-
-/*	HDC dc = GetDC(hwnd);
-	bgbmp = LoadBitmap( g_dllInst, LPCTSTR(IDB_STATUSBG) );
-	BYTE buf[8192];
-	long len = GetBitmapBits( bgbmp, sizeof(buf), buf );
-	SetBitmapBits(bgbmp, len,buf);
-	ReleaseDC(hwnd, dc );
-*/
-	return true;
-}
-
-void StatusWnd::enableChiEng(bool enable)
-{
-	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
-}
-
-void StatusWnd::toggleChiEngMode(HIMC hIMC)
-{
-	ToggleChiEngMode(hIMC);
-	updateIcons(hIMC);
-}
-
-void StatusWnd::toggleShapeMode(HIMC hIMC)
-{
-	ToggleFullShapeMode( hIMC );
-	updateIcons(hIMC);
-}
-
-void StatusWnd::updateIcons(HIMC hIMC)
-{
-	HWND toolbar = GetDlgItem( hwnd, IDC_STATUS_TB );
-
-	IMCLock imc(hIMC);
-
-	SendMessage( toolbar, TB_CHANGEBITMAP, 
-		ID_CHI_ENG, MAKELPARAM(imc.isChinese() ? 0 : 1, 0));
-
-	SendMessage( toolbar, TB_CHANGEBITMAP, 
-		ID_FULL_HALF, MAKELPARAM(imc.isFullShape() ? 2 : 3, 0));
+	switch( id )
+	{
+	case ID_CHI_ENG:
+		toggleChiEngMode(hIMC);
+		break;
+	case ID_FULL_HALF:
+		toggleShapeMode(hIMC);
+		break;
+	case ID_MENU:
+		{
+			HMENU menu = LoadMenu( g_dllInst, LPCTSTR(IDR_POPUP));
+			HMENU popup = GetSubMenu( menu, 0 );
+			RECT rc;
+			GetWindowRect(hwnd, &rc);
+			rc.left += 9;
+			UINT flag;
+			long y;
+			if((rc.top * 2) > GetSystemMetrics(SM_CYSCREEN) )
+			{
+				y = rc.top;
+				flag = TPM_BOTTOMALIGN|TPM_LEFTALIGN;
+			}
+			else
+			{
+				y = rc.bottom;
+				flag = TPM_TOPALIGN|TPM_LEFTALIGN;
+			}
+			TrackPopupMenu( popup, flag, rc.left, y, 0, hwnd, NULL);
+			DestroyMenu(menu);
+			break;
+		}
+	case ID_CONFIG:
+	case ID_ABOUT:
+		{
+			HWND top = hwnd;
+			HWND desktop = GetDesktopWindow(), parent = NULL;
+			while( (parent=GetParent(top)) != desktop && parent )
+				top = parent;
+			EnableWindow( hwnd, FALSE );
+			if( id == ID_CONFIG )
+				ConfigureChewingIME(top);
+			else
+				DialogBox(g_dllInst, LPCTSTR(IDD_ABOUT), top, (DLGPROC)AboutDlgProc);
+			EnableWindow( hwnd, TRUE );
+		}
+		break;
+	case ID_WEBSITE:
+	case ID_BUGREPORT:
+		{
+			LPCTSTR url = _T("http://chewing.csie.net/");
+			if( id == ID_BUGREPORT )
+				url = _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Queue=271");
+			ShellExecute( NULL, "open", url, NULL, NULL, SW_SHOWNORMAL );
+			break;
+		}
+	}
 }

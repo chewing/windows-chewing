@@ -11,7 +11,7 @@ extern bool g_isWindowNT;
 
 const LPCTSTR g_pcmanIMEClass = _T("ChewingIME");
 const LPCTSTR g_compWndClass = _T("ChewingComp");
-const LPCTSTR g_cnadWndClass = _T("ChewingCand");
+const LPCTSTR g_candWndClass = _T("ChewingCand");
 const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)

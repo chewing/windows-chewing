@@ -203,6 +203,12 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath="..\..\libchewing\branches\win32\src\userphrase.c">
 			</File>
 			<File
+				RelativePath=".\Window.cpp">
+			</File>
+			<File
+				RelativePath=".\XPToolbar.cpp">
+			</File>
+			<File
 				RelativePath="..\..\libchewing\branches\win32\src\zuin.c">
 			</File>
 		</Filter>
@@ -255,6 +261,12 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			<File
 				RelativePath=".\StatusWnd.h">
 			</File>
+			<File
+				RelativePath=".\Window.h">
+			</File>
+			<File
+				RelativePath=".\XPToolbar.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="¸ê·½ÀÉ"
@@ -264,22 +276,25 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\ChewingIME.rc">
 			</File>
 			<File
-				RelativePath=".\icon1.ico">
+				RelativePath=".\chi.ico">
 			</File>
 			<File
-				RelativePath=".\icon3.ico">
+				RelativePath=".\config.ico">
 			</File>
 			<File
-				RelativePath=".\icon4.ico">
+				RelativePath=".\eng.ico">
 			</File>
 			<File
-				RelativePath=".\status_bar24.bmp">
+				RelativePath=".\full.ico">
 			</File>
 			<File
-				RelativePath=".\status_bar256.bmp">
+				RelativePath=".\half.ico">
 			</File>
 			<File
-				RelativePath=".\statusbg.bmp">
+				RelativePath=".\icon.bmp">
+			</File>
+			<File
+				RelativePath=".\mainicon.ico">
 			</File>
 		</Filter>
 		<File

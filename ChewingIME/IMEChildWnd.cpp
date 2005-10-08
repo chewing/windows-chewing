@@ -88,10 +88,3 @@ void IMEChildWnd::move(int x, int y)
 
 	MoveWindow( hwnd, x, y, w, h, TRUE );
 }
-
-void IMEChildWnd::destroy(void)
-{
-	if( hwnd )
-		DestroyWindow(hwnd);
-	hwnd = NULL;
-}

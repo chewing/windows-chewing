@@ -238,5 +238,5 @@ void Chewing::SetFullShape(bool full)
 
 bool Chewing::GetFullShape(void)
 {
-	return cd->bFullShape;
+	return !!cd->bFullShape;
 }

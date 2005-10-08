@@ -8,6 +8,7 @@
 #include "CompWnd.h"
 #include "CandWnd.h"
 #include "StatusWnd.h"
+#include "XPToolbar.h"
 
 #include <windows.h>
 
@@ -110,6 +111,8 @@ BOOL IMEUI::registerUIClasses()
 		return FALSE;
 	if( !StatusWnd::registerClass() )
 		return FALSE;
+//	if( !XPToolbar::registerClass() )
+//		return FALSE;
 	return TRUE;
 }
 
@@ -318,4 +321,13 @@ bool IMEUI::getWorkingArea(RECT* rc)
 	GetMonitorInfo(, &mi);
 */
 	return true;
+}
+
+void IMEUI::unregisterUIClasses()
+{
+	UnregisterClass(g_pcmanIMEClass, g_dllInst);
+	UnregisterClass(g_candWndClass, g_dllInst);
+	UnregisterClass(g_compWndClass, g_dllInst);
+	UnregisterClass(g_statusWndClass, g_dllInst);
+//	XPToolbar::unregisterClass();
 }

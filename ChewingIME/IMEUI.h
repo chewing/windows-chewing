@@ -30,5 +30,6 @@ protected:
 	void closeCandWnd(void);
 	void setCandWndPos(HIMC hIMC);
 public:
+	static void unregisterUIClasses();
 	static bool getWorkingArea(RECT* rc);
 };

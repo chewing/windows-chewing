@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.0.8.0"
+!define PRODUCT_VERSION "0.0.9"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -67,6 +67,7 @@ Section "MainSection" SEC01
   File "Data\fonetree.dat"
   File "Data\dict.dat"
   File "Data\ch_index.dat"
+  File "Data\statuswnd.bmp"
   File "License.txt"
   File "Installer\Release\Installer.exe"
   SetOutPath "$SYSDIR"
@@ -104,11 +105,12 @@ FunctionEnd
 Section Uninstall
 
   Exec '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
-
+  Sleep 2000
   Delete "$INSTDIR\uninst.exe"
 ;  Delete "$SYSDIR\libchewing.dll"
   Delete "$SYSDIR\Chewing.ime"
   Delete "$SYSDIR\IME\Chewing\License.txt"
+  Delete "$SYSDIR\IME\Chewing\statuswnd.bmp"
   Delete "$SYSDIR\IME\Chewing\ch_index.dat"
   Delete "$SYSDIR\IME\Chewing\dict.dat"
   Delete "$SYSDIR\IME\Chewing\fonetree.dat"

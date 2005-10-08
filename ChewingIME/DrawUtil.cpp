@@ -35,3 +35,12 @@ void Draw3DBorder(HDC hdc, LPRECT rc, COLORREF light, COLORREF dark, int width)
 	DeleteObject( dark_pen );
 	SelectObject( hdc, oldPen );
 }
+
+void DrawBitmap(HDC dc, HBITMAP bmp, int x, int y, int w, int h, int srcx, int srcy )
+{
+	HDC memdc = CreateCompatibleDC(dc);
+	HGDIOBJ oldobj = SelectObject( memdc, bmp );
+	BitBlt( dc, x, y, w, h, memdc, srcx, srcy, SRCCOPY);
+	SelectObject(memdc, oldobj );
+	DeleteDC(memdc);
+}

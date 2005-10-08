@@ -444,12 +444,17 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			return FALSE;
 		cl = new (cl) CandList;	// placement new
 
-		if( ! ic->fdwInit )		// Initialize
+		if( ! (ic->fdwInit & (INIT_STATUSWNDPOS|INIT_CONVERSION)) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
 			ic->ptStatusWndPos.x = ic->ptStatusWndPos.y = -1;
 			ic->lfFont;
 			ic->fdwInit = INIT_STATUSWNDPOS|INIT_CONVERSION|INIT_LOGFONT;
+
+			RECT rc;
+			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+			ic->ptStatusWndPos.x = rc.right - (9+20*3+4) - 100;
+			ic->ptStatusWndPos.y = rc.bottom - 26;
 		}
 
 		// Set Chinese or English mode
@@ -638,11 +643,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 			g_isWindowNT = (GetVersion() < 0x80000000);
 
-			INITCOMMONCONTROLSEX iccex;
-			iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-			iccex.dwICC = ICC_BAR_CLASSES;
-			InitCommonControlsEx(&iccex);
-
 			if( !IMEUI::registerUIClasses() )
 				return FALSE;
 
@@ -652,10 +652,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 		}
 
 	case DLL_PROCESS_DETACH:
-		UnregisterClass(g_pcmanIMEClass, (HINSTANCE)hModule);
-		UnregisterClass(g_cnadWndClass, (HINSTANCE)hModule);
-		UnregisterClass(g_compWndClass, (HINSTANCE)hModule);
-		UnregisterClass(g_statusWndClass, (HINSTANCE)hModule);
+		IMEUI::unregisterUIClasses();
 
 		if( g_chewing )
 			delete g_chewing;
