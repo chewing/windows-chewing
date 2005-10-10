@@ -61,12 +61,12 @@ ShowUnInstDetails show
 
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
-  SetOverwrite ifnewer
+  SetOverwrite try
   File "Data\us_freq.dat"
-  File "Data\ph_index.dat"
-  File "Data\fonetree.dat"
+  File /oname=ph_index.dat "Data\ph_index.dat.bin"
+  File /oname=fonetree.dat "Data\fonetree.dat.bin"
   File "Data\dict.dat"
-  File "Data\ch_index.dat"
+  File /oname=ch_index.dat "Data\ch_index.dat.bin"
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "Installer\Release\Installer.exe"
