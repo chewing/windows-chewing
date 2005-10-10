@@ -97,7 +97,7 @@ SOURCE=..\..\libchewing\branches\win32\src\char.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ChewingIME\Chewing.cpp
+SOURCE=.\chewing.cpp
 # End Source File
 # Begin Source File
 
@@ -153,7 +153,7 @@ SOURCE=..\..\libchewing\branches\win32\src\zuin.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\ChewingIME\Chewingpp.h
+SOURCE=.\Chewingpp.h
 # End Source File
 # Begin Source File
 
