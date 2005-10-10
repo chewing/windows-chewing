@@ -146,7 +146,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		ExtTextOut( hDC, cand_rc.left + 2, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
 
-		if( num >= items_per_row && i <= pageEnd )
+		if( num >= items_per_row && i < pageEnd )
 		{
 			cand_rc.left = 1;
 			cand_rc.top += candsz.cy;
@@ -156,7 +156,8 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			cand_rc.left = cand_rc.right;
 
 	}
-
+	int rcleft = cand_rc.right;
+	int rcright = rc.right;
 	cand_rc.left = cand_rc.right;
 	cand_rc.right = rc.right;
 	ExtTextOut( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, NULL, 0, NULL);
