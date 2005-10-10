@@ -19,8 +19,8 @@ class Chewing
   int           kbLayout;
 
  public:
-  Chewing();
-  Chewing(char *dataDir, char *hashDir, int keyLayout=KB_DEFAULT);
+  static bool LoadDataFiles( const char* dataDir, const char* hashDir );
+  Chewing( bool spaceAsSelection = true, int keyLayout=KB_DEFAULT);
 
   void SetKeyboardLayout(int kb);
   void SetHsuSelectionKeyType(int type);
@@ -83,6 +83,7 @@ class Chewing
   char* Selection(int i);
   void SetFullShape(bool full);
   bool GetFullShape(void);
+  void SetSpaceAsSelection(bool spaceAsSelection);
 };
 
 #endif /* _CHEWING_H */

@@ -117,12 +117,22 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		pageEnd = candList->getTotalCount();
 	int numCand = pageEnd - candList->getPageStart();
 	int num = 0;
-	for( int i = candList->getPageStart(); i < pageEnd; ++i )
+	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
 
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		if( i < pageEnd )
+			wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		else
+		{
+			int page = 1 + candList->getPageStart() / candList->getPageSize();
+			int totalPage = candList->getTotalCount() / candList->getPageSize();
+			if( candList->getTotalCount() % candList->getPageSize() )
+				++totalPage;
+			wsprintf ( cand, _T("%d/%d"), page, totalPage );
+			SetTextColor( hDC, GetSysColor(COLOR_HIGHLIGHT) );
+		}
 
 		int len = _tcslen( cand );
 		SIZE candsz;
@@ -136,7 +146,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		ExtTextOut( hDC, cand_rc.left + 2, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
 
-		if( num >= items_per_row && (i + 1) <= pageEnd )
+		if( num >= items_per_row && i <= pageEnd )
 		{
 			cand_rc.left = 1;
 			cand_rc.top += candsz.cy;
@@ -179,18 +189,28 @@ void CandWnd::getSize(int* w, int* h)
 	int numCand = pageEnd - candList->getPageStart();
 	int num = 0;
 	int width = 0, height = 0;
-	for( int i = candList->getPageStart(); i < pageEnd; ++i )
+	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
 		TCHAR cand[64];
-		wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		if( i < pageEnd )
+			wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		else
+		{
+			int page = 1 + candList->getPageStart() / candList->getPageSize();
+			int totalPage = candList->getTotalCount() / candList->getPageSize();
+			if( candList->getTotalCount() % candList->getPageSize() )
+				++totalPage;
+			wsprintf ( cand, _T("%d/%d"), page, totalPage );
+		}
+
 		int len = _tcslen( cand );
 		SIZE candsz;
 		GetTextExtentPoint32(hDC, cand, len, &candsz);
 		width += candsz.cx + 4;
 		if( candsz.cy > height )
 			height = candsz.cy;
-        if( num >= items_per_row && (i + 1) <= pageEnd )
+        if( num >= items_per_row && i <= pageEnd )
 		{
 			if( width > *w )
 				*w = width;
@@ -202,7 +222,7 @@ void CandWnd::getSize(int* w, int* h)
 	if( width > *w )
 		*w = width;
 	if( num > 0 && num < items_per_row )
-		*h += height;
+		*h += height + 2;
 
 	SelectObject(hDC, oldFont );
 // End paint
@@ -212,7 +232,7 @@ void CandWnd::getSize(int* w, int* h)
 
 	ReleaseDC(hwnd, hDC);
 	*w += 2;
-	*h += 4;
+	*h += 2;
 }
 
 void CandWnd::updateSize(void)
@@ -244,7 +264,11 @@ void CandWnd::show(void)
 		return;
 
 	POINT pt = imc.getIC()->cfCandForm[0].ptCurrentPos;
-	switch( imc.getIC()->cfCandForm[0].dwStyle )
+	DWORD style = imc.getIC()->cfCandForm[0].dwStyle;
+	if( g_fixCompWnd )
+		style = CFS_DEFAULT;
+
+	switch( style )
 	{
 	case CFS_CANDIDATEPOS:
 		break;
@@ -275,11 +299,18 @@ void CandWnd::show(void)
 			IMEUI* ui = lock.getIMEUI();
 			if( ! ui )
 				break;
-			ui->compWnd.getCandPos(imc, &pt);
+			if( g_fixCompWnd )
+			{
+				ui->compWnd.getRelativeCandPos(imc, &pt);
+				ClientToScreen(ui->compWnd.getHwnd(), &pt);
+			}
+			else
+				ui->compWnd.getCandPos(imc, &pt);
 		}
 	}
 
-	ClientToScreen( imc.getIC()->hWnd, &pt );
+	if( ! g_fixCompWnd )
+		ClientToScreen( imc.getIC()->hWnd, &pt );
 
 	move( pt.x, pt.y );
 	IMEChildWnd::show();

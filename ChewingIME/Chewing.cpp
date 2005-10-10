@@ -1,9 +1,9 @@
 #include <string.h>
-
+#include <winsock.h>
 #include "Chewingpp.h"
 #include ".\chewingpp.h"
 
-Chewing::Chewing(char *dataDir, char *hashDir, int keyLayout) {
+Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
     cf = (ChewingConf *) calloc( 1, sizeof( ChewingConf ) );
     cd = (ChewingData *) calloc( 1, sizeof( ChewingData ) );
     co = (ChewingOutput *) calloc( 1, sizeof( ChewingOutput ) );
@@ -13,14 +13,11 @@ Chewing::Chewing(char *dataDir, char *hashDir, int keyLayout) {
     cf->inp_ename = "Chewing";
     cf->kb_type   = kbLayout;
 
-    ReadTree( dataDir );
-    InitChar( dataDir );
-    InitDict( dataDir );
-    ReadHash( hashDir );
     InitChewing(cd,cf);
 
     config.selectAreaLen = 40;
     config.maxChiSymbolLen = 16;
+	config.bSpaceAsSelection = spaceAsSelection;
 
     SetKeyboardLayout(kbLayout);
 }
@@ -46,7 +43,7 @@ void Chewing::SetKeyboardLayout(int kb)
     else SelKey("1234567890");
     cd->zuinData.kbtype=kb;
     // Always use space as candidate key for SpaceChewing style.
-    cd->config.bSpaceAsSelection=1;
+//    cd->config.bSpaceAsSelection=1;
     SetConfig(cd, &config);
 }
 
@@ -239,4 +236,19 @@ void Chewing::SetFullShape(bool full)
 bool Chewing::GetFullShape(void)
 {
 	return !!cd->bFullShape;
+}
+
+bool Chewing::LoadDataFiles(const char *dataDir, const char *hashDir)
+{
+    ReadTree( (char*)dataDir );
+    InitChar( (char*)dataDir );
+    InitDict( (char*)dataDir );
+    ReadHash( (char*)hashDir );
+	return true; 
+}
+
+void Chewing::SetSpaceAsSelection(bool spaceAsSelection)
+{
+	config.bSpaceAsSelection = spaceAsSelection;
+    SetConfig(cd, &config);
 }

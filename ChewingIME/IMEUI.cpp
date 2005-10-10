@@ -14,6 +14,7 @@
 
 IMEUI::IMEUI(HWND hUIWnd) : hwnd(hUIWnd)
 {
+	fixedCompWndPos.x = fixedCompWndPos.y = 0;
 }
 
 IMEUI::~IMEUI(void)
@@ -128,51 +129,7 @@ LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 	case WM_IME_STARTCOMPOSITION:
 		break;
 	case WM_IME_COMPOSITION:
-		{
-			IMCLock imc(hIMC);
-			if( !imc.getIC() )
-				break;
-
-			CompStr* cs = imc.getCompStr();
-
-			if( !compWnd.isWindow() )
-				compWnd.create(hwnd);
-
-			if( lp & GCS_COMPSTR )
-			{
-				compWnd.refresh();
-
-				POINT pt = imc.getIC()->cfCompForm.ptCurrentPos;
-				if( 0 == imc.getIC()->cfCompForm.dwStyle )
-				{
-					RECT rc;
-					if( GetCaretPos( &pt ) )
-					{
-					}
-					else
-					{
-						SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
-						pt.x = rc.left + 10;
-						pt.y = rc.bottom -= 50;
-					}
-				}
-				imc.getIC()->cfCompForm.ptCurrentPos = pt;
-				ClientToScreen( imc.getIC()->hWnd, &pt );
-				compWnd.move( pt.x, pt.y );
-
-				if( ! cs->isEmpty() )
-				{
-					if( !compWnd.isVisible() )
-						compWnd.show();
-				}
-				else
-					compWnd.hide();
-			}
-			if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
-				if( compWnd.isVisible() )
-					compWnd.refresh();
-			break;
-		}
+		return onComposition( hIMC, wp, lp );
 	case WM_IME_ENDCOMPOSITION:
 		{
 			compWnd.hide();
@@ -330,4 +287,61 @@ void IMEUI::unregisterUIClasses()
 	UnregisterClass(g_compWndClass, g_dllInst);
 	UnregisterClass(g_statusWndClass, g_dllInst);
 //	XPToolbar::unregisterClass();
+}
+
+LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
+{
+	IMCLock imc(hIMC);
+	if( !imc.getIC() )
+		return 0;
+
+	CompStr* cs = imc.getCompStr();
+
+	if( !compWnd.isWindow() )
+		compWnd.create(hwnd);
+
+	if( lp & GCS_COMPSTR )
+	{
+		compWnd.refresh();
+
+		if( g_fixCompWnd )
+		{
+			RECT rc;
+			GetWindowRect( compWnd.getHwnd(), &rc );
+			compWnd.move( rc.left, rc.top );
+		}
+		else
+		{
+			POINT pt = imc.getIC()->cfCompForm.ptCurrentPos;
+			bool absolute = false;
+			if( g_fixCompWnd || 0 == imc.getIC()->cfCompForm.dwStyle )
+			{
+				RECT rc;
+				if( g_fixCompWnd || !GetCaretPos( &pt ) )
+				{
+					SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+					pt.x = rc.left + 10;
+					pt.y = rc.bottom -= 50;
+					absolute = true;
+				}
+			}
+			imc.getIC()->cfCompForm.ptCurrentPos = pt;
+			if( !absolute )
+				ClientToScreen( imc.getIC()->hWnd, &pt );
+			compWnd.move( pt.x, pt.y );
+		}
+
+		if( ! cs->isEmpty() )
+		{
+			if( !compWnd.isVisible() )
+				compWnd.show();
+		}
+		else
+			compWnd.hide();
+
+	}
+	if( (lp & GCS_COMPSTR) || (lp & GCS_CURSORPOS) )
+		if( compWnd.isVisible() )
+			compWnd.refresh();
+	return LRESULT(0);
 }

@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include "imm.h"
-#include "ChewingPP.h"
+#include "ChewingClient.h"
 
 extern HINSTANCE g_dllInst;
 extern bool g_isWindowNT;
@@ -17,8 +17,9 @@ const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
 extern DWORD g_keyboardLayout;
 extern DWORD g_candPerRow;
+extern DWORD g_fixCompWnd;
 
-extern Chewing* g_chewing;
+extern ChewingClient* g_chewing;
 
 inline BOOL IsImeMessage(UINT msg)
 {

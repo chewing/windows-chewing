@@ -35,6 +35,9 @@
 #define IDC_DEFAULT_ENG                 1013
 #define IDC_COMBO1                      1014
 #define IDC_SHIFT_CAPITAL               1015
+#define IDC_SPACESEL                    1016
+#define IDC_FIX_COMPWND                 1017
+#define IDC_FIXCOMPWND                  1017
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_BUGREPORT                    40003
@@ -43,7 +46,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        123
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40004
 #define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           106

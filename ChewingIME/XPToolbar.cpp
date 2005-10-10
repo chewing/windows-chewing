@@ -219,18 +219,24 @@ void XPToolbar::setTheme(HBITMAP bmp)
 void XPToolbar::drawBtn(HDC dc, int idx)
 {
 	int left = gripperW + btnW * idx;
+	int iconleft = left + (btnW-16) / 2;
+	int icontop = (btnH-16)/2;
 	int state = buttons[idx].state;
 	int srcx;
 	if( state == 0 )
 		srcx = gripperW;
 	else if( state < 0 )
+	{
 		srcx = gripperW + btnW * 2;
+		++iconleft;
+		++icontop;
+	}
 	else
 		srcx = gripperW + btnW;
 
 	::DrawBitmap( dc, themeBmp, left, 0, btnW, btnH, srcx, 0 );
 
-	DrawIconEx( dc, left + (btnW-16) / 2, (btnH-16)/2, buttons[idx].hIcon
+	DrawIconEx( dc, iconleft, icontop, buttons[idx].hIcon
 				, 16, 16, 0, NULL, DI_NORMAL );
 }
 

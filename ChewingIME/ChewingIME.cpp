@@ -24,10 +24,12 @@ bool g_isWindowNT = false;
 
 long g_shiftPressedTime = -1;
 
-Chewing* g_chewing = NULL;
+ChewingClient* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 DWORD g_defaultEnglish = false;
+DWORD g_spaceAsSelection = true;
+DWORD g_fixCompWnd = false;
 
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
 
@@ -49,11 +51,13 @@ void LoadConfig()
 	HKEY hk = NULL;
 	if( ERROR_SUCCESS == RegOpenKey( HKEY_CURRENT_USER, _T("Software\\ChewingIME"), &hk) )
 	{
-		DWORD size = sizeof(g_keyboardLayout);
+		DWORD size = sizeof(DWORD);
 		DWORD type = REG_DWORD;
 		RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&g_keyboardLayout, &size );		
 		RegQueryValueEx( hk, "CandPerRow", 0, &type, (LPBYTE)&g_candPerRow, &size );
 		RegQueryValueEx( hk, "DefaultEnglish", 0, &type, (LPBYTE)&g_defaultEnglish, &size );
+		RegQueryValueEx( hk, "SpaceAsSelection", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
+		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegCloseKey( hk );
 	}
 }
@@ -68,6 +72,8 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("KeyboardLayout"), 0, REG_DWORD, (LPBYTE)&g_keyboardLayout, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("CandPerRow"), 0, REG_DWORD, (LPBYTE)&g_candPerRow, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("DefaultEnglish"), 0, REG_DWORD, (LPBYTE)&g_defaultEnglish, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("SpaceAsSelection"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -83,6 +89,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			SendMessage( hwnd, WM_SETICON, ICON_SMALL, LPARAM(icon) );
 			CheckRadioButton( hwnd, IDC_KB1, IDC_KB9, IDC_KB1 + g_keyboardLayout );
 			CheckDlgButton( hwnd, IDC_DEFAULT_ENG, g_defaultEnglish );
+			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
+			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 7 );
@@ -105,6 +113,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 				}
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
+				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
+				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
 				EndDialog(hwnd, IDOK);
 			}
 			break;
@@ -161,7 +171,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 							 IME_PROP_UNICODE|
 						#endif
 							 IME_PROP_CANDLIST_START_FROM_1|IME_PROP_COMPLETE_ON_UNSELECT
-							 /*|IME_PROP_END_UNLOAD*/;
+							 |IME_PROP_END_UNLOAD;
 /*
 	if(g_isWindowsNT && (DWORD(lpszOptions) & IME_SYSTEMINFO_WINLOGON ))
 	{
@@ -324,8 +334,13 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 			for( int i = 0; i < g_chewing->TotalChoice(); ++i )
 			{
 				char* cand =  g_chewing->Selection( i );
-				candList->setCand( i , cand );
-				free(cand);
+				if( cand )
+				{
+					candList->setCand( i , cand );
+					free(cand);
+				}
+				else
+					candList->setCand( i , "" );
 			}
 		}
 		if( 0 == old_total_count )
@@ -348,8 +363,13 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	if( g_chewing->CommitReady() )
 	{
 		char* cstr = g_chewing->CommitStr();
-		cs->setResultStr(cstr);
-		free(cstr);
+		if( cstr )
+		{
+			cs->setResultStr(cstr);
+			free(cstr);
+		}
+		else
+			cs->setResultStr("");
 		cs->setCompStr("");
 		cs->setZuin("");
 		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
@@ -359,8 +379,11 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	if( g_chewing->BufferLen() )
 	{
 		char* chibuf = g_chewing->Buffer();
-		cs->setCompStr(chibuf);
-		free(chibuf);
+		if(chibuf)
+		{
+			cs->setCompStr(chibuf);
+			free(chibuf);
+		}
 	}
 	else
 		cs->setCompStr("");
@@ -374,7 +397,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	cs->setCursorPos( cursorpos );
 
 	char* zuin = g_chewing->ZuinStr();
-	if( *zuin )
+	if( zuin )
 	{
 		cs->setZuin(zuin);
 		free(zuin);
@@ -395,26 +418,9 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE l
 	return TRUE;
 }
 
-Chewing* LoadChewingEngine()
+ChewingClient* LoadChewingEngine()
 {
-	TCHAR datadir[MAX_PATH];
-	TCHAR hashdir[MAX_PATH];
-	LPCTSTR phashdir = datadir;
-	GetSystemDirectory( datadir, MAX_PATH );
-	_tcscat( datadir, _T("\\IME\\Chewing") );
-
-	LPITEMIDLIST pidl;
-	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
-	{
-		SHGetPathFromIDList(pidl, hashdir);
-		_tcscat( hashdir, _T("\\Chewing") );
-		CreateDirectory( hashdir, NULL );
-		phashdir = hashdir;
-		IMalloc* palloc = NULL;
-		if( NOERROR == SHGetMalloc(&palloc) )
-			palloc->Free(pidl);
-	}
-	return new Chewing( datadir, hashdir, int(g_keyboardLayout) );
+	return new ChewingClient( int(g_keyboardLayout), g_spaceAsSelection );
 }
 
 
@@ -429,8 +435,9 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 	{
 		// FIXME: I don't know why this is needed, but without this
 		//        action, the IME cannot work normally under Win 2000/XP.
-		//        It seems that Windows 98/ME don't have this problem.		if( g_isWindowNT )
-		ic->fOpen = TRUE;
+		//        It seems that Windows 98/ME don't have this problem.
+//		if( g_isWindowNT )
+			ic->fOpen = TRUE;
 
 		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
 		CompStr* cs = imc.getCompStr();
@@ -518,9 +525,10 @@ BOOL CommitBuffer( IMCLock& imc )
 		// FIXME: If candidate window is opened, this
 		//        will cause problems.
 		g_chewing->Enter();	// Commit
-		if( g_chewing->CommitReady() )
+		char* cstr = NULL;
+		if( g_chewing->CommitReady() && 
+			(cstr = g_chewing->CommitStr()) )
 		{
-			char* cstr = g_chewing->CommitStr();
 			cs->setResultStr(cstr);
 			free(cstr);
 		}
@@ -674,23 +682,40 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate )
 {
 	bool isChinese = imc.isChinese();
+	bool isFullShape = imc.isFullShape();
+
 	if( !g_chewing )
 	{
-		if( ! isChinese )
+		if( ! isChinese && !isFullShape )
 			return FALSE;	//delay the loading of Chewing engine
+		// Enable numpad even in Chinese mode
+		if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
+			return FALSE;
 		if( ! (g_chewing = LoadChewingEngine()) )
 			return FALSE;
-		if( IsKeyToggled( keystate[VK_CAPITAL]) )
+		if( IsKeyToggled( keystate[VK_CAPITAL]) || !isChinese )
 			g_chewing->Capslock();	// switch to English mode
 	}
-	else if( !isChinese )	// Chewing has been loaded but in English mode
+	else
 	{
 		CompStr* cs = imc.getCompStr();
-		// Bypass chewing if there is no composition string
+		// In English mode, Bypass chewing if there is no composition string
 		if( cs->isEmpty() )
-			return FALSE;
+		{
+			if( isChinese )
+			{
+				// Enable numpad even in Chinese mode
+				if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
+					return FALSE;
+			}
+			else if( !isFullShape )	// Chewing has been loaded but in English mode
+				return FALSE;
+		}
 	}
-	g_chewing->SetFullShape(imc.isFullShape());
+
+	g_chewing->SetFullShape(isFullShape);
+	g_chewing->SetSpaceAsSelection( !!g_spaceAsSelection );
+	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
 
 	switch( key )
 	{
@@ -711,10 +736,6 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		break;
 	case VK_DOWN:
 		g_chewing->Down();
-		break;
-	case VK_PRIOR:
-		break;
-	case VK_NEXT:
 		break;
 	case VK_HOME:
 		g_chewing->Home();
@@ -745,16 +766,8 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			g_chewing->Capslock();
 			return FALSE;
 		break;
-//	case VK_NUMLOCK:
-//		break;
 	default:
 		{
-//			if( key == VK_SPACE && IsKeyDown( keystate[VK_SHIFT] ) )
-//			{
-//				g_chewing->ShiftSpace();
-//				break;
-//			}
-
 			if( IsKeyDown( keystate[VK_CONTROL] ) )
 			{
 				if(  key >= '0' && key <= '9' )

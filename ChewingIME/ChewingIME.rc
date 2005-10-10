@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,9,3
- PRODUCTVERSION 0,0,9,3
+ FILEVERSION 0,0,1,0
+ PRODUCTVERSION 0,0,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 0, 9, 3"
+            VALUE "FileVersion", "0, 0, 1, 0"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 0, 9, 3"
+            VALUE "ProductVersion", "0, 0, 1, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -104,7 +104,7 @@ IDI_HALF                ICON                    "half.ico"
 // Dialog
 //
 
-IDD_CONFIG DIALOGEX 0, 0, 214, 142
+IDD_CONFIG DIALOGEX 0, 0, 225, 143
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | 
     WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
@@ -125,37 +125,42 @@ BEGIN
                     75,10
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,15,117,75,
                     10
-    EDITTEXT        IDC_CAND_PER_ROW,173,15,27,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_CAND_PER_ROW,182,15,27,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_CAND_PER_ROW_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS,197,14,10,14
-    DEFPUSHBUTTON   "確定",IDOK,103,121,50,14
-    PUSHBUTTON      "取消",IDCANCEL,157,121,50,14
-    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,128
-    GROUPBOX        "候選字視窗",IDC_STATIC,99,7,108,43
-    LTEXT           "每列顯示候選字個數",IDC_STATIC,105,18,63,8
+                    UDS_ARROWKEYS,208,14,10,14
+    DEFPUSHBUTTON   "確定",IDOK,111,122,50,14
+    PUSHBUTTON      "取消",IDCANCEL,168,122,50,14
+    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,129
+    GROUPBOX        "候選字視窗",IDC_STATIC,102,7,116,60
+    LTEXT           "每列顯示候選字個數",IDC_STATIC,112,18,63,8
     CONTROL         "預設以英文模式啟動",IDC_DEFAULT_ENG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,99,55,108,10
-    LTEXT           "選字鍵",IDC_STATIC,105,33,22,8,WS_DISABLED
-    COMBOBOX        IDC_COMBO1,134,32,66,30,CBS_DROPDOWN | CBS_SORT | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,102,72,115,10
+    LTEXT           "選字鍵",IDC_STATIC,112,33,22,8,WS_DISABLED
+    COMBOBOX        IDC_COMBO1,143,32,66,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,99,68,108,10
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,102,84,116,10
+    CONTROL         "打字時按空白鍵叫出選字視窗",IDC_SPACESEL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,51,105,10
+    CONTROL         "固定組字視窗位置",IDC_FIX_COMPWND,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,102,96,116,10
 END
 
-IDD_ABOUT DIALOG  0, 0, 263, 167
+IDD_ABOUT DIALOGEX 0, 0, 259, 183
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "關於新酷音輸入法"
-FONT 9, "MS Sans Serif"
+FONT 9, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    PUSHBUTTON      "確定 (&O)",IDOK,106,146,50,14
-    CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP,7,7,27,30
-    LTEXT           "新酷音 － 智慧型注音輸入法 0.0.9\n\n發行日期：2005.10.9\n\n授權方式： GNU General Public License",
-                    IDC_STATIC,46,7,158,40
-    GROUPBOX        "簡介",IDC_STATIC,7,49,249,94
+    GROUPBOX        "",IDC_STATIC,7,85,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
-                    IDC_STATIC,16,62,231,79
+                    IDC_STATIC,17,95,224,75
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.1.0  Release Candidate\n\n發行日期：2005.10.11\n\n授權方式： GNU General Public License\n\n軟體作者：洪任諭  (以 libchewing 為基礎)",
+                    IDC_STATIC,75,7,162,75
+    CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP | 
+                    SS_REALSIZEIMAGE,7,7,59,63
+    LTEXT           "題字：翁政銓",IDC_STATIC,12,69,49,8
 END
 
 
@@ -170,17 +175,17 @@ BEGIN
     IDD_CONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 207
+        RIGHTMARGIN, 218
         TOPMARGIN, 7
-        BOTTOMMARGIN, 135
+        BOTTOMMARGIN, 136
     END
 
     IDD_ABOUT, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 256
+        RIGHTMARGIN, 252
         TOPMARGIN, 7
-        BOTTOMMARGIN, 160
+        BOTTOMMARGIN, 176
     END
 END
 #endif    // APSTUDIO_INVOKED

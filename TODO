@@ -1,5 +1,5 @@
-1. Server/Client
-2. Support user defined phrases.
+1. Server/Client --- Done
+2. Support user defined phrases. --- Done
 3. Better UI. --- Partially done
 4. Let users change selection keys.
 5. Let users change font and colors.
@@ -10,4 +10,4 @@
 9. Better installer and uninstaller.
 10.Save the position of status window.
 11.The built-in phrases of libchewing should be fixed.
-12.Type numbers directly using numpad.
+12.Type numbers directly using numpad. --- Partially done

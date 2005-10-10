@@ -211,10 +211,28 @@ int CompWnd::getDisplayedCursorPos(IMCLock& imc)
 
 bool CompWnd::create(HWND imeUIWnd)
 {
+	RECT rc;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+	rc.left += 10;
+	rc.bottom -= 50;
+
 	hwnd = CreateWindowEx(0, g_compWndClass, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
-					0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+					rc.left, rc.bottom, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	return !!hwnd;
+}
+
+void CompWnd::getRelativeCandPos(IMCLock& imc, POINT* pt)
+{
+	RECT rc;
+	GetWindowRect(hwnd, &rc );
+	INPUTCONTEXT* ic = imc.getIC();
+	if(!ic)
+		return;
+	string compstr = imc.getCompStr()->getCompStr();
+	pt->x = indexToXPos( compstr, getDisplayedCursorPos());
+	pt->y = (rc.bottom - rc.top);
+
 }
 
 void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
@@ -224,10 +242,10 @@ void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
 	INPUTCONTEXT* ic = imc.getIC();
 	if(!ic)
 		return;
-	ic->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
-	ic->cfCandForm->ptCurrentPos.y += (rc.bottom - rc.top);
-	*pt = imc.getIC()->cfCandForm->ptCurrentPos;
-	string compstr = imc.getCompStr()->getCompStr();
-	pt->x += indexToXPos( compstr, getDisplayedCursorPos());
+	getRelativeCandPos(imc, pt);
 
+	ic->cfCandForm->ptCurrentPos = imc.getIC()->cfCompForm.ptCurrentPos;
+	ic->cfCandForm->ptCurrentPos.y += pt->y;
+	ic->cfCandForm->ptCurrentPos.x += pt->x;
+	*pt = ic->cfCandForm->ptCurrentPos;
 }

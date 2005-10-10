@@ -16,6 +16,7 @@ public:
 	CandWnd candWnd;
 	StatusWnd statusWnd;
 	HWND hwnd;
+	POINT fixedCompWndPos;
 
 	static BOOL IMEUI::registerUIClasses();
 protected:
@@ -32,4 +33,5 @@ protected:
 public:
 	static void unregisterUIClasses();
 	static bool getWorkingArea(RECT* rc);
+	LRESULT onComposition(HIMC hIMC, WPARAM wp , LPARAM lp);
 };

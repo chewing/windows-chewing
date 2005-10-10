@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
+				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32\include;..\ChewingServer"
 				PreprocessorDefinitions="NOIME;WIN32;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -78,7 +78,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
+				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32\include;..\ChewingServer"
 				PreprocessorDefinitions="NOIME;WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -140,10 +140,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\CandWnd.cpp">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32\src\char.c">
-			</File>
-			<File
-				RelativePath=".\Chewing.cpp">
+				RelativePath=".\chewingclient.cpp">
 			</File>
 			<File
 				RelativePath=".\ChewingIME.cpp">
@@ -152,31 +149,13 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\ChewingIME.def">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32\src\chewingio.c">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\chewingutil.c">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\choice.c">
-			</File>
-			<File
 				RelativePath=".\CompStr.cpp">
 			</File>
 			<File
 				RelativePath=".\CompWnd.cpp">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32\src\dict.c">
-			</File>
-			<File
 				RelativePath=".\DrawUtil.cpp">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\hanyupinying.c">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\hash.c">
 			</File>
 			<File
 				RelativePath=".\IMCLock.cpp">
@@ -191,25 +170,13 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\IMEUILock.cpp">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32\src\common\key2pho.c">
-			</File>
-			<File
 				RelativePath=".\StatusWnd.cpp">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\tree.c">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\userphrase.c">
 			</File>
 			<File
 				RelativePath=".\Window.cpp">
 			</File>
 			<File
 				RelativePath=".\XPToolbar.cpp">
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\zuin.c">
 			</File>
 		</Filter>
 		<Filter
@@ -223,10 +190,10 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\CandWnd.h">
 			</File>
 			<File
-				RelativePath=".\ChewingIME.h">
+				RelativePath=".\ChewingClient.h">
 			</File>
 			<File
-				RelativePath=".\Chewingpp.h">
+				RelativePath=".\ChewingIME.h">
 			</File>
 			<File
 				RelativePath=".\CompStr.h">
@@ -280,6 +247,12 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			</File>
 			<File
 				RelativePath=".\config.ico">
+			</File>
+			<File
+				RelativePath=".\cool.bmp">
+			</File>
+			<File
+				RelativePath=".\cool2.bmp">
 			</File>
 			<File
 				RelativePath=".\eng.ico">

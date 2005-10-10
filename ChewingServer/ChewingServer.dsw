@@ -3,19 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "ChewingIME"=".\ChewingIME.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "ChewingServer"=".\ChewingServer\ChewingServer.dsp" - Package Owner=<4>
+Project: "ChewingServer"=".\ChewingServer.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

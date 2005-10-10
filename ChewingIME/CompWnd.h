@@ -28,5 +28,6 @@ public:
 	int getDisplayedCursorPos(){	return getDisplayedCursorPos(IMCLock(getIMC()));	}
 public:
 	bool create(HWND imeUIWnd);
+	void getRelativeCandPos(IMCLock& imc, POINT* pt);
 	void getCandPos(IMCLock& imc, POINT* pt);
 };

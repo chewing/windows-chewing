@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.0.9.3"
+!define PRODUCT_VERSION "0.1.0 rc"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -70,6 +70,7 @@ Section "MainSection" SEC01
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "Installer\Release\Installer.exe"
+  File "ChewingServer\Release\ChewingServer.exe"
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
 ; File "..\libchewing\branches\win32\win32\Release\libchewing.dll"
@@ -104,6 +105,9 @@ FunctionEnd
 
 Section Uninstall
 
+  FindWindow $0 "ChewingServer"
+  SendMessage $0 ${WM_CLOSE} 0 0
+
   Exec '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
   Sleep 2000
   Delete "$INSTDIR\uninst.exe"
@@ -118,6 +122,7 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\ph_index.dat"
   Delete "$SYSDIR\IME\Chewing\us_freq.dat"
   Delete "$SYSDIR\IME\Chewing\Installer.exe"
+  Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
 
   Delete "$SMPROGRAMS\新酷音輸入法\Uninstall.lnk"
 
