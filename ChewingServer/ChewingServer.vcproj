@@ -87,13 +87,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include,..\ChewingIME"
+				InlineFunctionExpansion="2"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;NDEBUG;_WINDOWS"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough=""
 				PrecompiledHeaderFile=".\Release/ChewingServer.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -173,28 +174,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\chewing.cpp">
-			</File>
-			<File
-				RelativePath="..\ChewingIME\Chewing.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath=".\Chewing.cpp">
 			</File>
 			<File
 				RelativePath="..\..\libchewing\branches\win32\src\chewingio.c">
@@ -453,7 +433,7 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\ChewingIME\Chewingpp.h">
+				RelativePath=".\Chewingpp.h">
 			</File>
 			<File
 				RelativePath="ChewingServer.h">
