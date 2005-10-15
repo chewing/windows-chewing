@@ -94,7 +94,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 7 );
-			::SendMessage( spin, UDM_SETPOS32, 0, g_candPerRow );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) g_candPerRow , 0));
 		}
 		return TRUE;
 	case WM_COMMAND:
@@ -108,7 +109,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					{
 						g_keyboardLayout = (id - IDC_KB1);
 						HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-						g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS32, 0, 0 );
+						g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
 						break;
 					}
 				}
@@ -275,7 +276,7 @@ void ToggleFullShapeMode(HIMC hIMC)
 	ImmSetConversionStatus( hIMC, conv, sentence);
 }
 
-BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, LPCBYTE lpbKeyState )
+BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYTE *lpbKeyState )
 {
 	if( !hIMC )
 		return FALSE;
@@ -778,7 +779,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			else
 			{
 				char ascii[2];
-				int ret = ToAscii( key, ki.scanCode, keystate, (LPWORD)ascii, 0);
+				int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
 				if( ret )
 					key = ascii[0];
 				else
