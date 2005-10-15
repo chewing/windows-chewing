@@ -91,6 +91,7 @@ void XPToolbar::unregisterClass()
 
 void XPToolbar::onPaint(PAINTSTRUCT &ps)
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	RECT rc;
 	GetClientRect( hwnd, &rc );
 
@@ -125,6 +126,7 @@ bool XPToolbar::create(HWND parent, UINT id, LONG style, int x, int y, int w, in
 
 bool XPToolbar::onLButtonDown(WPARAM wp, LPARAM lp)
 {
+    if ( IsWindow(hwnd)==FALSE ) return false;
 	POINTS pt = MAKEPOINTS(lp);
 	curPressedBtn = hitTest(pt.x, pt.y);
 	if(curPressedBtn < 0)
@@ -140,6 +142,7 @@ bool XPToolbar::onLButtonDown(WPARAM wp, LPARAM lp)
 
 bool XPToolbar::onLButtonUp(WPARAM wp, LPARAM lp)
 {
+    if ( IsWindow(hwnd)==FALSE ) return false;
 	if( curPressedBtn < 0 )
 		return false;
 	POINTS pt = MAKEPOINTS(lp);
@@ -163,6 +166,7 @@ bool XPToolbar::onLButtonUp(WPARAM wp, LPARAM lp)
 
 bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 {
+    if ( IsWindow(hwnd)==FALSE ) return false;
 	POINTS pt = MAKEPOINTS(lp);
 	int idx = hitTest(pt.x, pt.y);
 
@@ -213,11 +217,13 @@ bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 
 void XPToolbar::setTheme(HBITMAP bmp)
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	themeBmp = bmp;
 }
 
 void XPToolbar::drawBtn(HDC dc, int idx)
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	int left = gripperW + btnW * idx;
 	int iconleft = left + (btnW-16) / 2;
 	int icontop = (btnH-16)/2;
@@ -248,12 +254,14 @@ int XPToolbar::addBtn(UINT id, int iImage)
 
 void XPToolbar::getSize(int *w, int *h)
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	*w = gripperW + btnW * buttons.size() + 4;
 	*h = btnH;
 }
 
 int XPToolbar::hitTest(int x, int y)
 {
+    if ( IsWindow(hwnd)==FALSE ) return 0;
 	RECT rc;
 	GetClientRect(hwnd, &rc);
 	int ymargin = (rc.bottom - 21)/2;
@@ -266,6 +274,7 @@ int XPToolbar::hitTest(int x, int y)
 
 void XPToolbar::setBtnImage(int idx, HICON icon)
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	if( buttons[idx].hIcon == icon )
 		return;
 	buttons[idx].hIcon = icon;
@@ -276,6 +285,7 @@ void XPToolbar::setBtnImage(int idx, HICON icon)
 
 void XPToolbar::onCaptureChanged( LPARAM lp )
 {
+    if ( IsWindow(hwnd)==FALSE ) return;
 	if( HWND(lp) != hwnd && prevHilightBtn >= 0 )
 	{
 		HDC dc = GetDC(hwnd);
