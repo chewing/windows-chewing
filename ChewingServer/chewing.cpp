@@ -172,23 +172,23 @@ int Chewing::ChineseMode() {
 }
 
 int Chewing::Candidate() {
-  return (co->pci->nPage);
+	return (co->pci ? co->pci->nPage : 0);
 }
 
 int Chewing::ChoicePerPage() {
-  return (co->pci->nChoicePerPage);
+	return (co->pci ? co->pci->nChoicePerPage : 0);
 }
 
 int Chewing::TotalChoice() {
-  return (co->pci->nTotalChoice);
+	return (co->pci ? co->pci->nTotalChoice : 0);
 }
 
 int Chewing::TotalPage() {
-    return (co->pci->nPage);
+	return (co->pci ? co->pci->nPage : 0);
 }
 
 int Chewing::CurrentPage() {
-    return (co->pci->pageNo);
+	return (co->pci ? co->pci->pageNo : -1);
 }
 
 /*
@@ -251,4 +251,27 @@ void Chewing::SetSpaceAsSelection(bool spaceAsSelection)
 {
 	config.bSpaceAsSelection = spaceAsSelection;
     SetConfig(cd, &config);
+}
+
+int Chewing::ShowMsgLen(void)
+{
+	return co->bShowMsg ? co->showMsgLen : 0;
+}
+
+char* Chewing::ShowMsg(void)
+{
+	char *msg = (char*) calloc (1 + co->showMsgLen, sizeof(char) * WCH_SIZE);
+	for(int i = 0; i < co->showMsgLen ; ++i )
+		strcat(msg, (char*)(co->showMsg[i].s));
+	return msg;
+}
+
+void Chewing::SetAddPhraseForward(bool add_forward)
+{
+	cd->config.bAddPhraseForward = add_forward;
+}
+
+bool Chewing::GetAddPhraseForward(void)
+{
+	return !!cd->config.bAddPhraseForward;
 }

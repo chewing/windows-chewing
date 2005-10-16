@@ -46,6 +46,8 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::TotalChoice ,
 	(ChewingMemberFuncCI) &Chewing::TotalPage ,
 	(ChewingMemberFuncCI) &Chewing::CurrentPage ,
+	(ChewingMemberFuncCI) &Chewing::ShowMsgLen ,
+	(ChewingMemberFuncCI) &Chewing::GetAddPhraseForward ,
 
 	// int (int) or void int
 	(ChewingMemberFuncCI) &Chewing::Key ,
@@ -55,6 +57,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 
 	(ChewingMemberFuncCI) &Chewing::SetFullShape ,
 	(ChewingMemberFuncCI) &Chewing::SetSpaceAsSelection ,
+	(ChewingMemberFuncCI) &Chewing::SetAddPhraseForward ,
 	(ChewingMemberFuncCI) &Chewing::SetKeyboardLayout ,
 	(ChewingMemberFuncCI) &Chewing::SetHsuSelectionKeyType ,
 
@@ -62,6 +65,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ZuinStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::CommitStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::Buffer ,
+	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ShowMsg ,
 
 	  // char* (int)
 	(ChewingMemberFuncCI) &Chewing::Selection, 
@@ -130,7 +134,7 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 	{
 	case cmdAddClient:
 		{
-			SetPriorityClass( GetCurrentProcess(), NORMAL_PRIORITY_CLASS );
+//			SetPriorityClass( GetCurrentProcess(), NORMAL_PRIORITY_CLASS );
 			Chewing* client = new Chewing();
 			chewingClients.push_back(client);
 			return (LRESULT)client;
@@ -141,8 +145,8 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 			Chewing* client = (Chewing*)lp;
 			chewingClients.remove( client );
 			delete client;
-			if( chewingClients.empty() )
-				SetPriorityClass( GetCurrentProcess(), IDLE_PRIORITY_CLASS );
+//			if( chewingClients.empty() )
+//				SetPriorityClass( GetCurrentProcess(), IDLE_PRIORITY_CLASS );
 //			PostQuitMessage(0);
 			break;
 		}
@@ -166,7 +170,7 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 bool ChewingServer::startServer()
 {
 	HANDLE hprocess = GetCurrentProcess();
-	SetPriorityClass( hprocess, HIGH_PRIORITY_CLASS );
+//	SetPriorityClass( hprocess, HIGH_PRIORITY_CLASS );
 
 	LPCTSTR name = _T("Local\\ChewingServer");
 	LPCTSTR evtname = _T("Local\\ChewingServerEvent");
@@ -209,7 +213,7 @@ bool ChewingServer::startServer()
 		CloseHandle(evt);
 	}
 
-	SetPriorityClass( hprocess, NORMAL_PRIORITY_CLASS );
+//	SetPriorityClass( hprocess, NORMAL_PRIORITY_CLASS );
 	return true;
 }
 

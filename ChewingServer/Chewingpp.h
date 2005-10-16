@@ -84,6 +84,10 @@ class Chewing
   void SetFullShape(bool full);
   bool GetFullShape(void);
   void SetSpaceAsSelection(bool spaceAsSelection);
+  int ShowMsgLen(void);
+  char* ShowMsg(void);
+  void SetAddPhraseForward(bool add_forward);
+  bool GetAddPhraseForward(void);
 };
 
 #endif /* _CHEWING_H */
