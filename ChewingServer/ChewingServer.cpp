@@ -70,7 +70,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	  // char* (int)
 	(ChewingMemberFuncCI) &Chewing::Selection, 
 
-	// char* (void)
+	// void (char*)
 	(ChewingMemberFuncCI) (SetSelKeyFunc)&Chewing::SelKey 
 
 };
@@ -253,6 +253,14 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 			free(str);
 			return len;
 		}
+	}
+	if( cmd == (cmdSetSelKey - cmdFirst) )
+	{
+		SetSelKeyFunc func = (SetSelKeyFunc)chewingCmdTable[cmd];
+		char* pbuf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 
+									0, 0, CHEWINGSERVER_BUF_SIZE );
+		(chewing->*func)(pbuf);
+		UnmapViewOfFile( pbuf );
 	}
 	return 0;
 }

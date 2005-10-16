@@ -87,8 +87,8 @@ public:
 		// char* (int)
 		cmdSelection,
 
-		// void char*
-//		cmdSetSelKey,
+		// void (char*)
+		cmdSetSelKey,
 
 		cmdLast, 
 

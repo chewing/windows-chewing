@@ -33,7 +33,7 @@ void Chewing::SetHsuSelectionKeyType(int type)
 void Chewing::SetKeyboardLayout(int kb)
 {
     kbLayout = kb;
-    if (kb==KB_HSU) {
+/*    if (kb==KB_HSU) {
         if(cd->config.hsuSelKeyType == HSU_SELKEY_TYPE2) {
             SelKey("asdfzxcv89");
         } else {
@@ -41,9 +41,8 @@ void Chewing::SetKeyboardLayout(int kb)
         }
     } else if (kb==KB_DVORAK_HSU) SelKey("aoeuhtn789");
     else SelKey("1234567890");
+*/
     cd->zuinData.kbtype=kb;
-    // Always use space as candidate key for SpaceChewing style.
-//    cd->config.bSpaceAsSelection=1;
     SetConfig(cd, &config);
 }
 
