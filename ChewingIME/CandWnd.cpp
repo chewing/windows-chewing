@@ -117,15 +117,28 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		pageEnd = candList->getTotalCount();
 	int numCand = pageEnd - candList->getPageStart();
 	int num = 0;
+
+	int selkey_w = 0;
+	SIZE candsz;
+	GetTextExtentPoint32(hDC, "m.", 2, &candsz);
+	selkey_w = candsz.cx;
+
 	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
 
 		TCHAR cand[64];
+		TCHAR selKey[4]="1.";
 		if( i < pageEnd )
-			wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+		{
+			LPCTSTR selKeys = g_selKeyNames[g_selKeyType];
+			selKey[0] = selKeys[(i - candList->getPageStart())];
+			_tcscpy( cand, candList->getCand(i) );
+		}
 		else
 		{
+			*selKey = 0;
+
 			int page = 1 + candList->getPageStart() / candList->getPageSize();
 			int totalPage = candList->getTotalCount() / candList->getPageSize();
 			if( candList->getTotalCount() % candList->getPageSize() )
@@ -135,19 +148,29 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		}
 
 		int len = _tcslen( cand );
-		SIZE candsz;
 		GetTextExtentPoint32(hDC, cand, len, &candsz);
 		candsz.cx += 4;
 		candsz.cy += 2;
-
-		cand_rc.right = cand_rc.left + candsz.cx;
 		cand_rc.bottom = cand_rc.top + candsz.cy;
 
-		ExtTextOut( hDC, cand_rc.left + 2, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
+		if( *selKey )
+		{
+			cand_rc.right = cand_rc.left + selkey_w;
+			cand_rc.bottom = cand_rc.top + candsz.cy;
+			// Draw selKey
+			ExtTextOut( hDC, cand_rc.left+1, cand_rc.top, ETO_OPAQUE, &cand_rc, selKey, 2, NULL);
+			cand_rc.left = cand_rc.right;
+		}
+		cand_rc.right = cand_rc.left + candsz.cx;
+		ExtTextOut( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
 
 		if( num >= items_per_row && i < pageEnd )
 		{
+			cand_rc.left = cand_rc.right;
+			cand_rc.right = rc.right;
+			ExtTextOut( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, NULL, 0, NULL);
+
 			cand_rc.left = 1;
 			cand_rc.top += candsz.cy;
 			num = 0;
@@ -190,12 +213,16 @@ void CandWnd::getSize(int* w, int* h)
 	int numCand = pageEnd - candList->getPageStart();
 	int num = 0;
 	int width = 0, height = 0;
+	int selkey_w = 0;
+	SIZE candsz;
+	GetTextExtentPoint32(hDC, "m.", 2, &candsz);
+	selkey_w = candsz.cx;
 	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
 		TCHAR cand[64];
 		if( i < pageEnd )
-			wsprintf ( cand, _T("%d.%s"), (i - candList->getPageStart() + 1), candList->getCand(i) );
+			wsprintf ( cand, _T("%s"), candList->getCand(i) );
 		else
 		{
 			int page = 1 + candList->getPageStart() / candList->getPageSize();
@@ -206,9 +233,10 @@ void CandWnd::getSize(int* w, int* h)
 		}
 
 		int len = _tcslen( cand );
-		SIZE candsz;
 		GetTextExtentPoint32(hDC, cand, len, &candsz);
 		width += candsz.cx + 4;
+		width += selkey_w;
+
 		if( candsz.cy > height )
 			height = candsz.cy;
         if( num >= items_per_row && i <= pageEnd )

@@ -104,7 +104,7 @@ IDI_HALF                ICON                    "half.ico"
 // Dialog
 //
 
-IDD_CONFIG DIALOGEX 0, 0, 227, 157
+IDD_CONFIG DIALOGEX 0, 0, 227, 185
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | 
     WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
@@ -125,30 +125,36 @@ BEGIN
                     75,10
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,15,117,75,
                     10
+    LTEXT           "每列顯示候選字個數",IDC_STATIC,112,18,63,8
     EDITTEXT        IDC_CAND_PER_ROW,182,15,27,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_CAND_PER_ROW_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
                     UDS_ARROWKEYS,210,14,10,14
-    DEFPUSHBUTTON   "確定",IDOK,111,136,50,14
-    PUSHBUTTON      "取消",IDCANCEL,170,136,50,14
-    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,143
-    GROUPBOX        "候選字視窗",IDC_STATIC,104,7,116,60
-    LTEXT           "每列顯示候選字個數",IDC_STATIC,112,18,63,8
-    CONTROL         "預設以英文模式啟動",IDC_DEFAULT_ENG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,102,72,115,10
-    LTEXT           "選字鍵",IDC_STATIC,112,33,22,8,WS_DISABLED
-    COMBOBOX        IDC_COMBO1,143,32,66,30,CBS_DROPDOWN | CBS_SORT | 
-                    WS_DISABLED | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,102,84,116,10
+    LTEXT           "選字鍵",IDC_STATIC,112,33,22,8
+    COMBOBOX        IDC_SELKEYS,143,32,66,30,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
     CONTROL         "打字時按空白鍵叫出選字視窗",IDC_SPACESEL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,112,51,105,10
-    CONTROL         "固定組字視窗位置",IDC_FIX_COMPWND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,102,96,116,10
+    CONTROL         "預設以英文模式啟動",IDC_DEFAULT_ENG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,72,116,10
+    CONTROL         "預設以全形模式啟動",IDC_DEFAULT_FS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,86,116,10
+    CONTROL         "使用 Shift 快速切換中英文模式",IDC_ENABLE_SHIFT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,100,116,10
     CONTROL         "Ctrl + 數字加入前方的詞而非後方",IDC_ADD_PHRASE_FORWARD,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,102,120,116,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,104,114,116,10
+    CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,104,128,116,
+                    10
+    CONTROL         "固定組字視窗位置",IDC_FIX_COMPWND,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,149,71,10
+    GROUPBOX        "使用者介面",IDC_STATIC,7,138,89,40
     CONTROL         "隱藏狀態工具列",IDC_HIDE_STATUSWND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,102,108,116,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,161,64,10
+    DEFPUSHBUTTON   "確定",IDOK,111,164,50,14
+    PUSHBUTTON      "取消",IDCANCEL,170,164,50,14
+    GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,127
+    GROUPBOX        "候選字視窗",IDC_STATIC,104,7,116,60
 END
 
 IDD_ABOUT DIALOGEX 0, 0, 259, 183
@@ -181,7 +187,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 220
         TOPMARGIN, 7
-        BOTTOMMARGIN, 150
+        BOTTOMMARGIN, 178
     END
 
     IDD_ABOUT, DIALOG
@@ -227,9 +233,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_CHI_ENG              "中英文切換 ( Shift )"
+    ID_CHI_ENG              "中文/英數 模式切換 ( Shift )"
     ID_FULL_HALF            "全半形切換 ( Shift + Space )"
-    ID_MENU                 "新酷音輸入法選單"
+    ID_MENU                 "新酷音輸入法設定"
 END
 
 #endif    // 中文 (台灣) resources

@@ -9,9 +9,9 @@
 
 #include "resource.h"
 
-#include <commctrl.h>
 #include <winreg.h>
 #include <shlobj.h>
+#include <windowsx.h>
 
 #include "CompWnd.h"
 #include "CandWnd.h"
@@ -28,10 +28,35 @@ ChewingClient* g_chewing = NULL;
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 DWORD g_defaultEnglish = false;
+DWORD g_defaultFullSpace = false;
 DWORD g_spaceAsSelection = true;
+DWORD g_enableShift = true;
 DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
+DWORD g_selKeyType = 0;
+static const char* g_selKeys[]={
+	"1234567890",
+	"asdfghjkl;",
+	"asdfzxcv89",
+	"asdfjkl789",
+	"aoeuhtn789",
+	NULL
+};
+
+#ifdef	UNICODE
+	static const TCHAR* g_selKeyNameStrs[]={
+		_T("1234567890"),
+		_T("asdfghjkl;"),
+		_T("asdfzxcv89"),
+		_T("asdfjkl789"),
+		_T("aoeuhtn789"),
+		NULL
+	};
+	const TCHAR** g_selKeyNames = g_selKeyNameStrs;
+#else
+	const TCHAR** g_selKeyNames = g_selKeys;
+#endif
 
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
 
@@ -58,12 +83,18 @@ void LoadConfig()
 		RegQueryValueEx( hk, "KeyboardLayout", 0, &type, (LPBYTE)&g_keyboardLayout, &size );		
 		RegQueryValueEx( hk, "CandPerRow", 0, &type, (LPBYTE)&g_candPerRow, &size );
 		RegQueryValueEx( hk, "DefaultEnglish", 0, &type, (LPBYTE)&g_defaultEnglish, &size );
+		RegQueryValueEx( hk, "DefaultFullSpace", 0, &type, (LPBYTE)&g_defaultFullSpace, &size );
 		RegQueryValueEx( hk, "SpaceAsSelection", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
-		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
+		RegQueryValueEx( hk, "EnableShift", 0, &type, (LPBYTE)&g_enableShift, &size );
+		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_addPhraseForward, &size );
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
+		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegCloseKey( hk );
 	}
+
+	if( g_chewing )
+		g_chewing->SelKey( (char*)g_selKeys[g_selKeyType] );
 }
 
 
@@ -76,10 +107,13 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("KeyboardLayout"), 0, REG_DWORD, (LPBYTE)&g_keyboardLayout, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("CandPerRow"), 0, REG_DWORD, (LPBYTE)&g_candPerRow, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("DefaultEnglish"), 0, REG_DWORD, (LPBYTE)&g_defaultEnglish, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("DefaultFullSpace"), 0, REG_DWORD, (LPBYTE)&g_defaultFullSpace, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SpaceAsSelection"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
-		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("EnableShift"), 0, REG_DWORD, (LPBYTE)&g_enableShift, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_addPhraseForward, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -95,7 +129,9 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			SendMessage( hwnd, WM_SETICON, ICON_SMALL, LPARAM(icon) );
 			CheckRadioButton( hwnd, IDC_KB1, IDC_KB9, IDC_KB1 + g_keyboardLayout );
 			CheckDlgButton( hwnd, IDC_DEFAULT_ENG, g_defaultEnglish );
+			CheckDlgButton( hwnd, IDC_DEFAULT_FS, g_defaultFullSpace );
 			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
+			CheckDlgButton( hwnd, IDC_ENABLE_SHIFT, g_enableShift );
 			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
 			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
@@ -104,6 +140,12 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			::SendMessage( spin, UDM_SETRANGE32, 1, 7 );
 			::SendMessage( spin, UDM_SETPOS, 0, 
                            (LPARAM) MAKELONG ((short) g_candPerRow , 0));
+
+			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
+			const TCHAR** pselkeys = g_selKeyNames;
+			while( *pselkeys )
+				ComboBox_AddString( combo, *(pselkeys++) );
+			ComboBox_SetCurSel( combo, g_selKeyType );
 		}
 		return TRUE;
 	case WM_COMMAND:
@@ -122,10 +164,16 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 				}
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
+				g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
 				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
+				g_enableShift = IsDlgButtonChecked( hwnd, IDC_ENABLE_SHIFT );
 				g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
 				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
+
+				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
+				if( g_selKeyType < 0 )
+					g_selKeyType = 0;
 				EndDialog(hwnd, IDOK);
 			}
 			break;
@@ -247,15 +295,26 @@ LRESULT APIENTRY ImeEscape(HIMC, UINT, LPVOID)
 
 void ToggleChiEngMode(HIMC hIMC)
 {
-	DWORD conv, sentence;
+	bool isChinese;
+//	if( g_enableShift )
+//	{
+		DWORD conv, sentence;
+		ImmGetConversionStatus( hIMC, &conv, &sentence);
+		isChinese = !!(conv & IME_CMODE_CHINESE);
+		if( isChinese )
+			conv &= ~IME_CMODE_CHINESE;
+		else
+			conv |= IME_CMODE_CHINESE;
+		ImmSetConversionStatus( hIMC, conv, sentence);
+//	}
+//	else
+//	{
+//		isChinese = !LOBYTE(GetKeyState(VK_CAPITAL));
+//		BYTE scan = MapVirtualKey(VK_CAPITAL, 0);
+//		keybd_event( VK_CAPITAL, MapVirtualKey(VK_CAPITAL, 0), 0, 0  );	// Capslock on/off
+//		keybd_event( VK_CAPITAL, MapVirtualKey(VK_CAPITAL, 0), KEYEVENTF_KEYUP, 0 );	// Capslock on/off
+//	}
 
-	ImmGetConversionStatus( hIMC, &conv, &sentence);
-	bool isChinese = !!(conv & IME_CMODE_CHINESE);
-	if( isChinese )
-		conv &= ~IME_CMODE_CHINESE;
-	else
-		conv |= IME_CMODE_CHINESE;
-	ImmSetConversionStatus( hIMC, conv, sentence);
 	isChinese = !isChinese;
 
 	if( g_chewing )
@@ -297,25 +356,31 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	if( GetKeyInfo(lParam).isKeyUp || !IsKeyDown(lpbKeyState[uVirKey]) )	// Key up
 	{
-		if( g_shiftPressedTime > 0 )
+		if( g_enableShift )
 		{
-			if( uVirKey == VK_SHIFT && (GetTickCount() - g_shiftPressedTime) <= 300 )
+			if( g_shiftPressedTime > 0 )
 			{
-				// Toggle Chinese/English mode.
-				ToggleChiEngMode(hIMC);
+				if( uVirKey == VK_SHIFT && (GetTickCount() - g_shiftPressedTime) <= 300 )
+				{
+					// Toggle Chinese/English mode.
+					ToggleChiEngMode(hIMC);
+				}
+				g_shiftPressedTime = -1;
 			}
-			g_shiftPressedTime = -1;
 		}
 		return FALSE;
 	}
 
-	if( uVirKey == VK_SHIFT  )
+	if( g_enableShift )
 	{
-		if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
-			g_shiftPressedTime = GetTickCount();
+		if( uVirKey == VK_SHIFT  )
+		{
+			if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
+				g_shiftPressedTime = GetTickCount();
+		}
+		else if( g_shiftPressedTime > 0 )
+			g_shiftPressedTime = -1;
 	}
-	else if( g_shiftPressedTime > 0 )
-		g_shiftPressedTime = -1;
 
 	// IME Toggle key : Ctrl + Space & Shift + Space
 	if( LOWORD(uVirKey) == VK_SPACE && 
@@ -369,12 +434,6 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	if( g_chewing->CommitReady() )
 	{
-		static time = 0;
-		time++;
-		if(time >= 2)
-		{
-			time = 2;
-		}
 		char* cstr = g_chewing->CommitStr();
 		if( cstr )
 		{
@@ -439,9 +498,9 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 ChewingClient* LoadChewingEngine()
 {
-	return new ChewingClient( int(g_keyboardLayout), g_spaceAsSelection );
+	return new ChewingClient( int(g_keyboardLayout), 
+		g_spaceAsSelection, g_selKeys[g_selKeyType] );
 }
-
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 {
@@ -473,6 +532,11 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		if( ! (ic->fdwInit & INIT_CONVERSION) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
+
+			if( g_defaultFullSpace )
+				ic->fdwConversion |=  IME_CMODE_FULLSHAPE;
+			else
+				ic->fdwConversion &=  ~IME_CMODE_FULLSHAPE;
 			ic->fdwInit |= INIT_CONVERSION;
 		}
 		if( ! (ic->fdwInit & INIT_STATUSWNDPOS) )

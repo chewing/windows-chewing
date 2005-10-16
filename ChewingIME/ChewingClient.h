@@ -15,7 +15,7 @@
 class ChewingClient  
 {
 public:
-	ChewingClient( int kbLayout, bool spaceAsSel = true );
+	ChewingClient( int kbLayout, bool spaceAsSel = true, const char* selKeys="1234567890" );
 	~ChewingClient();
 
 public:

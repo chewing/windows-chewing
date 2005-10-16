@@ -15,9 +15,14 @@ const LPCTSTR g_candWndClass = _T("ChewingCand");
 const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
+
+extern const TCHAR** g_selKeyNames;
+extern DWORD g_selKeyType;
+
 extern DWORD g_keyboardLayout;
 extern DWORD g_candPerRow;
 extern DWORD g_hideStatusWnd;
+extern DWORD g_enableShift;
 extern DWORD g_fixCompWnd;
 
 extern ChewingClient* g_chewing;

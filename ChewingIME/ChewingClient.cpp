@@ -11,12 +11,13 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel )
+ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys )
 	: serverWnd(NULL), chewingID(0), sharedMem(INVALID_HANDLE_VALUE)
 	, spaceAsSelection(spaceAsSel)
 	, keyLayout(kbLayout)
 {
 	ConnectServer();
+	SelKey((char*)selKeys);
 }
 
 ChewingClient::~ChewingClient()
@@ -97,7 +98,11 @@ char ChewingClient::SelKey(int i)
 
 void ChewingClient::SelKey(char* selkey)
 {
-
+	char* pbuf = (char*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
+								0, 0, CHEWINGSERVER_BUF_SIZE );
+	strcpy( pbuf, selkey );
+	UnmapViewOfFile( pbuf );
+	SendMessage( serverWnd, ChewingServer::cmdSetSelKey, 0, chewingID);
 }
 
 char* ChewingClient::ZuinStr()
@@ -213,7 +218,7 @@ void ChewingClient::ConnectServer(void)
 	chewingID = SendMessage( serverWnd, ChewingServer::cmdAddClient, 0, 0 );
 	TCHAR filemapName[100];
 	GetWindowText( serverWnd, filemapName, sizeof(filemapName) );
-	sharedMem = OpenFileMapping( FILE_MAP_READ, FALSE, filemapName);
+	sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
 
 	SetSpaceAsSelection(spaceAsSelection);
 	SetKeyboardLayout(keyLayout);

@@ -118,6 +118,7 @@ void StatusWnd::enableChiEng(bool enable)
 void StatusWnd::toggleChiEngMode(HIMC hIMC)
 {
 	ToggleChiEngMode(hIMC);
+/// FIXME: icons should indicate whether capslock is toggled or not.
 	updateIcons(hIMC);
 }
 
@@ -130,8 +131,12 @@ void StatusWnd::toggleShapeMode(HIMC hIMC)
 void StatusWnd::updateIcons(HIMC hIMC)
 {
 	IMCLock imc(hIMC);
-
-	this->setBtnImage( 0, imc.isChinese() ? iconChi : iconEng );
+	bool isChinese;
+//	if( g_enableShift )
+		isChinese = imc.isChinese();
+//	else
+//		isChinese = !LOBYTE(GetKeyState(VK_CAPITAL));
+	this->setBtnImage( 0, isChinese ? iconChi : iconEng );
 	this->setBtnImage( 1, imc.isFullShape() ? iconFull : iconHalf );
 }
 
