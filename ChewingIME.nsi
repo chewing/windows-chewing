@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.1.0 雙十國慶紀念版"
+!define PRODUCT_VERSION "0.1.3"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -58,10 +58,14 @@ InstallDir "$SYSDIR\IME\Chewing"
 ShowInstDetails show
 ShowUnInstDetails show
 
+Function OnInstError
+    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版後重開機再安裝。"
+    Abort
+FunctionEnd
 
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
-  SetOverwrite try
+  SetOverwrite on
   File "Data\us_freq.dat"
   File /oname=ph_index.dat "Data\ph_index.dat.bin"
   File /oname=fonetree.dat "Data\fonetree.dat.bin"
@@ -74,6 +78,10 @@ Section "MainSection" SEC01
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
 ; File "..\libchewing\branches\win32\win32\Release\libchewing.dll"
+
+  IfErrors 0 +2
+    Call OnInstError
+
 SectionEnd
 
 Section -AdditionalIcons
@@ -90,11 +98,19 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
   Exec '"$SYSDIR\IME\Chewing\Installer.exe"'
+
+  IfErrors 0 +2
+    Call OnInstError
+
 SectionEnd
 
+;Function un.onError
+;  MessageBox MB_ICONSTOP|MB_OK "解除安裝發生錯誤，請確定輸入法不在使用中$\n$\n建議到控制台輸入法設定當中檢查是否正確移除。"
+;  Abort
+;FunctionEnd
 
 Function un.onUninstSuccess
-  HideWindow
+;  HideWindow
   MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) 已成功地從你的電腦移除。"
 FunctionEnd
 
@@ -106,11 +122,10 @@ FunctionEnd
 Section Uninstall
 
   FindWindow $0 "ChewingServer"
-  SendMessage $0 ${WM_CLOSE} 0 0
+  SendMessage $0 ${WM_DESTROY} 0 0
 
-  Exec '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
-  Sleep 2000
-  Delete "$INSTDIR\uninst.exe"
+  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
+
 ;  Delete "$SYSDIR\libchewing.dll"
   Delete "$SYSDIR\Chewing.ime"
   Delete "$SYSDIR\IME\Chewing\License.txt"
@@ -124,11 +139,17 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\Installer.exe"
   Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
 
+;  IfErrors 0 +2
+;    Call un.onError
+
   Delete "$SMPROGRAMS\新酷音輸入法\Uninstall.lnk"
 
   RMDir "$SYSDIR\IME\Chewing"
   RMDir "$SMPROGRAMS\新酷音輸入法"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
+
+  Delete "$INSTDIR\uninst.exe"
+
   SetAutoClose true
 SectionEnd

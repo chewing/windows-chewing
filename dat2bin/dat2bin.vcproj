@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_DAT2BIN"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -68,7 +68,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_DAT2BIN"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
@@ -117,6 +117,18 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\dat2bin.cpp">
+			</File>
+			<File
+				RelativePath="..\..\libchewing\branches\win32\src\common\key2pho.c">
+			</File>
+			<File
+				RelativePath="..\..\libchewing\branches\win32\src\tools\maketree.c">
+			</File>
+			<File
+				RelativePath="..\..\libchewing\branches\win32\src\tools\sort_dic.c">
+			</File>
+			<File
+				RelativePath="..\..\libchewing\branches\win32\src\tools\sort_word.c">
 			</File>
 		</Filter>
 		<Filter

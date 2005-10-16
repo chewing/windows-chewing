@@ -3,17 +3,57 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+#ifdef WIN32
+	#include <direct.h>
+#endif
+
 #include "global.h"
 #include "char.h"
 
+extern "C"
+{
+	int maketree();
+	int sort_dic();
+	int sort_word();
+}
+
 int main(int argc, char* argv[])
 {
-	if( argc < 2 )
-		return 1;
-
-	char* prefix = argv[1];
+	char* prefix = argc < 2 ? "" : argv[1];
 	char filename[ 100 ];
+	char workdir[ 100 ];
 	int i;
+
+#ifdef WIN32
+	if( *prefix )
+		_chdir(prefix);
+	else
+	{
+		_getcwd(workdir, 100);
+		prefix = workdir;
+	}
+#else
+	if( *prefix )
+		chdir(prefix);
+	else
+	{
+		getcwd(workdir, 100);
+		prefix = workdir;
+	}
+#endif
+
+	printf("sort_dic...\n");
+	sort_dic();
+
+	printf("maketree...\n");
+	maketree();
+
+	printf("sort_word...\n");
+	sort_word();
+
+	printf("convert dat files to binary format...\n");
 
 #ifndef WIN32
 	sprintf( filename, "%s/%s", prefix, CHAR_INDEX_FILE );
@@ -67,7 +107,6 @@ int main(int argc, char* argv[])
 		fclose( fo );
 	}
 	fclose( fi );
-
 
 #ifndef WIN32
 	sprintf( filename, "%s/%s", prefix, PH_INDEX_FILE );
