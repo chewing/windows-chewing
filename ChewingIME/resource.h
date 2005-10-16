@@ -37,7 +37,9 @@
 #define IDC_SHIFT_CAPITAL               1015
 #define IDC_SPACESEL                    1016
 #define IDC_FIX_COMPWND                 1017
-#define IDC_FIXCOMPWND                  1017
+#define IDC_ADD_PHRASE_FORWARD          1018
+#define IDC_FIX_COMPWND2                1019
+#define IDC_HIDE_STATUSWND              1019
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_BUGREPORT                    40003

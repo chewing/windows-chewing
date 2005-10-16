@@ -11,6 +11,7 @@
 #include "XPToolbar.h"
 
 #include <windows.h>
+#include <multimon.h>
 
 IMEUI::IMEUI(HWND hUIWnd) : hwnd(hUIWnd)
 {
@@ -32,16 +33,19 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 		openStatusWnd(hIMC);
 		break;
 	case IMN_OPENCANDIDATE:
+//		tooltip.showTip(100, 100, "IMN_OPENCANDIDATE");
 		openCandWnd();
 		break;
 	case IMN_CHANGECANDIDATE:
+//		tooltip.showTip(100, 100, "IMN_CHANGECANDIDATE");
 		updateCandWnd();
 		break;
 	case IMN_CLOSECANDIDATE:
+//		tooltip.showTip(100, 100, "IMN_CLOSECANDIDATE");
 		closeCandWnd();
 		break;
 	case IMN_SETCANDIDATEPOS:
-		setCandWndPos(hIMC);
+//		setCandWndPos(hIMC);
 		break;
 	case IMN_SETCONVERSIONMODE:
 		statusWnd.updateIcons(hIMC);
@@ -63,9 +67,32 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 	// the Input Context is updated. When the UI window receives this message, 
 	// the cfCompForm of the Input Context can be referenced to obtain the new 
 	// conversion mode.
-
+			POINT pt = getCompWndPos( IMCLock(hIMC) );
+			if( !compWnd.isWindow() )
+				compWnd.create(hwnd);
+			compWnd.move(pt.x, pt.y);
 		}
 		break;
+	case IMN_PRIVATE:
+		{
+			switch( lp )
+			{
+			case 0:
+				{
+					IMCLock imc(hIMC);
+					CompStr* cs = imc.getCompStr();
+					LPCTSTR msg = cs->getShowMsg();
+					if( *msg )
+					{
+						POINT pt = getCompWndPos(imc);
+						tooltip.showTip(pt.x, pt.y + 22, msg, 1500);
+					}
+					else if(tooltip.isVisible())
+						tooltip.hideTip();
+					break;
+				}
+			}
+		}
 	case IMN_GUIDELINE:
 	// The IMN_GUIDELINE message is sent when an IME is about to show an error or 
 	// information. When the application or UI window receives this message, either 
@@ -104,16 +131,12 @@ BOOL IMEUI::registerUIClasses()
 	wc.lpszClassName	= g_pcmanIMEClass;
 	wc.hbrBackground	= NULL;
 	wc.hIconSm			= NULL;
-	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
+	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) 
+		|| !CompWnd::registerClass()
+		|| !CandWnd::registerClass()
+		|| !StatusWnd::registerClass()
+		|| !Tooltip::registerClass() )
 		return FALSE;
-	if( !CompWnd::registerClass() )
-		return FALSE;
-	if( !CandWnd::registerClass() )
-		return FALSE;
-	if( !StatusWnd::registerClass() )
-		return FALSE;
-//	if( !XPToolbar::registerClass() )
-//		return FALSE;
 	return TRUE;
 }
 
@@ -127,7 +150,16 @@ LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 		onIMENotify( hIMC,wp, lp );
 		break;
 	case WM_IME_STARTCOMPOSITION:
-		break;
+		{
+			IMCLock imc( hIMC );
+			if( !imc.getIC() )
+				break;
+			POINT pt = getCompWndPos( imc );
+			if( !compWnd.isWindow() )
+				compWnd.create(hwnd);
+			compWnd.move(pt.x, pt.y);
+			break;
+		}
 	case WM_IME_COMPOSITION:
 		return onComposition( hIMC, wp, lp );
 	case WM_IME_ENDCOMPOSITION:
@@ -161,6 +193,8 @@ LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 		}
 	case WM_IME_RELOADCONFIG:
 		LoadConfig();
+		if( g_hideStatusWnd && statusWnd.isVisible() )
+			statusWnd.hide();
 		break;
 	case WM_CREATE:
 		{
@@ -194,6 +228,9 @@ void IMEUI::closeStatusWnd(void)
 
 void IMEUI::openStatusWnd(HIMC hIMC)
 {
+	if( g_hideStatusWnd )
+		return;
+
 	if( !statusWnd.isWindow() )
 		statusWnd.create(hwnd);
 
@@ -205,7 +242,7 @@ void IMEUI::openStatusWnd(HIMC hIMC)
 		if( ic->ptStatusWndPos.x == -1 && ic->ptStatusWndPos.y == -1 )
 		{
 			RECT rc;
-			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+			IMEUI::getWorkingArea( &rc, ic->hWnd );
 			int w, h;
 			statusWnd.getSize(&w, &h);
 			ic->ptStatusWndPos.x = rc.right - w;
@@ -229,6 +266,9 @@ void IMEUI::openCandWnd(void)
 
 void IMEUI::updateCandWnd(void)
 {
+	if( !candWnd.isWindow() )
+		candWnd.create(hwnd);
+
 	candWnd.refresh();
 //	candWnd.updateSize();
 	candWnd.show();
@@ -239,44 +279,13 @@ void IMEUI::closeCandWnd(void)
 	candWnd.destroy();
 }
 
-void IMEUI::setCandWndPos(HIMC hIMC)
+bool IMEUI::getWorkingArea(RECT* rc, HWND app_wnd)
 {
-	IMCLock imc(hIMC);
-
-	INPUTCONTEXT* ic = imc.getIC();
-	if( ic )
-		return;
-	POINT pt = ic->cfCandForm[0].ptCurrentPos;
-	switch( ic->cfCandForm[0].dwStyle )
-	{
-	case CFS_CANDIDATEPOS :
-//		pt = ic->cfCandForm[0].ptCurrentPos;
-		break;
-	case CFS_DEFAULT:
-		break;
-	case CFS_EXCLUDE:
-		{
-			RECT &rc = ic->cfCandForm[0].rcArea;
-			if( pt.x >= rc.left && pt.x <= rc.right )
-				pt.x = rc.right;
-
-			if( pt.y >= rc.top && pt.y <= rc.bottom )
-				pt.x = rc.bottom;
-			break;
-		}
-	}
-	ClientToScreen(ic->hWnd, &pt);
-}
-
-bool IMEUI::getWorkingArea(RECT* rc)
-{
-	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)rc, 0 );
-
-// Prepared to support mutiple monitor in the future.
-/*	MONITORINFO mi;
+	HMONITOR mon = MonitorFromWindow( app_wnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO mi;
 	mi.cbSize = sizeof(mi);
-	GetMonitorInfo(, &mi);
-*/
+	if( GetMonitorInfo(mon, &mi) )
+		*rc = mi.rcWork;
 	return true;
 }
 
@@ -286,6 +295,7 @@ void IMEUI::unregisterUIClasses()
 	UnregisterClass(g_candWndClass, g_dllInst);
 	UnregisterClass(g_compWndClass, g_dllInst);
 	UnregisterClass(g_statusWndClass, g_dllInst);
+	Tooltip::unregisterClass();
 //	XPToolbar::unregisterClass();
 }
 
@@ -303,33 +313,11 @@ LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
 	if( lp & GCS_COMPSTR )
 	{
 		compWnd.refresh();
-
-		if( g_fixCompWnd )
-		{
-			RECT rc;
-			GetWindowRect( compWnd.getHwnd(), &rc );
-			compWnd.move( rc.left, rc.top );
-		}
-		else
-		{
-			POINT pt = imc.getIC()->cfCompForm.ptCurrentPos;
-			bool absolute = false;
-			if( g_fixCompWnd || 0 == imc.getIC()->cfCompForm.dwStyle )
-			{
-				RECT rc;
-				if( g_fixCompWnd || !GetCaretPos( &pt ) )
-				{
-					SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
-					pt.x = rc.left + 10;
-					pt.y = rc.bottom -= 50;
-					absolute = true;
-				}
-			}
-			imc.getIC()->cfCompForm.ptCurrentPos = pt;
-			if( !absolute )
-				ClientToScreen( imc.getIC()->hWnd, &pt );
-			compWnd.move( pt.x, pt.y );
-		}
+//		POINT pt = getCompWndPos(imc);
+//		compWnd.move( pt.x, pt.y );
+		int w, h;
+		compWnd.getSize(&w, &h);
+		SetWindowPos( compWnd.getHwnd(), NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE );
 
 		if( ! cs->isEmpty() )
 		{
@@ -345,3 +333,77 @@ LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
 			compWnd.refresh();
 	return LRESULT(0);
 }
+
+POINT IMEUI::getCompWndPos(IMCLock& imc)
+{
+	POINT pt;
+	if( g_fixCompWnd )
+	{
+		RECT rc;
+		GetWindowRect( compWnd.getHwnd(), &rc );
+		pt.x = rc.left;
+		pt.y = rc.top;
+	}
+	else
+	{
+		pt = imc.getIC()->cfCompForm.ptCurrentPos;
+		bool absolute = false;
+		if( g_fixCompWnd || 0 == imc.getIC()->cfCompForm.dwStyle )
+		{
+			RECT rc;
+			if( g_fixCompWnd || !GetCaretPos( &pt ) )
+			{
+				getWorkingArea( &rc, imc.getIC()->hWnd );
+				pt.x = rc.left + 10;
+				pt.y = rc.bottom -= 50;
+				absolute = true;
+			}
+		}
+		imc.getIC()->cfCompForm.ptCurrentPos = pt;
+		if( !absolute )
+			ClientToScreen( imc.getIC()->hWnd, &pt );
+	}
+	return pt;
+}
+
+/*
+void IMEUI::setCompWndPos(IMCLock& imc)
+{
+	INPUTCONTEXT* ic = imc.getIC();
+	if( !ic )
+		return;
+	POINT pt;
+	if( ic->cfCompForm.dwStyle & CFS_FORCE_POSITION )
+	{
+		pt = ic->cfCompForm.ptCurrentPos;
+		ClientToScreen( ic->hWnd, &pt );
+	}
+	else
+	{
+		switch( ic->cfCompForm.dwStyle )
+		{
+		case CFS_POINT:
+		case CFS_RECT :
+			pt = ic->cfCompForm.ptCurrentPos;
+			ClientToScreen( ic->hWnd, &pt );
+			break;
+		case CFS_DEFAULT:
+		default:
+			if( GetCaretPos(&pt) )
+				ClientToScreen( ic->hWnd, &pt );
+			else
+			{
+				RECT rc;
+				getWorkingArea(&rc, ic->hWnd);
+				pt.x = rc.left + 20;
+				pt.y = rc.bottom - 80;
+			}
+			break;
+		}
+	}
+	if( !compWnd.isWindow() )
+		compWnd.create(hwnd);
+	compWnd.move(pt.x, pt.y);
+}
+*/
+

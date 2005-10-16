@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32\include;..\ChewingServer"
-				PreprocessorDefinitions="NOIME;WIN32;_WINDOWS"
+				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -79,7 +79,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32\include;..\ChewingServer"
-				PreprocessorDefinitions="NOIME;WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
@@ -96,6 +96,9 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Release"
 				ModuleDefinitionFile="ChewingIME.def"
 				GenerateDebugInformation="TRUE"
+				GenerateMapFile="TRUE"
+				MapExports="TRUE"
+				MapLines="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -173,6 +176,9 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				RelativePath=".\StatusWnd.cpp">
 			</File>
 			<File
+				RelativePath=".\Tooltip.cpp">
+			</File>
+			<File
 				RelativePath=".\Window.cpp">
 			</File>
 			<File
@@ -227,6 +233,9 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			</File>
 			<File
 				RelativePath=".\StatusWnd.h">
+			</File>
+			<File
+				RelativePath=".\Tooltip.h">
 			</File>
 			<File
 				RelativePath=".\Window.h">

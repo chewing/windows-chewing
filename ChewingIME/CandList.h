@@ -13,14 +13,14 @@ public:
 	int getTotalCount(){ return cl.dwCount; }
 	void setPageSize(int s){ cl.dwPageSize = s; }
 	int getPageSize(){ return cl.dwPageSize; }
-	void setPageStart(int i){ cl.dwPageStart = i; }
+	void setPageStart(int i){ cl.dwPageStart = i;}
 	int getPageStart(){ return cl.dwPageStart; }
 	void setCand(int i, LPCTSTR cand);
 	LPCTSTR getCand(int i){ return candStr[i]; }
 protected:
     CANDIDATEINFO  ci;
     CANDIDATELIST  cl;
-    DWORD offset[240];
+    DWORD offset[240-1];
 #ifdef	UNICODE
     TCHAR candStr[240][8];
 #else

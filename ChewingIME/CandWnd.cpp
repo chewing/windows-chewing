@@ -253,6 +253,10 @@ bool CandWnd::create(HWND imeUIWnd)
 
 void CandWnd::show(void)
 {
+	static int time = 0;
+	time++;
+	if(time == 1)
+		time = 2;
 	HIMC hIMC = getIMC();
 	IMCLock imc(hIMC);
 	if( !hIMC )
@@ -276,20 +280,31 @@ void CandWnd::show(void)
 	case CFS_EXCLUDE:
 		{
 			RECT &rc = imc.getIC()->cfCandForm[0].rcArea;
-
-			RECT crc;
+			RECT crc, intersect_rc;
 			GetWindowRect(hwnd, &crc);
 			int w = crc.right - crc.left;
 			int h = crc.bottom - crc.top;
+			crc.left = pt.x;	crc.top = pt.y;
+			crc.right = crc.left + w;
+			crc.bottom = crc.top + h;
+//			InflateRect( &crc, 1, 1 );
 
 			RECT wrc;
-			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&wrc, 0 );
-			if( pt.y >= rc.top && pt.y <= rc.bottom )
+			IMEUI::getWorkingArea(&wrc, imc.getIC()->hWnd);
+			MapWindowPoints( HWND_DESKTOP, imc.getIC()->hWnd, (LPPOINT)&wrc, 2 );
+
+			if( IntersectRect( &intersect_rc, &rc, &crc ) )
 			{
-				if( (rc.bottom + h + 1) < wrc.bottom )
-					pt.y = rc.bottom + 1;
-				else if( (rc.top - 1) > h )
-					pt.y = rc.top - h -1;
+				if( imc.isVerticalComp() )
+				{
+					if( (pt.x = rc.left - w) < wrc.left )
+						pt.x = rc.right;
+				}
+				else
+				{
+					if( (pt.y = rc.bottom) > wrc.bottom )
+						pt.y = rc.top - h;
+				}
 			}
 			break;
 		}
@@ -306,7 +321,10 @@ void CandWnd::show(void)
 				ClientToScreen(ui->compWnd.getHwnd(), &pt);
 			}
 			else
+			{
+				pt = ui->getCompWndPos(imc);
 				ui->compWnd.getCandPos(imc, &pt);
+			}
 		}
 	}
 

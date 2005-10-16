@@ -2,9 +2,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "XPToolbar.h"
+#include ".\xptoolbar.h"
 #include <tchar.h>
 #include "DrawUtil.h"
+#include "Tooltip.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -15,13 +16,12 @@ static LPCTSTR xpToolbarClass = _T("XPToolbar");
 XPToolbar::XPToolbar(int gripperw, int btnw, int btnh)
 	: themeBmp(NULL), gripperW(gripperw), btnW(btnw), btnH(btnh), 
 	  prevHilightBtn(-1), curPressedBtn(-1), cmdTarget(NULL)
+	  , tooltip(NULL)
 {
 }
 
 XPToolbar::~XPToolbar()
 {
-	if(hwnd)
-		DestroyWindow(hwnd);
 }
 
 //	NOT USED IN CHEWING IME
@@ -50,13 +50,7 @@ BOOL XPToolbar::registerClass()
 LRESULT CALLBACK XPToolbar::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	XPToolbar* pthis = NULL;
-	if( sizeof(void*) > sizeof(LONG) )	// 64 bit environment
-	{
-		((LONG*)pthis)[0] = GetWindowLong( hwnd, 0 );
-		((LONG*)pthis)[1] = GetWindowLong( hwnd, sizeof(LONG) );
-	}
-	else	// 32 bit environment
-		pthis = (XPToolbar*)GetWindowLong( hwnd, GWL_USERDATA );
+	pthis = (XPToolbar*)GetWindowLongPtr( hwnd, GWL_USERDATA );
 	if( pthis )
 		return pthis->wndProc(msg, wp, lp);
 	return DefWindowProc(hwnd, msg, wp, lp );
@@ -113,14 +107,7 @@ bool XPToolbar::create(HWND parent, UINT id, LONG style, int x, int y, int w, in
 {
 	hwnd = CreateWindowEx( 0, xpToolbarClass, NULL, WS_CHILD|WS_VISIBLE, x, y, w, h, 
 		parent, NULL, HINSTANCE(GetModuleHandle(NULL)), NULL);
-	if( sizeof(void*) > sizeof(LONG) )	// 64 bit environment
-	{
-		void* pthis = (void*)this;
-		SetWindowLong( hwnd, 0, ((LONG*)&pthis)[0] );
-		SetWindowLong( hwnd, sizeof(LONG), ((LONG*)&pthis)[1] );
-	}
-	else	// 32 bit environment
-		SetWindowLong( hwnd, GWL_USERDATA, LONG(this));
+	SetWindowLongPtr( hwnd, GWL_USERDATA, LONG_PTR(this));
 	return !!hwnd;
 }
 
@@ -178,6 +165,8 @@ bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 			buttons[prevHilightBtn].state = 0;
 			drawBtn( dc, prevHilightBtn );
 			ReleaseDC(hwnd, dc);
+			if( tooltip )
+				tooltip->hideTip();
 		}
 		prevHilightBtn = -1;
 
@@ -209,6 +198,16 @@ bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 			drawBtn( dc, prevHilightBtn );
 		}
 	}
+
+	if(tooltip && !buttons[idx].tooltip.empty() )
+	{
+		RECT rc;
+		getBtnRect( idx, rc );
+		POINT pt;	pt.x = rc.left;	pt.y = rc.bottom;
+		ClientToScreen( hwnd, &pt );
+		tooltip->showTip( pt.x, pt.y, buttons[idx].tooltip.c_str(), 6000 );
+	}
+
 	drawBtn( dc, idx );
 	prevHilightBtn = idx;
 	ReleaseDC(hwnd, dc);
@@ -246,9 +245,9 @@ void XPToolbar::drawBtn(HDC dc, int idx)
 				, 16, 16, 0, NULL, DI_NORMAL );
 }
 
-int XPToolbar::addBtn(UINT id, int iImage)
+int XPToolbar::addBtn(UINT id, int iImage, LPCTSTR tooltip)
 {
-	buttons.push_back( XPToolbarBtn(id, iImage, 0) );
+	buttons.push_back( XPToolbarBtn(id, iImage, tooltip, 0) );
 	return buttons.size();
 }
 
@@ -292,5 +291,26 @@ void XPToolbar::onCaptureChanged( LPARAM lp )
 		buttons[prevHilightBtn].state = 0;
 		drawBtn( dc, prevHilightBtn );
 		ReleaseDC(hwnd, dc);
+		if( tooltip )
+			tooltip->hideTip();
 	}
+}
+
+void XPToolbar::setTooltip(Tooltip* tip)
+{
+	tooltip = tip;
+}
+
+bool XPToolbar::getBtnRect(int idx, RECT& rc)
+{
+	if( idx >= buttons.size() )
+		return false;
+	GetClientRect( hwnd, &rc );
+	int ymargin = (rc.bottom - 21)/2;
+
+	rc.left = gripperW + btnW * idx;
+	rc.right = rc.left + btnW;
+	rc.top = ymargin;
+	rc.bottom = rc.top + btnH;
+	return true;
 }

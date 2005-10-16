@@ -1,6 +1,7 @@
-#include "IMEChildWnd.h"
-#include "ChewingIME.h"
 #include ".\IMEChildWnd.h"
+#include "ChewingIME.h"
+#include "IMCLock.h"
+#include "IMEUI.h"
 
 IMEChildWnd::IMEChildWnd()
 {
@@ -75,7 +76,13 @@ void IMEChildWnd::move(int x, int y)
 	getSize(&w, &h);
 
 	RECT rc;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+	HIMC hIMC = getIMC();
+	if( hIMC )
+	{
+		IMCLock imc(hIMC);
+		if( imc.getIC() )
+			IMEUI::getWorkingArea( &rc, imc.getIC()->hWnd );
+	}
 	if( x < rc.left )
 		x = rc.left;
 	else if( (x + w) > rc.right )

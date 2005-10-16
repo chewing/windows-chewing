@@ -73,3 +73,8 @@ bool IMCLock::isFullShape(void)
 	return false;
 }
 
+
+bool IMCLock::isVerticalComp(void)
+{
+	return ( getIC() && ((LOGFONT&)ic->lfFont).lfEscapement == 2700 );
+}

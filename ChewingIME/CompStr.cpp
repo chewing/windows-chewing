@@ -4,6 +4,8 @@
 CompStr::CompStr(void)
 {
 	cs.dwSize = sizeof(CompStr);
+	cs.dwDeltaStart = 0;
+	cs.dwCursorPos = 0;
 
 	cs.dwCompStrOffset = DWORD( &compStr[0] - (TCHAR*)this);
 	cs.dwCompStrLen = 0;
@@ -25,7 +27,21 @@ CompStr::CompStr(void)
 	cs.dwCompReadAttrLen = 0;
 	memset( readAttr, 0, sizeof(readAttr) );
 
-	cs.dwDeltaStart = 0;
+	cs.dwCompClauseOffset = DWORD( &compClause[0] - (TCHAR*)this);
+	cs.dwCompClauseLen = 0;
+	memset( compClause, 0, sizeof(compClause) );
+
+	cs.dwCompReadClauseOffset = DWORD( &readClause[0] - (TCHAR*)this);
+	cs.dwCompReadClauseLen = 0;
+	memset( readClause, 0, sizeof(readClause) );
+
+	cs.dwResultClauseOffset = DWORD( &resultClause[0] - (TCHAR*)this);
+	cs.dwResultClauseLen = 0;
+	memset( resultClause, 0, sizeof(resultClause) );
+
+	cs.dwPrivateOffset = DWORD( &showMsg[0] - (TCHAR*)this);
+	cs.dwPrivateSize = sizeof(showMsg);
+	memset( showMsg, 0, sizeof(showMsg) );
 }
 
 CompStr::~CompStr(void)
@@ -38,6 +54,11 @@ void CompStr::setCompStr(LPCTSTR compstr)
 	cs.dwCompStrLen = _tcslen( compStr );
 	cs.dwCompAttrLen = cs.dwCompStrLen;
 	memset( (char*)compAttr, ATTR_CONVERTED, cs.dwCompAttrLen );
+}
+
+void CompStr::setShowMsg(LPCTSTR showmsg)
+{
+	_tcscpy( showMsg, showmsg );
 }
 
 void CompStr::setResultStr(LPCTSTR resultstr)

@@ -91,9 +91,16 @@ bool StatusWnd::create(HWND imeUIWnd)
 	iconHalf = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_HALF), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
 	iconConfig = (HICON)LoadImage( g_dllInst, LPCTSTR (IDI_CONFIG), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR  );
 
-	addBtn( ID_CHI_ENG, imc.isChinese() ? iconChi : iconEng );
-	addBtn( ID_FULL_HALF, imc.isFullShape() ? iconFull : iconHalf );
-	addBtn( ID_MENU, iconConfig );
+	TCHAR tip[128];
+	LoadString(g_dllInst, ID_CHI_ENG, tip, sizeof(tip) );
+	addBtn( ID_CHI_ENG, imc.isChinese() ? iconChi : iconEng, tip );
+	LoadString(g_dllInst, ID_FULL_HALF, tip, sizeof(tip) );
+	addBtn( ID_FULL_HALF, imc.isFullShape() ? iconFull : iconHalf, tip );
+	LoadString(g_dllInst, ID_MENU, tip, sizeof(tip) );
+	addBtn( ID_MENU, iconConfig, tip );
+
+	IMEUILock ui(GetParent(hwnd));
+	setTooltip( &ui.getIMEUI()->tooltip );
 	setCmdTarget(hwnd);
 
 	int w, h;

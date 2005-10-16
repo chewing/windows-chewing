@@ -29,6 +29,8 @@ DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 DWORD g_defaultEnglish = false;
 DWORD g_spaceAsSelection = true;
+DWORD g_addPhraseForward = true;
+DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
 
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
@@ -57,7 +59,9 @@ void LoadConfig()
 		RegQueryValueEx( hk, "CandPerRow", 0, &type, (LPBYTE)&g_candPerRow, &size );
 		RegQueryValueEx( hk, "DefaultEnglish", 0, &type, (LPBYTE)&g_defaultEnglish, &size );
 		RegQueryValueEx( hk, "SpaceAsSelection", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
+		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
+		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
 		RegCloseKey( hk );
 	}
 }
@@ -73,7 +77,9 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("CandPerRow"), 0, REG_DWORD, (LPBYTE)&g_candPerRow, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("DefaultEnglish"), 0, REG_DWORD, (LPBYTE)&g_defaultEnglish, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SpaceAsSelection"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -90,6 +96,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckRadioButton( hwnd, IDC_KB1, IDC_KB9, IDC_KB1 + g_keyboardLayout );
 			CheckDlgButton( hwnd, IDC_DEFAULT_ENG, g_defaultEnglish );
 			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
+			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
+			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
@@ -115,6 +123,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				}
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
 				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
+				g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
+				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
 				EndDialog(hwnd, IDOK);
 			}
@@ -162,7 +172,7 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lpszOptions)
 {
 	_tcscpy( lpszUIClass, _T(g_pcmanIMEClass) );
-	lpIMEInfo->fdwConversionCaps = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_CHINESE;
+	lpIMEInfo->fdwConversionCaps = IME_CMODE_NOCONVERSION | IME_CMODE_FULLSHAPE | IME_CMODE_CHINESE;
 	lpIMEInfo->fdwSentenceCaps = IME_SMODE_NONE;
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
 	lpIMEInfo->fdwSCSCaps = 0;
@@ -194,12 +204,12 @@ static BOOL CALLBACK ReloadAllChewingInst(HWND hwnd, LPARAM lp)
 
 void ConfigureChewingIME(HWND parent)
 {
-	TCHAR title[32];
-	LoadString( g_dllInst, IDS_CONFIGTIELE, title, sizeof(title) );
-	HWND dlg;
-	if( dlg = FindWindow( NULL, title) )
-		SetForegroundWindow( dlg );
-	else
+//	TCHAR title[32];
+//	LoadString( g_dllInst, IDS_CONFIGTIELE, title, sizeof(title) );
+//	HWND dlg;
+//	if( dlg = FindWindow( NULL, title) )
+//		SetForegroundWindow( dlg );
+//	else
 	{
 		if( IDOK == DialogBox( g_dllInst, LPCTSTR(IDD_CONFIG), parent, (DLGPROC)ConfigDlgProc ) )
 		{
@@ -282,10 +292,10 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		return FALSE;
 	IMCLock imc(hIMC);
 	INPUTCONTEXT* ic = imc.getIC();
-	if( !ic )
+	if( !ic || !ic->fOpen )
 		return FALSE;
 
-	if( GetKeyInfo(lParam).isKeyUp )	// Key up
+	if( GetKeyInfo(lParam).isKeyUp || !IsKeyDown(lpbKeyState[uVirKey]) )	// Key up
 	{
 		if( g_shiftPressedTime > 0 )
 		{
@@ -302,10 +312,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( uVirKey == VK_SHIFT  )
 	{
 		if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
-		{
 			g_shiftPressedTime = GetTickCount();
-			return TRUE;
-		}
 	}
 	else if( g_shiftPressedTime > 0 )
 		g_shiftPressedTime = -1;
@@ -345,15 +352,14 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 			}
 		}
 		if( 0 == old_total_count )
-			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_OPENCANDIDATE, 0 );
-		else
-			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CHANGECANDIDATE, 0 );
+			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_OPENCANDIDATE, 1 );
+		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CHANGECANDIDATE, 1 );
 
 		return TRUE;
 	}
 	else if( candList->getTotalCount() > 0 )
 	{
-		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 0 );
+		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 1 );
 		candList->setTotalCount(0);
 	}
 
@@ -363,19 +369,29 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	if( g_chewing->CommitReady() )
 	{
+		static time = 0;
+		time++;
+		if(time >= 2)
+		{
+			time = 2;
+		}
 		char* cstr = g_chewing->CommitStr();
 		if( cstr )
 		{
+//			commit_str = cstr;
 			cs->setResultStr(cstr);
 			free(cstr);
 		}
 		else
 			cs->setResultStr("");
-		cs->setCompStr("");
+		if( g_chewing->BufferLen() > 0 )
+			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, WM_IME_COMPOSITIONFULL );
 		cs->setZuin("");
-		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTSTR );
+		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTCLAUSE|GCS_RESULTSTR );
 		cs->setResultStr("");
 	}
+	else
+		cs->setResultStr("");
 
 	if( g_chewing->BufferLen() )
 	{
@@ -383,6 +399,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		if(chibuf)
 		{
 			cs->setCompStr(chibuf);
+//			comp_str = chibuf;
 			free(chibuf);
 		}
 	}
@@ -401,6 +418,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( zuin )
 	{
 		cs->setZuin(zuin);
+//		zuin_str = zuin;
 		free(zuin);
 	}
 	else
@@ -460,7 +478,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 		if( ! (ic->fdwInit & INIT_STATUSWNDPOS) )
 		{
 			RECT rc;
-			SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+			IMEUI::getWorkingArea( &rc, ic->hWnd );
 			ic->ptStatusWndPos.x = rc.right - (9+20*3+4) - 150;
 			ic->ptStatusWndPos.y = rc.bottom - 26;
 			ic->fdwInit |= INIT_STATUSWNDPOS;
@@ -717,6 +735,36 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	g_chewing->SetFullShape(isFullShape);
 	g_chewing->SetSpaceAsSelection( !!g_spaceAsSelection );
 	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
+	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
+
+	if( g_chewing->Candidate() > 0 )
+	{
+		switch( key )
+		{
+		case VK_NEXT:
+			key = VK_RIGHT;
+			break;
+		case VK_PRIOR:
+			key = VK_LEFT;
+		}
+	}
+	else if( imc.isVerticalComp() && ! g_fixCompWnd )
+	{
+		//Vertical composition mode
+		switch( key )
+		{
+		case VK_LEFT:
+		case VK_RIGHT:
+			key = VK_DOWN;
+			break;
+		case VK_UP:
+			key = VK_LEFT;
+			break;
+		case VK_DOWN:
+			key = VK_RIGHT;
+			break;
+		}
+	}
 
 	switch( key )
 	{
@@ -772,7 +820,20 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			if( IsKeyDown( keystate[VK_CONTROL] ) )
 			{
 				if(  key >= '0' && key <= '9' )
+				{
 					g_chewing->CtrlNum( key );
+					CompStr* cs = imc.getCompStr();
+					if( g_chewing->ShowMsgLen() > 0 )
+					{
+						char* msg = g_chewing->ShowMsg();
+						if( msg )
+						{
+							cs->setShowMsg(msg);
+							free(msg);
+							GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );
+						}
+					}
+				}
 				else
 					return FALSE;
 			}
@@ -781,7 +842,23 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				char ascii[2];
 				int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
 				if( ret )
+				{
+					// Ugly hack to enable numpad even in Chinese mode
+					if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
+					{
+						bool tempEng = g_chewing->ChineseMode();
+						if( tempEng )
+							g_chewing->Capslock();
+						bool full_shape = g_chewing->GetFullShape();
+						g_chewing->SetFullShape(false);
+						g_chewing->Key( ascii[0] );
+						g_chewing->SetFullShape(full_shape);
+						if( tempEng )
+							g_chewing->Capslock();
+						return TRUE;
+					}
 					key = ascii[0];
+				}
 				else
 					return FALSE;
 

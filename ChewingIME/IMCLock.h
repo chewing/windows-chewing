@@ -25,4 +25,5 @@ public:
 	void unlock(void);
 	bool isChinese(void);
 	bool isFullShape(void);
+	bool isVerticalComp(void);
 };

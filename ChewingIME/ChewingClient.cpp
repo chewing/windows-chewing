@@ -218,3 +218,19 @@ void ChewingClient::ConnectServer(void)
 	SetSpaceAsSelection(spaceAsSelection);
 	SetKeyboardLayout(keyLayout);
 }
+
+int ChewingClient::ShowMsgLen(void)
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdShowMsgLen, 0, chewingID);	}
+
+char* ChewingClient::ShowMsg(void)
+{
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdShowMsg, 0, chewingID);
+	return GetStringFromSharedMem(len);
+}
+
+void ChewingClient::SetAddPhraseForward(bool add_forward)
+{	SendMessage( serverWnd, ChewingServer::cmdSetAddPhraseForward, add_forward, chewingID);	}
+
+int ChewingClient::GetAddPhraseForward(void)
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdGetAddPhraseForward, 0, chewingID);	}
+

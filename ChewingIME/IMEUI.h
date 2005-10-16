@@ -5,6 +5,7 @@
 #include "CompWnd.h"
 #include "CandWnd.h"
 #include "StatusWnd.h"
+#include "Tooltip.h"
 
 class IMEUI
 {
@@ -15,6 +16,7 @@ public:
 	CompWnd compWnd;
 	CandWnd candWnd;
 	StatusWnd statusWnd;
+	Tooltip tooltip;
 	HWND hwnd;
 	POINT fixedCompWndPos;
 
@@ -29,9 +31,11 @@ protected:
 	void openCandWnd(void);
 	void updateCandWnd(void);
 	void closeCandWnd(void);
-	void setCandWndPos(HIMC hIMC);
+
 public:
 	static void unregisterUIClasses();
-	static bool getWorkingArea(RECT* rc);
+	static bool getWorkingArea(RECT* rc, HWND app_wnd);
 	LRESULT onComposition(HIMC hIMC, WPARAM wp , LPARAM lp);
+	POINT getCompWndPos(IMCLock& imc);
+//	void setCompWndPos(IMCLock& imc);
 };

@@ -211,14 +211,16 @@ int CompWnd::getDisplayedCursorPos(IMCLock& imc)
 
 bool CompWnd::create(HWND imeUIWnd)
 {
-	RECT rc;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0 );
+/*	RECT rc;
+	IMCLock imc( getIMC(imeUIWnd) );
+	if( imc.getIC() )
+		IMEUI::getWorkingArea( &rc, imc.getIC()->hWnd );
 	rc.left += 10;
 	rc.bottom -= 50;
-
+*/
 	hwnd = CreateWindowEx(0, g_compWndClass, NULL,
 					WS_POPUP|WS_CLIPCHILDREN,
-					rc.left, rc.bottom, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
+					/*rc.left, rc.bottom*/ 0, 0, 0, 0, imeUIWnd, NULL, g_dllInst, NULL);
 	return !!hwnd;
 }
 

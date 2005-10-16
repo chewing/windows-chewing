@@ -15,7 +15,8 @@ Window::Window()
 
 Window::~Window()
 {
-
+	if(hwnd)
+		DestroyWindow(hwnd);
 }
 
 void Window::destroy(void)

@@ -85,6 +85,11 @@ public:
 protected:
 	bool spaceAsSelection;
 	int keyLayout;
+public:
+	int ShowMsgLen(void);
+	char* ShowMsg(void);
+	void SetAddPhraseForward(bool add_forward);
+	int GetAddPhraseForward(void);
 };
 
 #endif // !defined(AFX_CHEWINGCLIENT_H__E54E6740_17FB_4E1D_B912_751FF053FFD1__INCLUDED_)
