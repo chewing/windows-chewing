@@ -24,6 +24,10 @@ IMEUI::~IMEUI(void)
 
 LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 {
+    if ( hIMC==NULL )
+    {
+        return  0;
+    }
 	switch(wp)
 	{
 	case IMN_CLOSESTATUSWINDOW:
