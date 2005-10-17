@@ -86,6 +86,9 @@ int ChewingClient::Key(unsigned int code)
 int ChewingClient::CtrlNum(unsigned int code)
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdCtrlNum, code, chewingID);	}
 
+int ChewingClient::NumPad(unsigned int code)
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdNumPad, code, chewingID);	}
+
 int ChewingClient::CtrlOption(unsigned int code)
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdCtrlOption, code, chewingID);	}
 

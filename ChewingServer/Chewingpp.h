@@ -46,6 +46,7 @@ class Chewing
   int Capslock();
   int Key(unsigned int code);
   int CtrlNum(unsigned int code);
+  int NumPad(unsigned int code);
   int CtrlOption(unsigned int code);
   int DoubleTab();
 

@@ -52,6 +52,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	// int (int) or void int
 	(ChewingMemberFuncCI) &Chewing::Key ,
 	(ChewingMemberFuncCI) &Chewing::CtrlNum ,
+	(ChewingMemberFuncCI) &Chewing::NumPad ,
 	(ChewingMemberFuncCI) &Chewing::CtrlOption ,
 	(ChewingMemberFuncCI) (GetSelKeyFunc)&Chewing::SelKey ,
 

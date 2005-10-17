@@ -801,6 +801,27 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
 	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
 
+	if( IsKeyDown( keystate[VK_CONTROL] ) )
+	{
+		if(  key >= '0' && key <= '9' )
+		{
+			g_chewing->CtrlNum( key );
+			CompStr* cs = imc.getCompStr();
+			if( g_chewing->ShowMsgLen() > 0 )
+			{
+				char* msg = g_chewing->ShowMsg();
+				if( msg )
+				{
+					cs->setShowMsg(msg);
+					free(msg);
+					GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );
+				}
+			}
+		}
+		else
+			return FALSE;
+	}
+
 	if( g_chewing->Candidate() > 0 )
 	{
 		switch( key )
@@ -881,67 +902,35 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		break;
 	default:
 		{
-			if( IsKeyDown( keystate[VK_CONTROL] ) )
+			char ascii[2];
+			int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
+			if( ret )
 			{
-				if(  key >= '0' && key <= '9' )
+				if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
 				{
-					g_chewing->CtrlNum( key );
-					CompStr* cs = imc.getCompStr();
-					if( g_chewing->ShowMsgLen() > 0 )
-					{
-						char* msg = g_chewing->ShowMsg();
-						if( msg )
-						{
-							cs->setShowMsg(msg);
-							free(msg);
-							GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );
-						}
-					}
+					g_chewing->NumPad( ascii[0] );
+					return TRUE;
 				}
-				else
-					return FALSE;
+				key = ascii[0];
 			}
 			else
+				return FALSE;
+
+			if( isChinese )
 			{
-				char ascii[2];
-				int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
-				if( ret )
+				if( IsKeyToggled( keystate[VK_CAPITAL] ) )
 				{
-					// Ugly hack to enable numpad even in Chinese mode
-					if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
-					{
-						bool tempEng = g_chewing->ChineseMode();
-						if( tempEng )
-							g_chewing->Capslock();
-						bool full_shape = g_chewing->GetFullShape();
-						g_chewing->SetFullShape(false);
-						g_chewing->Key( ascii[0] );
-						g_chewing->SetFullShape(full_shape);
-						if( tempEng )
-							g_chewing->Capslock();
-						return TRUE;
-					}
-					key = ascii[0];
+					if( key >= 'A' && key <= 'Z' )
+						key = tolower(key);
+					else if( key >= 'a' && key <= 'z' )
+						key = toupper( key );
 				}
-				else
-					return FALSE;
-
-				if( isChinese )
-				{
-					if( IsKeyToggled( keystate[VK_CAPITAL] ) )
-					{
-						if( key >= 'A' && key <= 'Z' )
-							key = tolower(key);
-						else if( key >= 'a' && key <= 'z' )
-							key = toupper( key );
-					}
-				}
-
-				if( key == VK_SPACE )
-					g_chewing->Space();
-				else
-					g_chewing->Key( key );
 			}
+
+			if( key == VK_SPACE )
+				g_chewing->Space();
+			else
+				g_chewing->Key( key );
 		}
 	}
 	return ! g_chewing->KeystrokeIgnore();

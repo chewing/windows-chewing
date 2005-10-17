@@ -79,6 +79,7 @@ int Chewing::DoubleTab() { return OnKeyDblTab((void*)cd, co);}
 int Chewing::Esc()   { return OnKeyEsc((void*)cd,co); }
 int Chewing::CtrlOption(unsigned int code) { return OnKeyCtrlOption((void*)cd,(int)code, co);}
 int Chewing::CtrlNum(unsigned int code)    { return OnKeyCtrlNum((void*)cd, (int)code,co);}
+int Chewing::NumPad(unsigned int code)    { return OnKeyNumlock((void*)cd, (int)code,co);}
 int Chewing::Key(unsigned int code) {
     SetKeyboardLayout(kbLayout);
     return OnKeyDefault((void*)cd,(int)code,co);

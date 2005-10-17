@@ -69,6 +69,7 @@ public:
 		// int (int) or void (int)
 		cmdKey,
 		cmdCtrlNum,
+		cmdNumPad,
 		cmdCtrlOption,
 		cmdGetSelKey,
 
