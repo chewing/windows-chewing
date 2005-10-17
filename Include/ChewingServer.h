@@ -63,6 +63,8 @@ public:
 		cmdTotalChoice,
 		cmdTotalPage,
 		cmdCurrentPage,
+		cmdShowMsgLen,
+		cmdGetAddPhraseForward,
 
 		// int (int) or void (int)
 		cmdKey,
@@ -72,6 +74,7 @@ public:
 
 		cmdSetFullShape,
 		cmdSetSpaceAsSelection,
+		cmdSetAddPhraseForward,
 		cmdSetKeyboardLayout,
 		cmdSetHsuSelectionKeyType,
 
@@ -79,12 +82,13 @@ public:
 		cmdZuinStr,
 		cmdCommitStr,
 		cmdBuffer,
+		cmdShowMsg,
 
 		// char* (int)
 		cmdSelection,
 
-		// void char*
-//		cmdSetSelKey,
+		// void (char*)
+		cmdSetSelKey,
 
 		cmdLast, 
 

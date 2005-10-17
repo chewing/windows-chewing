@@ -354,7 +354,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( !ic || !ic->fOpen )
 		return FALSE;
 
-	if( GetKeyInfo(lParam).isKeyUp || !IsKeyDown(lpbKeyState[uVirKey]) )	// Key up
+	if( GetKeyInfo(lParam).isKeyUp )	// Key up
 	{
 		if( g_enableShift )
 		{

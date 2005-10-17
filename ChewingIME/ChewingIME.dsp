@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "NDEBUG" /D "NOIME" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /D WINVER=0x040A /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\libchewing\branches\win32\include" /I "..\ChewingServer" /D "NDEBUG" /D "NOIME" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /D WINVER=0x040A /D "COMPILE_MULTIMON_STUBS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x404 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "_DEBUG" /D "NOIME" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /D WINVER=0x040A /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\libchewing\branches\win32\include" /I "..\ChewingServer" /D "_DEBUG" /D "NOIME" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CHEWINGIME_EXPORTS" /D WINVER=0x040A /D "COMPILE_MULTIMON_STUBS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x404 /d "_DEBUG"
@@ -184,6 +184,10 @@ SOURCE=.\StatusWnd.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Tooltip.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\libchewing\branches\win32\src\tree.c
 # End Source File
 # Begin Source File
@@ -264,6 +268,10 @@ SOURCE=.\StatusWnd.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Tooltip.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Window.h
 # End Source File
 # Begin Source File
@@ -321,6 +329,10 @@ SOURCE=.\icon2.ico
 # Begin Source File
 
 SOURCE=.\icon3.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\Mainicon.ico
 # End Source File
 # Begin Source File
 
