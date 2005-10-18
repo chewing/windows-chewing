@@ -137,28 +137,41 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 		{
 //			SetPriorityClass( GetCurrentProcess(), NORMAL_PRIORITY_CLASS );
 			Chewing* client = new Chewing();
-			chewingClients.push_back(client);
+			chewingClients[(unsigned int)client] = client;
 			return (LRESULT)client;
 			break;
 		}
 	case cmdRemoveClient:
 		{
-			Chewing* client = (Chewing*)lp;
-			chewingClients.remove( client );
-			delete client;
+			if ( chewingClients.erase((unsigned int)lp)>0 )
+            {   
+                delete (Chewing*) lp;
+            }
 //			if( chewingClients.empty() )
 //				SetPriorityClass( GetCurrentProcess(), IDLE_PRIORITY_CLASS );
 //			PostQuitMessage(0);
 			break;
 		}
-	case WM_CLOSE:
+    case    cmdEcho:
+        {
+            map<unsigned int, Chewing*>::iterator iterT;
+            
+            iterT = chewingClients.find((unsigned int)lp);
+            if ( iterT!=chewingClients.end() )
+            {
+                return  ~((LRESULT)(Chewing*)(iterT->second));
+            }
+        }
+        return  0;
+
+    case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
 		{
-			list<Chewing*>::iterator it = chewingClients.begin();
+			map<unsigned int, Chewing*>::iterator it = chewingClients.begin();
 			for( ; it != chewingClients.end(); ++it )
-				delete *it;
+				delete it->second;
 			chewingClients.clear();
 			PostQuitMessage(0);
 			break;

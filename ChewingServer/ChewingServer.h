@@ -8,9 +8,11 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+#pragma warning(disable : 4786) 
 
 #include <windows.h>
-#include <list>
+//#include <list>
+#include <map>
 #include "chewingpp.h"
 
 using namespace std;
@@ -94,7 +96,8 @@ public:
 		cmdLast, 
 
 		cmdAddClient,
-		cmdRemoveClient
+		cmdRemoveClient,
+        cmdEcho
 	};
 
 public:
@@ -107,7 +110,7 @@ protected:
 	HWND hwnd;
 	LRESULT wndProc( UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	list<Chewing*> chewingClients;
+	map<unsigned int, Chewing*> chewingClients;
 
 	static ChewingMemberFuncCI chewingCmdTable[];
 	HANDLE sharedMem;
