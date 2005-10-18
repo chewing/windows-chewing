@@ -382,6 +382,10 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 			g_shiftPressedTime = -1;
 	}
 
+    //  Is server alive? Or the server could be different one.
+    if ( g_chewing!=NULL )
+        g_chewing->CheckServer();
+
 	// IME Toggle key : Ctrl + Space & Shift + Space
 	if( LOWORD(uVirKey) == VK_SPACE && 
 		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) )

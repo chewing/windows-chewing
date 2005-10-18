@@ -75,11 +75,17 @@ public:
 	void SetFullShape(bool full);
 	bool GetFullShape(void);
 
+    unsigned int  EchoFromServer();
+    bool CheckServer();
+
 protected:
 	char* GetStringFromSharedMem(int len);
 	HANDLE sharedMem;
 	LPARAM chewingID;
 	HWND serverWnd;
+    TCHAR filemapName[MAX_PATH];
+    char *pSelKeys;
+
 public:
 	void SetSpaceAsSelection(bool spaceAsSelection);
 	void ConnectServer(void);

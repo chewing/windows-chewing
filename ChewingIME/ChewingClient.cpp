@@ -18,12 +18,16 @@ ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys
 {
 	ConnectServer();
 	SelKey((char*)selKeys);
+    pSelKeys = (char*)selKeys;
 }
 
 ChewingClient::~ChewingClient()
 {
 	SendMessage( serverWnd, ChewingServer::cmdRemoveClient, 0, chewingID );
-	CloseHandle(sharedMem);
+    if ( sharedMem==INVALID_HANDLE_VALUE )
+    {
+        CloseHandle(sharedMem);
+    }
 }
 
 void ChewingClient::SetKeyboardLayout(int kb)
@@ -101,11 +105,24 @@ char ChewingClient::SelKey(int i)
 
 void ChewingClient::SelKey(char* selkey)
 {
-	char* pbuf = (char*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
+    sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
+    if ( sharedMem==NULL )
+    {
+        sharedMem = INVALID_HANDLE_VALUE; 
+        return;
+    }
+
+    char* pbuf = (char*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
 								0, 0, CHEWINGSERVER_BUF_SIZE );
-	strcpy( pbuf, selkey );
-	UnmapViewOfFile( pbuf );
-	SendMessage( serverWnd, ChewingServer::cmdSetSelKey, 0, chewingID);
+    if ( pbuf!=NULL )
+    {
+	    strcpy( pbuf, selkey );
+	    UnmapViewOfFile( pbuf );
+    }
+	CloseHandle(sharedMem);
+    sharedMem = INVALID_HANDLE_VALUE;
+
+    SendMessage( serverWnd, ChewingServer::cmdSetSelKey, 0, chewingID);
 }
 
 char* ChewingClient::ZuinStr()
@@ -187,12 +204,21 @@ char* ChewingClient::GetStringFromSharedMem(int len)
 	char* str = NULL;
 	if( len > 0 )
 	{
+	    sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
+        if ( sharedMem==NULL )
+        {
+            sharedMem = INVALID_HANDLE_VALUE; 
+            return  "";
+        }
+
 		char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
 		if( buf )
 		{
 			str = strdup(buf);
 			UnmapViewOfFile(buf);
 		}
+    	CloseHandle(sharedMem);
+        sharedMem = INVALID_HANDLE_VALUE;
 	}
 	return str;
 }
@@ -219,9 +245,7 @@ void ChewingClient::ConnectServer(void)
 		serverWnd = FindWindow( chewingServerClassName, NULL );
 	}
 	chewingID = SendMessage( serverWnd, ChewingServer::cmdAddClient, 0, 0 );
-	TCHAR filemapName[100];
 	GetWindowText( serverWnd, filemapName, sizeof(filemapName) );
-	sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
 
 	SetSpaceAsSelection(spaceAsSelection);
 	SetKeyboardLayout(keyLayout);
@@ -242,3 +266,16 @@ void ChewingClient::SetAddPhraseForward(bool add_forward)
 int ChewingClient::GetAddPhraseForward(void)
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdGetAddPhraseForward, 0, chewingID);	}
 
+unsigned int ChewingClient::EchoFromServer()
+{	return (unsigned int)SendMessage( serverWnd, ChewingServer::cmdEcho, 0, chewingID);	}
+
+bool ChewingClient::CheckServer()
+{
+    if ( ChewingClient::EchoFromServer()==(~chewingID) )
+    {
+        return  true;
+    }
+    ConnectServer();
+	SelKey((char*)pSelKeys);
+    return  false;
+}
