@@ -68,6 +68,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_DAT2BIN"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="2"

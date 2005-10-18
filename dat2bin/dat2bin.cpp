@@ -64,18 +64,21 @@ int main(int argc, char* argv[])
 	if ( !fi )
 		return 1;
 
-	strcat(filename, ".bin");
+	strcat(filename, "_bin");
 	FILE* fo = fopen( filename, "wb" );
 
 	if( fo )
 	{
-		for ( i = 0; i <= PHONE_NUM; i++ )
+		for ( i = 0; i <= PHONE_NUM * 2; i++ )
 		{
-			uint16 arrPhone;
-			int begin;
-			fscanf( fi, "%hu %d", &arrPhone, &begin );
-			fwrite( &arrPhone, sizeof(uint16), 1, fo );
-			fwrite( &begin, sizeof(int), 1, fo );
+			static uint16 arrPhone[PHONE_NUM * 2];
+			static int begin[PHONE_NUM * 2];
+			if( fscanf( fi, "%hu %d", &arrPhone[i], &begin[i] ) < 2 )
+			{
+				fwrite( begin, sizeof(int), i, fo );
+				fwrite( arrPhone, sizeof(uint16), i, fo );
+				break;
+			}
 		}
 		fclose( fo );
 	}
@@ -89,13 +92,13 @@ int main(int argc, char* argv[])
 	fi = fopen( filename, "r" );
 	if ( !fi )
 		return 1;
-	strcat(filename, ".bin");
+	strcat(filename, "_bin");
 	fo = fopen( filename, "wb" );
 
 	if( fo )
 	{
 		TreeType tree = {0};
-		for ( i = 0; i < TREE_SIZE; i++ ) {
+		for ( i = 0; i < TREE_SIZE * 2; i++ ) {
 			if ( fscanf( fi, "%hu%d%d%d",
 				&tree.phone_id,
 				&tree.phrase_id,
@@ -116,7 +119,7 @@ int main(int argc, char* argv[])
 	fi = fopen( filename, "r" );
 	if( !fi )
 		return 1;
-	strcat( filename, ".bin" );
+	strcat( filename, "_bin" );
 	fo = fopen( filename, "wb" );
 	if( fo )
 	{
@@ -130,7 +133,6 @@ int main(int argc, char* argv[])
 		fclose(fo);
 	}
 	fclose( fi );
-
 	return 0;
 }
 

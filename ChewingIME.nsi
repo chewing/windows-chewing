@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.1.4"
+!define PRODUCT_VERSION "0.1.5"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -66,11 +66,11 @@ FunctionEnd
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
   SetOverwrite on
-  File "Data\us_freq.dat"
-  File /oname=ph_index.dat "Data\ph_index.dat.bin"
-  File /oname=fonetree.dat "Data\fonetree.dat.bin"
-  File "Data\dict.dat"
-  File /oname=ch_index.dat "Data\ch_index.dat.bin"
+  File "..\libchewing\trunk\data\us_freq.dat"
+  File /oname=ph_index.dat "..\libchewing\trunk\data\ph_index.dat.bin"
+  File /oname=fonetree.dat "..\libchewing\trunk\data\fonetree.dat.bin"
+  File "..\libchewing\trunk\data\dict.dat"
+  File /oname=ch_index.dat "..\libchewing\trunk\data\ch_index.dat.bin"
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "Installer\Release\Installer.exe"
