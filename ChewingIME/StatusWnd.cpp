@@ -284,10 +284,13 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 		break;
 	case ID_WEBSITE:
 	case ID_BUGREPORT:
+	case ID_DICT_BUGREPORT:
 		{
 			LPCTSTR url = _T("http://chewing.csie.net/");
 			if( id == ID_BUGREPORT )
 				url = _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Queue=271");
+			else if( id == ID_DICT_BUGREPORT )
+				url = _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436");
 			ShellExecute( NULL, "open", url, NULL, NULL, SW_SHOWNORMAL );
 			break;
 		}
