@@ -157,21 +157,21 @@ BEGIN
     GROUPBOX        "候選字視窗",IDC_STATIC,104,7,116,60
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 259, 200
+IDD_ABOUT DIALOGEX 0, 0, 259, 215
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "關於新酷音輸入法"
 FONT 9, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,7,85,245,90
+    GROUPBOX        "",IDC_STATIC,7,101,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
-                    IDC_STATIC,17,95,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.1.6\n\n發行日期：2005.10.19\n\n授權方式： GNU General Public License\n\n軟體作者：洪任諭  (以 libchewing 為基礎)",
-                    IDC_STATIC,75,7,162,75
+                    IDC_STATIC,17,111,224,75
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.1.7\n\n發行日期：2005.10.20\n\n授權方式： GNU General Public License\n\n軟體原作者：洪任諭  (以 libchewing 為基礎)\n\n其他協力開發者：seamxr",
+                    IDC_STATIC,75,7,162,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP | 
                     SS_REALSIZEIMAGE,7,7,59,63
     LTEXT           "題字：翁政銓",IDC_STATIC,12,69,49,8
-    PUSHBUTTON      "確定 (&O)",IDOK,104,179,50,14
+    PUSHBUTTON      "確定 (&O)",IDOK,104,194,50,14
 END
 
 
@@ -196,7 +196,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 252
         TOPMARGIN, 7
-        BOTTOMMARGIN, 193
+        BOTTOMMARGIN, 208
     END
 END
 #endif    // APSTUDIO_INVOKED
