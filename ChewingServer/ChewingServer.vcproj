@@ -101,6 +101,7 @@
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -109,11 +110,13 @@
 				OutputFile=".\Release/ChewingServer.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="FALSE"
-				AssemblyDebug="2"
+				GenerateDebugInformation="TRUE"
+				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Release/ChewingServer.pdb"
-				GenerateMapFile="FALSE"
+				GenerateMapFile="TRUE"
 				MapFileName=""
+				MapExports="TRUE"
+				MapLines="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool

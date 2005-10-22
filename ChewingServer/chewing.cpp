@@ -16,7 +16,7 @@ Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
     InitChewing(cd,cf);
 
     config.selectAreaLen = 40;
-    config.maxChiSymbolLen = 16;
+    config.maxChiSymbolLen = 20;
 	config.bSpaceAsSelection = spaceAsSelection;
 
     SetKeyboardLayout(kbLayout);
