@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,1,0
- PRODUCTVERSION 0,0,1,0
+ FILEVERSION 0,0,2,0
+ PRODUCTVERSION 0,0,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 0, 1, 0"
+            VALUE "FileVersion", "0, 0, 2, 0"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 0, 1, 0"
+            VALUE "ProductVersion", "0, 0, 2, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -144,8 +144,7 @@ BEGIN
     CONTROL         "Ctrl + 數字加入前方的詞而非後方",IDC_ADD_PHRASE_FORWARD,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,104,114,116,10
     CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,104,128,116,
-                    10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,128,116,10
     CONTROL         "固定組字視窗位置",IDC_FIX_COMPWND,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,149,71,10
     GROUPBOX        "使用者介面",IDC_STATIC,7,138,89,40
@@ -166,7 +165,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,7,101,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,17,111,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.1.7\n\n發行日期：2005.10.20\n\n授權方式： GNU General Public License\n\n軟體原作者：洪任諭  (以 libchewing 為基礎)\n\n其他協力開發者：seamxr",
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.2.0 Beta\n\n發行日期：2005.10.23\n\n授權方式： GNU General Public License\n\n軟體原作者：洪任諭  (以 libchewing 為基礎)\n\n其他協力開發者：seamxr",
                     IDC_STATIC,75,7,162,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP | 
                     SS_REALSIZEIMAGE,7,7,59,63

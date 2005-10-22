@@ -28,6 +28,7 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
     {
         return  0;
     }
+
 	switch(wp)
 	{
 	case IMN_CLOSESTATUSWINDOW:
@@ -37,15 +38,12 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 		openStatusWnd(hIMC);
 		break;
 	case IMN_OPENCANDIDATE:
-//		tooltip.showTip(100, 100, "IMN_OPENCANDIDATE");
 		openCandWnd();
 		break;
 	case IMN_CHANGECANDIDATE:
-//		tooltip.showTip(100, 100, "IMN_CHANGECANDIDATE");
 		updateCandWnd();
 		break;
 	case IMN_CLOSECANDIDATE:
-//		tooltip.showTip(100, 100, "IMN_CLOSECANDIDATE");
 		closeCandWnd();
 		break;
 	case IMN_SETCANDIDATEPOS:
@@ -147,14 +145,17 @@ BOOL IMEUI::registerUIClasses()
 LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 {
 	HIMC hIMC = (HIMC)GetWindowLong(hwnd, IMMGWL_IMC);
-
 	switch(msg)
 	{
 	case WM_IME_NOTIFY:
+		if( ! hIMC )
+			return 0;
 		onIMENotify( hIMC,wp, lp );
 		break;
 	case WM_IME_STARTCOMPOSITION:
 		{
+			if( ! hIMC )
+				return 0;
 			IMCLock imc( hIMC );
 			if( !imc.getIC() )
 				break;
@@ -165,6 +166,8 @@ LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 			break;
 		}
 	case WM_IME_COMPOSITION:
+		if( ! hIMC )
+			return 0;
 		return onComposition( hIMC, wp, lp );
 	case WM_IME_ENDCOMPOSITION:
 		{
@@ -317,13 +320,13 @@ LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
 	if( lp & GCS_COMPSTR )
 	{
 		compWnd.refresh();
-//		POINT pt = getCompWndPos(imc);
-//		compWnd.move( pt.x, pt.y );
+		POINT pt = getCompWndPos(imc);
+		compWnd.move( pt.x, pt.y );
 		int w, h;
 		compWnd.getSize(&w, &h);
 		SetWindowPos( compWnd.getHwnd(), NULL, 0, 0, w, h, SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE );
 
-		if( ! cs->isEmpty() )
+		if( *cs->getCompStr() )
 		{
 			if( !compWnd.isVisible() )
 				compWnd.show();
@@ -341,7 +344,7 @@ LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
 POINT IMEUI::getCompWndPos(IMCLock& imc)
 {
 	POINT pt;
-	if( g_fixCompWnd )
+	if( g_fixCompWnd && compWnd.isWindow() )
 	{
 		RECT rc;
 		GetWindowRect( compWnd.getHwnd(), &rc );
@@ -364,6 +367,8 @@ POINT IMEUI::getCompWndPos(IMCLock& imc)
 			}
 		}
 		imc.getIC()->cfCompForm.ptCurrentPos = pt;
+		if( ! (imc.getIC()->fdwInit & INIT_COMPFORM) )
+			imc.getIC()->fdwInit |= INIT_COMPFORM;
 		if( !absolute )
 			ClientToScreen( imc.getIC()->hWnd, &pt );
 	}

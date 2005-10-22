@@ -11,14 +11,20 @@ public:
 	~CompStr(void);
 protected:
 	COMPOSITIONSTRING cs;
+	TCHAR readStr[256];
+	BYTE readAttr[ 256/sizeof(TCHAR) ];
+	DWORD readClause[2];
+
 	TCHAR compStr[256];
+	BYTE compAttr[ 256/sizeof(TCHAR) ];
+	DWORD compClause[2];
+
+	TCHAR resultReadStr[256];
+	DWORD resultReadClause[2];
+
 	TCHAR resultStr[256];
-	TCHAR readStr[16];
-	TCHAR compClause[16];
-	TCHAR readClause[16];
-	TCHAR resultClause[16];
-	BYTE compAttr[ 256*sizeof(TCHAR) ];
-	BYTE readAttr[ 16*sizeof(TCHAR) ];
+	DWORD resultClause[2];
+
 // private data;
 	TCHAR showMsg[50];
 

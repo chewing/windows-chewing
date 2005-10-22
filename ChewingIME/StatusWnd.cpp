@@ -10,8 +10,6 @@
 
 #include "XPToolbar.h"
 
-#include <commctrl.h>
-
 BOOL AboutDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if( msg == WM_COMMAND )
@@ -112,7 +110,7 @@ bool StatusWnd::create(HWND imeUIWnd)
 
 void StatusWnd::enableChiEng(bool enable)
 {
-	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
+//	SendMessage( GetDlgItem( hwnd, IDC_STATUS_TB), TB_ENABLEBUTTON, ID_CHI_ENG, enable );
 }
 
 void StatusWnd::toggleChiEngMode(HIMC hIMC)
@@ -158,7 +156,7 @@ LRESULT StatusWnd::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 		case WM_COMMAND:
 			onCommand( LOWORD(wp), hIMC );
 			break;
-		case WM_NOTIFY:
+/*		case WM_NOTIFY:
 			{
 				switch( ((NMHDR*)lp)->code ) 
 				{
@@ -173,7 +171,7 @@ LRESULT StatusWnd::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 				}
 			}
 			break;
-		case WM_LBUTTONDOWN:
+*/		case WM_LBUTTONDOWN:
 			if( !XPToolbar::onLButtonDown(wp, lp) )
 			{
 				dragging = true;

@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="ChewingIME"
 	ProjectGUID="{517658CE-EFFE-4C17-BF82-55F743CB3123}"
+	RootNamespace="ChewingIME"
 	Keyword="ExtStoredProcProj">
 	<Platforms>
 		<Platform
@@ -23,7 +24,9 @@
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
+				SmallerTypeCheck="TRUE"
 				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
 				WarningLevel="3"
@@ -39,8 +42,13 @@
 				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Debug"
 				ModuleDefinitionFile="ChewingIME.def"
 				GenerateDebugInformation="TRUE"
+				GenerateMapFile="TRUE"
+				MapExports="TRUE"
+				MapLines="TRUE"
 				SubSystem="2"
-				TargetMachine="1"/>
+				BaseAddress=""
+				TargetMachine="1"
+				FixedBaseAddress="0"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"

@@ -25,16 +25,20 @@ bool g_isWindowNT = false;
 long g_shiftPressedTime = -1;
 
 ChewingClient* g_chewing = NULL;
+
+// Configuration
 DWORD g_keyboardLayout = KB_DEFAULT;
 DWORD g_candPerRow = 4;
 DWORD g_defaultEnglish = false;
 DWORD g_defaultFullSpace = false;
 DWORD g_spaceAsSelection = true;
 DWORD g_enableShift = true;
+DWORD g_shiftCapital = false;
 DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
 DWORD g_selKeyType = 0;
+
 static const char* g_selKeys[]={
 	"1234567890",
 	"asdfghjkl;",
@@ -86,6 +90,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "DefaultFullSpace", 0, &type, (LPBYTE)&g_defaultFullSpace, &size );
 		RegQueryValueEx( hk, "SpaceAsSelection", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
 		RegQueryValueEx( hk, "EnableShift", 0, &type, (LPBYTE)&g_enableShift, &size );
+		RegQueryValueEx( hk, "ShiftCapital", 0, &type, (LPBYTE)&g_shiftCapital, &size );
 		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_addPhraseForward, &size );
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
@@ -110,6 +115,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("DefaultFullSpace"), 0, REG_DWORD, (LPBYTE)&g_defaultFullSpace, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SpaceAsSelection"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EnableShift"), 0, REG_DWORD, (LPBYTE)&g_enableShift, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("ShiftCapital"), 0, REG_DWORD, (LPBYTE)&g_shiftCapital, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_addPhraseForward, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
@@ -132,6 +138,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_DEFAULT_FS, g_defaultFullSpace );
 			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
 			CheckDlgButton( hwnd, IDC_ENABLE_SHIFT, g_enableShift );
+			CheckDlgButton( hwnd, IDC_SHIFT_CAPITAL, g_shiftCapital );
 			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
 			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
@@ -167,6 +174,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
 				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
 				g_enableShift = IsDlgButtonChecked( hwnd, IDC_ENABLE_SHIFT );
+				g_shiftCapital = IsDlgButtonChecked( hwnd, IDC_SHIFT_CAPITAL );
 				g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
 				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
@@ -191,10 +199,12 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 {
 	if(!hIMC)
 		return FALSE;
+
 	BOOL success = FALSE;
 	INPUTCONTEXT* ic = ImmLockIMC(hIMC);
 	if(!ic)
 		return FALSE;
+
 	HIMCC hbuf = ImmReSizeIMCC( ic->hMsgBuf, sizeof(TRANSMSG) * (ic->dwNumMsgBuf + 1) );
 	if( hbuf )
 	{
@@ -207,12 +217,14 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 			pbuf[ic->dwNumMsgBuf].lParam = lp;
 			ic->dwNumMsgBuf++;
 			success = TRUE;
+			ImmUnlockIMCC(hbuf);
 		}
-		ImmUnlockIMCC(hbuf);
 	}
 	ImmUnlockIMC(hIMC);
+
 	if( success )
 		success = ImmGenerateMessage(hIMC);
+
 	return success;
 }
 
@@ -345,59 +357,13 @@ void ToggleFullShapeMode(HIMC hIMC)
 	ImmSetConversionStatus( hIMC, conv, sentence);
 }
 
-BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYTE *lpbKeyState )
+BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 {
-	if( !hIMC )
-		return FALSE;
-	IMCLock imc(hIMC);
-	INPUTCONTEXT* ic = imc.getIC();
-	if( !ic || !ic->fOpen )
-		return FALSE;
-
-	if( GetKeyInfo(lParam).isKeyUp )	// Key up
-	{
-		if( g_enableShift )
-		{
-			if( g_shiftPressedTime > 0 )
-			{
-				if( uVirKey == VK_SHIFT && (GetTickCount() - g_shiftPressedTime) <= 300 )
-				{
-					// Toggle Chinese/English mode.
-					ToggleChiEngMode(hIMC);
-				}
-				g_shiftPressedTime = -1;
-			}
-		}
-		return FALSE;
-	}
-
-	if( g_enableShift )
-	{
-		if( uVirKey == VK_SHIFT  )
-		{
-			if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
-				g_shiftPressedTime = GetTickCount();
-		}
-		else if( g_shiftPressedTime > 0 )
-			g_shiftPressedTime = -1;
-	}
-
-    //  Is server alive? Or the server could be different one.
-    if ( g_chewing!=NULL )
-        g_chewing->CheckServer();
-
-	// IME Toggle key : Ctrl + Space & Shift + Space
-	if( LOWORD(uVirKey) == VK_SPACE && 
-		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) )
-		return TRUE;	// Eat the message
-
-	BOOL ret = FilterKeyByChewing( imc, uVirKey, GetKeyInfo(lParam), lpbKeyState );
-	if( !ret )
-		return FALSE;
-
 	// Candidate list opened
 	int pageCount = 0;
-	CandList* candList = imc.getCandList();
+	CandList* candList = (CandList*)ImmLockIMCC(hCandInfo);
+	if( !candList )
+		return FALSE;
 	if( pageCount = g_chewing->Candidate() )
 	{
 		candList->setPageStart( g_chewing->CurrentPage() * g_chewing->ChoicePerPage() );
@@ -420,49 +386,90 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 					candList->setCand( i , "" );
 			}
 		}
+		ImmUnlockIMCC( hCandInfo );
+
 		if( 0 == old_total_count )
 			GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_OPENCANDIDATE, 1 );
 		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CHANGECANDIDATE, 1 );
-
 		return TRUE;
 	}
 	else if( candList->getTotalCount() > 0 )
 	{
+		ImmUnlockIMCC( hCandInfo );
 		GenerateIMEMessage( hIMC, WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 1 );
 		candList->setTotalCount(0);
 	}
 
-	CompStr* cs = imc.getCompStr();
-	if( cs->isEmpty() && ret )	// No composition string
-		GenerateIMEMessage( hIMC, WM_IME_STARTCOMPOSITION );
+	return FALSE;
+}
 
-	if( g_chewing->CommitReady() )
-	{
+
+BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYTE *lpbKeyState )
+{
+	if( !hIMC )
+		return FALSE;
+
+	if( GetKeyInfo(lParam).isKeyUp )	{	// Key up
+		if( g_enableShift )		{
+			if( g_shiftPressedTime > 0 )	{
+				if( uVirKey == VK_SHIFT && (GetTickCount() - g_shiftPressedTime) <= 300 )
+				{
+					// Toggle Chinese/English mode.
+					ToggleChiEngMode(hIMC);
+				}
+				g_shiftPressedTime = -1;
+			}
+		}
+		return FALSE;
+	}
+
+	if( g_enableShift )	{
+		if( uVirKey == VK_SHIFT  )	{
+			if( ! IsKeyDown( lpbKeyState[VK_CONTROL] ) && g_shiftPressedTime < 0 )
+				g_shiftPressedTime = GetTickCount();
+		}
+		else if( g_shiftPressedTime > 0 )
+			g_shiftPressedTime = -1;
+	}
+
+    //  Is server alive? Or the server could be different one.
+    if ( g_chewing != NULL )
+        g_chewing->CheckServer();
+
+	// IME Toggle key : Ctrl + Space & Shift + Space
+	if( LOWORD(uVirKey) == VK_SPACE && 
+		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) )
+		return TRUE;	// Eat the message
+
+	BOOL ret = FilterKeyByChewing( IMCLock(hIMC), uVirKey, GetKeyInfo(lParam), lpbKeyState );
+	if( !ret )
+		return FALSE;
+
+	INPUTCONTEXT* ic = (INPUTCONTEXT*)ImmLockIMC(hIMC);
+	if( ProcessCandidateList( hIMC, ic->hCandInfo ) )	{
+		ImmUnlockIMC( hIMC );
+		return TRUE;
+	}
+
+	CompStr* cs = (CompStr*)ImmLockIMCC(ic->hCompStr);
+	bool composition_started = !!*cs->getCompStr();
+
+	if( g_chewing->CommitReady() )	{
 		char* cstr = g_chewing->CommitStr();
-		if( cstr )
-		{
-//			commit_str = cstr;
+		if( cstr )	{
 			cs->setResultStr(cstr);
 			free(cstr);
 		}
 		else
 			cs->setResultStr("");
-		if( g_chewing->BufferLen() > 0 )
-			GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, WM_IME_COMPOSITIONFULL );
-		cs->setZuin("");
-		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 0, GCS_RESULTCLAUSE|GCS_RESULTSTR );
-		cs->setResultStr("");
 	}
 	else
 		cs->setResultStr("");
 
-	if( g_chewing->BufferLen() )
-	{
+	if( g_chewing->BufferLen() )	{
 		char* chibuf = g_chewing->Buffer();
-		if(chibuf)
-		{
+		if(chibuf)	{
 			cs->setCompStr(chibuf);
-//			comp_str = chibuf;
 			free(chibuf);
 		}
 	}
@@ -478,10 +485,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	cs->setCursorPos( cursorpos );
 
 	char* zuin = g_chewing->ZuinStr();
-	if( zuin )
-	{
+	if( zuin )	{
 		cs->setZuin(zuin);
-//		zuin_str = zuin;
 		free(zuin);
 	}
 	else
@@ -489,14 +494,30 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	cs->beforeGenerateMsg();
 
-	GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
-				*(WORD*)cs->getCompStr(),
-				(GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|
-				GCS_COMPREADATTR|GCS_CURSORPOS|GCS_DELTASTART) );
+	WORD word = *(WORD*)cs->getCompStr();
+	bool is_empty = !*cs->getCompStr();
+	bool has_result = !!*cs->getResultStr();
 
-	if( cs->isEmpty() )
+	if( ! composition_started && *cs->getCompStr() )
+	{
+		GenerateIMEMessage( hIMC, WM_IME_STARTCOMPOSITION );
+		composition_started = true;
+	}
+
+	ImmUnlockIMCC(ic->hCompStr);
+
+	GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
+				(composition_started ? word : 0),
+				(GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|GCS_COMPREADATTR|
+				GCS_COMPCLAUSE|GCS_COMPREADCLAUSE|
+				GCS_COMPREADATTR|GCS_CURSORPOS|
+				(composition_started ? GCS_DELTASTART : 0 )|
+				(has_result ? (GCS_RESULTCLAUSE|GCS_RESULTSTR|GCS_RESULTREADSTR|GCS_RESULTREADCLAUSE):0 ) ) );
+
+	if( is_empty && composition_started )
 		GenerateIMEMessage( hIMC, WM_IME_ENDCOMPOSITION );
 
+	ImmUnlockIMC(hIMC);
 	return TRUE;
 }
 
@@ -515,11 +536,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 
 	if(fSelect)
 	{
-		// FIXME: I don't know why this is needed, but without this
-		//        action, the IME cannot work normally under Win 2000/XP.
-		//        It seems that Windows 98/ME don't have this problem.
-//		if( g_isWindowNT )
-			ic->fOpen = TRUE;
+		ic->fOpen = TRUE;
 
 		ImmReSizeIMCC( imc.getIC()->hCompStr, sizeof(CompStr) );
 		CompStr* cs = imc.getCompStr();
@@ -785,19 +802,38 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	}
 	else
 	{
+		// Correct Chinese/English mode
+		if( g_chewing->ChineseMode() )
+		{
+			if( IsKeyToggled( keystate[VK_CAPITAL]) || !isChinese )
+				g_chewing->Capslock();
+		}
+		else if( !IsKeyToggled( keystate[VK_CAPITAL]) && isChinese )
+			g_chewing->Capslock();
+
 		CompStr* cs = imc.getCompStr();
 		// In English mode, Bypass chewing if there is no composition string
-		if( cs->isEmpty() )
+		if( !*cs->getCompStr() )
 		{
 			if( isChinese )
 			{
 				// Enable numpad even in Chinese mode
 				if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
 					return FALSE;
+				if( key == VK_SPACE || key == VK_RETURN )
+					return FALSE;
+				char ascii[2];
+				int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
+				if( ret )
+					if( ascii[0] >= 'A' && ascii[0] <= 'Z' &&
+					!IsKeyToggled( keystate[VK_CAPITAL]) && g_shiftCapital )
+						return FALSE;
 			}
 			else if( !isFullShape )	// Chewing has been loaded but in English mode
 				return FALSE;
 		}
+
+
 	}
 
 	g_chewing->SetFullShape(isFullShape);
@@ -821,6 +857,9 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 					GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );
 				}
 			}
+			else if( ! g_chewing->Candidate() )
+				return FALSE;
+			return ! g_chewing->KeystrokeIgnore();
 		}
 		else
 			return FALSE;
@@ -928,6 +967,21 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 						key = tolower(key);
 					else if( key >= 'a' && key <= 'z' )
 						key = toupper( key );
+				}
+				if( g_shiftCapital && key >= 'A' && key <= 'Z' )
+				{
+					/// FIXME: Temporary hack to enable typing
+					//  capital English characters in Chinese mode
+					//  with shift key. There should be a better way.
+					//  We temporary switch to English mode here, and
+					//  that's ok since this wrong state will be corrected 
+					//  when FilterKeyByChewing() is called next time.
+					//  We always examine whether English/Chinese mode
+					//  is properly set and correct it in the beginning
+					//  of this function.
+					g_chewing->Capslock();
+					g_chewing->Key( key );
+					return TRUE;
 				}
 			}
 

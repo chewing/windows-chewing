@@ -114,8 +114,7 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 //		int selstart = indexToXPos( CompSelStart );
 //		int selend = indexToXPos( CompSelEnd );
 		int cursor = indexToXPos( compStr, cursorPos );
-//		BitBlt( memdc, selstart, 0, selend-selstart, rc.bottom, memdc, selstart, 0, NOTSRCCOPY );
-		BitBlt( memdc, cursor, 0, 1, rc.bottom, memdc, cursor, 0, SRCINVERT );
+		BitBlt( memdc, cursor, 0, 2, rc.bottom, memdc, cursor, 0, NOTSRCCOPY );
 	}
 
 	InflateRect( &rc, 1, 1 );
