@@ -46,6 +46,7 @@ class Chewing
   int Capslock();
   int Key(unsigned int code);
   int CtrlNum(unsigned int code);
+  int NumPad(unsigned int code);
   int CtrlOption(unsigned int code);
   int DoubleTab();
 
@@ -88,6 +89,7 @@ class Chewing
   char* ShowMsg(void);
   void SetAddPhraseForward(bool add_forward);
   bool GetAddPhraseForward(void);
+  void SetSelAreaLen(int len);
 };
 
 #endif /* _CHEWING_H */

@@ -281,15 +281,20 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 		}
 		break;
 	case ID_WEBSITE:
+		ShellExecute( NULL, "open", _T("http://chewing.csie.net/"), NULL, NULL, SW_SHOWNORMAL );
+		break;
 	case ID_BUGREPORT:
+		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Queue=271"), NULL, NULL, SW_SHOWNORMAL );
+		break;
 	case ID_DICT_BUGREPORT:
+		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436"), NULL, NULL, SW_SHOWNORMAL );
+		break;
+	case ID_CHEWING_HELP:
 		{
-			LPCTSTR url = _T("http://chewing.csie.net/");
-			if( id == ID_BUGREPORT )
-				url = _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Queue=271");
-			else if( id == ID_DICT_BUGREPORT )
-				url = _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436");
-			ShellExecute( NULL, "open", url, NULL, NULL, SW_SHOWNORMAL );
+			TCHAR path[MAX_PATH];
+			GetSystemDirectory( path, MAX_PATH );
+			_tcscat( path, _T("\\IME\\Chewing\\Chewing.chm"));
+			ShellExecute( NULL, "open", path, NULL, NULL, SW_SHOWMAXIMIZED );
 			break;
 		}
 	}

@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.2.0b"
+!define PRODUCT_VERSION "0.2.0rc"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -73,6 +73,7 @@ Section "MainSection" SEC01
   File /oname=ch_index.dat "..\libchewing\trunk\data\ch_index.dat"
   File "Data\statuswnd.bmp"
   File "License.txt"
+  File "UserGuide\chewing.chm"
   File "Installer\Release\Installer.exe"
   File "ChewingServer\Release\ChewingServer.exe"
   SetOutPath "$SYSDIR"
@@ -87,6 +88,7 @@ SectionEnd
 Section -AdditionalIcons
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\新酷音輸入法"
+  CreateShortCut "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk" "$INSTDIR\Chewing.chm"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
@@ -136,12 +138,14 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\hash.dat"
   Delete "$SYSDIR\IME\Chewing\ph_index.dat"
   Delete "$SYSDIR\IME\Chewing\us_freq.dat"
+  Delete "$SYSDIR\IME\Chewing\Chewing.chm"
   Delete "$SYSDIR\IME\Chewing\Installer.exe"
   Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
 
 ;  IfErrors 0 +2
 ;    Call un.onError
 
+  Delete "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\Uninstall.lnk"
 
   RMDir "$SYSDIR\IME\Chewing"

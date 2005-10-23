@@ -43,19 +43,19 @@
 #define IDC_HIDE_STATUSWND              1019
 #define IDC_DEFAULT_FS                  1020
 #define IDC_ENABLE_SHIFT                1021
-#define IDC_CAND_PER_ROW_SPIN2          1022
 #define IDC_CAND_PER_PAGE_SPIN          1022
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
 #define ID_BUGREPORT                    40006
+#define ID_CHEWING_HELP                 40009
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
-#define _APS_NEXT_COMMAND_VALUE         40007
+#define _APS_NEXT_COMMAND_VALUE         40010
 #define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
