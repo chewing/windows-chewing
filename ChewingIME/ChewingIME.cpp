@@ -153,7 +153,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-			::SendMessage( spin, UDM_SETRANGE32, 1, 7 );
+			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
 			::SendMessage( spin, UDM_SETPOS, 0, 
                            (LPARAM) MAKELONG ((short) g_candPerRow , 0));
 
