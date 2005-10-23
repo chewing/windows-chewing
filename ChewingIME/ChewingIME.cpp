@@ -642,23 +642,23 @@ BOOL CommitBuffer( IMCLock& imc )
 	if( !cs )
 		return FALSE;
 
-	if( !cs->isEmpty() )
+	if( ! *cs->getCompStr() )
 	{
 		// FIXME: If candidate window is opened, this
 		//        will cause problems.
 		g_chewing->Enter();	// Commit
 		char* cstr = NULL;
 		if( g_chewing->CommitReady() && 
-			(cstr = g_chewing->CommitStr()) )
-		{
+			(cstr = g_chewing->CommitStr()) )	{
 			cs->setResultStr(cstr);
 			free(cstr);
 		}
-		else
-			cs->setResultStr( cs->getCompStr() );
+
+		cs->setResultStr( cs->getCompStr() );
+		cs->setZuin("");
 		cs->setCompStr("");
 		cs->setCursorPos(0);
-		cs->setZuin("");
+		cs->beforeGenerateMsg();
 
 		GenerateIMEMessage( imc.getHIMC(), WM_IME_COMPOSITION, 
 			0,
@@ -831,7 +831,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 
 		CompStr* cs = imc.getCompStr();
 		// In English mode, Bypass chewing if there is no composition string
-		if( !*cs->getCompStr() )
+		if( !cs || !*cs->getCompStr() )
 		{
 			if( isChinese )
 			{
