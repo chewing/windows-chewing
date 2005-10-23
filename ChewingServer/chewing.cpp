@@ -275,3 +275,8 @@ bool Chewing::GetAddPhraseForward(void)
 {
 	return !!cd->config.bAddPhraseForward;
 }
+
+void Chewing::SetSelAreaLen(int len)
+{
+	cd->config.selectAreaLen = len;
+}

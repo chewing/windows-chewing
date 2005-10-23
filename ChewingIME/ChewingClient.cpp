@@ -279,3 +279,6 @@ bool ChewingClient::CheckServer()
 	SelKey((char*)pSelKeys);
     return  false;
 }
+
+void ChewingClient::SetSelAreaLen(int len)
+{	SendMessage( serverWnd, ChewingServer::cmdSetSelAreaLen, len, chewingID);	}

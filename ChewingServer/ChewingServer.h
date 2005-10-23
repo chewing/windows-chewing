@@ -80,6 +80,7 @@ public:
 		cmdSetAddPhraseForward,
 		cmdSetKeyboardLayout,
 		cmdSetHsuSelectionKeyType,
+		cmdSetSelAreaLen,
 
 		// char* (void)
 		cmdZuinStr,

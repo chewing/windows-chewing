@@ -38,6 +38,7 @@ DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
 DWORD g_selKeyType = 0;
+DWORD g_selAreaLen = 50;
 
 static const char* g_selKeys[]={
 	"1234567890",
@@ -95,8 +96,15 @@ void LoadConfig()
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
+		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
 		RegCloseKey( hk );
 	}
+
+	if( g_selKeyType > ((sizeof(g_selKeys)/sizeof(char*))-1) )
+		g_selKeyType = 0;
+
+	if( g_selAreaLen > 55 || g_selAreaLen < 40 )
+		g_selAreaLen = 40;
 
 	if( g_chewing )
 		g_chewing->SelKey( (char*)g_selKeys[g_selKeyType] );
@@ -120,6 +128,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -148,6 +157,12 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			::SendMessage( spin, UDM_SETPOS, 0, 
                            (LPARAM) MAKELONG ((short) g_candPerRow , 0));
 
+			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
+			::SendMessage( spin, UDM_SETRANGE32, 7, 10 );
+			int cand_per_page = ( g_selAreaLen - 5 ) / ( 1 * 2 + 3 );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) cand_per_page , 0));
+
 			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
 			const TCHAR** pselkeys = g_selKeyNames;
 			while( *pselkeys )
@@ -160,16 +175,19 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 		case IDOK:
 			{
-				for( UINT id = IDC_KB1; id <= IDC_KB9; ++id )
-				{
-					if( IsDlgButtonChecked( hwnd, id) )
-					{
+				for( UINT id = IDC_KB1; id <= IDC_KB9; ++id )	{
+					if( IsDlgButtonChecked( hwnd, id) )	{
 						g_keyboardLayout = (id - IDC_KB1);
-						HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-						g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
 						break;
 					}
 				}
+				HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
+				g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+
+				spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
+				int cand_per_page = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+				g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
+
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
 				g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
 				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
@@ -840,6 +858,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	g_chewing->SetSpaceAsSelection( !!g_spaceAsSelection );
 	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
 	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
+	g_chewing->SetSelAreaLen( (int)g_selAreaLen );
 
 	if( IsKeyDown( keystate[VK_CONTROL] ) )
 	{

@@ -32,6 +32,7 @@
 #define IDC_KB9                         1009
 #define IDC_CAND_PER_ROW                1010
 #define IDC_CAND_PER_ROW_SPIN           1011
+#define IDC_CAND_PER_PAGE               1012
 #define IDC_DEFAULT_ENG                 1013
 #define IDC_COMBO1                      1014
 #define IDC_SELKEYS                     1014
@@ -42,6 +43,8 @@
 #define IDC_HIDE_STATUSWND              1019
 #define IDC_DEFAULT_FS                  1020
 #define IDC_ENABLE_SHIFT                1021
+#define IDC_CAND_PER_ROW_SPIN2          1022
+#define IDC_CAND_PER_PAGE_SPIN          1022
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
@@ -53,7 +56,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40007
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

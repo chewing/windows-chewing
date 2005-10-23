@@ -126,25 +126,31 @@ BEGIN
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,15,117,75,
                     10
     LTEXT           "每列顯示候選字個數",IDC_STATIC,112,18,63,8
-    EDITTEXT        IDC_CAND_PER_ROW,182,15,27,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_CAND_PER_ROW,182,16,27,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_CAND_PER_ROW_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS,210,14,10,14
-    LTEXT           "選字鍵",IDC_STATIC,112,33,22,8
-    COMBOBOX        IDC_SELKEYS,143,32,66,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    UDS_ARROWKEYS,210,15,10,14
+    LTEXT           "每頁顯示候選字個數",IDC_STATIC,112,34,63,8
+    EDITTEXT        IDC_CAND_PER_PAGE,182,32,27,14,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_CAND_PER_PAGE_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS,210,31,10,14
+    LTEXT           "選字鍵",IDC_STATIC,112,50,22,8
+    COMBOBOX        IDC_SELKEYS,143,49,66,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "打字時按空白鍵叫出選字視窗",IDC_SPACESEL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,112,51,105,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,66,105,10
     CONTROL         "預設以英文模式啟動",IDC_DEFAULT_ENG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,104,72,116,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,87,116,10
     CONTROL         "預設以全形模式啟動",IDC_DEFAULT_FS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,104,86,116,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,101,116,10
     CONTROL         "使用 Shift 快速切換中英文模式",IDC_ENABLE_SHIFT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,104,100,116,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,115,116,10
     CONTROL         "Ctrl + 數字加入前方的詞而非後方",IDC_ADD_PHRASE_FORWARD,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,104,114,116,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,104,129,116,10
     CONTROL         "中文模式下按住 Shift 打大寫",IDC_SHIFT_CAPITAL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,104,128,116,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104,143,116,10
     CONTROL         "固定組字視窗位置",IDC_FIX_COMPWND,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,149,71,10
     GROUPBOX        "使用者介面",IDC_STATIC,7,138,89,40
@@ -153,7 +159,7 @@ BEGIN
     DEFPUSHBUTTON   "確定",IDOK,111,164,50,14
     PUSHBUTTON      "取消",IDCANCEL,170,164,50,14
     GROUPBOX        "鍵盤對應",IDC_STATIC,7,7,89,127
-    GROUPBOX        "候選字視窗",IDC_STATIC,104,7,116,60
+    GROUPBOX        "候選字視窗",IDC_STATIC,104,7,116,76
 END
 
 IDD_ABOUT DIALOGEX 0, 0, 259, 215
