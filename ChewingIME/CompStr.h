@@ -29,12 +29,6 @@ protected:
 	TCHAR showMsg[50];
 
 public:
-	bool isEmpty()
-	{
-		return !cs.dwCompStrLen 
-			&& !cs.dwCompReadStrLen 
-			&& !cs.dwResultStrLen;
-	}
 	TCHAR* getCompStr()	{	return &compStr[0];	}
 	TCHAR* getResultStr()	{	return &resultStr[0];	}
 	TCHAR* getShowMsg()	{	return &showMsg[0];	}
