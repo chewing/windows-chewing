@@ -642,18 +642,19 @@ BOOL CommitBuffer( IMCLock& imc )
 	if( !cs )
 		return FALSE;
 
-	if( ! *cs->getCompStr() )
+	if( *cs->getCompStr() )
 	{
 		// FIXME: If candidate window is opened, this
 		//        will cause problems.
-		g_chewing->Enter();	// Commit
-		char* cstr = NULL;
-		if( g_chewing->CommitReady() && 
-			(cstr = g_chewing->CommitStr()) )	{
-			cs->setResultStr(cstr);
-			free(cstr);
+		if( g_chewing )
+		{
+			g_chewing->Enter();	// Commit
+			char* cstr = NULL;
+			if( g_chewing->CommitReady() && 
+				(cstr = g_chewing->CommitStr()) )	{
+				free(cstr);
+			}
 		}
-
 		cs->setResultStr( cs->getCompStr() );
 		cs->setZuin("");
 		cs->setCompStr("");
