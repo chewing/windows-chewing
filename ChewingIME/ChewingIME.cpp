@@ -839,7 +839,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				// Enable numpad even in Chinese mode
 				if( key >= VK_NUMPAD0 && key <= VK_DIVIDE )
 					return FALSE;
-				if( key == VK_SPACE || key == VK_RETURN )
+				if( ( key == VK_SPACE && !isFullShape ) || key == VK_RETURN )
 					return FALSE;
 				char ascii[2];
 				int ret = ToAscii( key, ki.scanCode, (BYTE*)keystate, (LPWORD)ascii, 0);
