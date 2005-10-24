@@ -129,9 +129,17 @@ void CompStr::beforeGenerateMsg(void)
 
 	compClause[0] = 0;
 	compClause[1] = cs.dwCompStrLen;
-	cs.dwCompClauseLen = sizeof(compClause);
+	cs.dwCompClauseLen = 0;//sizeof(compClause);
 
 	resultClause[0] = 0;
 	resultClause[1] = cs.dwResultStrLen;
-	cs.dwResultClauseLen = sizeof(resultClause);
+	cs.dwResultClauseLen = 0;//sizeof(resultClause);
+
+	readClause[0] = 0;
+	readClause[1] = cs.dwCompReadStrLen;
+	cs.dwCompReadClauseLen = 0;//sizeof(readClause);
+
+	resultReadClause[0] = 0;
+	resultReadClause[1] = cs.dwResultReadClauseLen = 0;
+	cs.dwResultReadClauseLen = 0;//sizeof(resultReadClause);
 }

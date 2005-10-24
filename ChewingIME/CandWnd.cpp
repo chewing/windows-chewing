@@ -307,7 +307,8 @@ void CandWnd::show(void)
 		break;
 	case CFS_EXCLUDE:
 		{
-			RECT &rc = imc.getIC()->cfCandForm[0].rcArea;
+			RECT rc = imc.getIC()->cfCandForm[0].rcArea;
+			RECT &area = imc.getIC()->cfCandForm[0].rcArea;
 			RECT crc, intersect_rc;
 			GetWindowRect(hwnd, &crc);
 			int w = crc.right - crc.left;
@@ -315,7 +316,7 @@ void CandWnd::show(void)
 			crc.left = pt.x;	crc.top = pt.y;
 			crc.right = crc.left + w;
 			crc.bottom = crc.top + h;
-//			InflateRect( &crc, 1, 1 );
+			InflateRect( &rc, 1, 1 );
 
 			RECT wrc;
 			IMEUI::getWorkingArea(&wrc, imc.getIC()->hWnd);
@@ -325,13 +326,13 @@ void CandWnd::show(void)
 			{
 				if( imc.isVerticalComp() )
 				{
-					if( (pt.x = rc.left - w) < wrc.left )
-						pt.x = rc.right;
+					if( (pt.x = area.left - w) < wrc.left )
+						pt.x = area.right;
 				}
 				else
 				{
-					if( (pt.y = rc.bottom) > wrc.bottom )
-						pt.y = rc.top - h;
+					if( (pt.y = area.bottom) > wrc.bottom )
+						pt.y = area.top - h;
 				}
 			}
 			break;
