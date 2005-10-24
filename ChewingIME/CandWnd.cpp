@@ -90,6 +90,20 @@ LRESULT CandWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 	return 0;
 }
 
+static void _DecideCandStringcolor(DWORD &CandIndex, DWORD &CandBody, BOOL bCandPage)
+{
+#define RGB_CAND_CHAR_IDX       RGB(230, 20, 20)
+#define RGB_CAND_CHAR_BODY      RGB(20, 20, 230)
+#define RGB_CAND_BLACK          RGB(0, 0, 0)
+
+    CandIndex = CandBody = RGB_CAND_BLACK;
+    if ( g_ColorCandWnd==true && bCandPage==FALSE )
+    {
+        CandIndex = RGB_CAND_CHAR_IDX;
+        CandBody = RGB_CAND_CHAR_BODY;
+    }
+}
+
 void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 {
 	IMCLock imc( hIMC );
@@ -119,6 +133,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 	int num = 0;
 
 	int selkey_w = 0;
+    DWORD   colorIdx, colorBody;
 	SIZE candsz;
 	GetTextExtentPoint32(hDC, "m.", 2, &candsz);
 	selkey_w = candsz.cx;
@@ -134,6 +149,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			LPCTSTR selKeys = g_selKeyNames[g_selKeyType];
 			selKey[0] = selKeys[(i - candList->getPageStart())];
 			_tcscpy( cand, candList->getCand(i) );
+            _DecideCandStringcolor(colorIdx, colorBody, FALSE);
 		}
 		else
 		{
@@ -143,8 +159,8 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			int totalPage = candList->getTotalCount() / candList->getPageSize();
 			if( candList->getTotalCount() % candList->getPageSize() )
 				++totalPage;
-			wsprintf ( cand, _T("%d/%d"), page, totalPage );
-			SetTextColor( hDC, GetSysColor(COLOR_HIGHLIGHT) );
+			wsprintf ( cand, _T("  %d/%d"), page, totalPage );
+            _DecideCandStringcolor(colorIdx, colorBody, TRUE);
 		}
 
 		int len = _tcslen( cand );
@@ -158,10 +174,12 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			cand_rc.right = cand_rc.left + selkey_w;
 			cand_rc.bottom = cand_rc.top + candsz.cy;
 			// Draw selKey
+            SetTextColor( hDC, colorIdx);
 			ExtTextOut( hDC, cand_rc.left+1, cand_rc.top, ETO_OPAQUE, &cand_rc, selKey, 2, NULL);
 			cand_rc.left = cand_rc.right;
 		}
 		cand_rc.right = cand_rc.left + candsz.cx;
+        SetTextColor( hDC, colorBody);
 		ExtTextOut( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
 

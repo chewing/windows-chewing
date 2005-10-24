@@ -37,6 +37,7 @@ DWORD g_shiftCapital = false;
 DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
+DWORD g_ColorCandWnd = true;
 DWORD g_selKeyType = 0;
 DWORD g_selAreaLen = 50;
 
@@ -95,6 +96,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_addPhraseForward, &size );
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
+		RegQueryValueEx( hk, "ColorCandWnd", 0, &type, (LPBYTE)&g_ColorCandWnd, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
 		RegCloseKey( hk );
@@ -127,6 +129,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_addPhraseForward, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("ColorCandWnd"), 0, REG_DWORD, (LPBYTE)&g_ColorCandWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -151,6 +154,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
 			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
+			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -196,6 +200,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
 				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
+				g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
 
 				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
 				if( g_selKeyType < 0 )

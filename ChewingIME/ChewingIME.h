@@ -24,6 +24,7 @@ extern DWORD g_candPerRow;
 extern DWORD g_hideStatusWnd;
 extern DWORD g_enableShift;
 extern DWORD g_fixCompWnd;
+extern DWORD g_ColorCandWnd;
 
 extern ChewingClient* g_chewing;
 
