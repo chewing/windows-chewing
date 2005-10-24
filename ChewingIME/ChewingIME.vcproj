@@ -98,7 +98,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib libchewing.lib comctl32.lib shell32.lib"
+				AdditionalDependencies="imm32.lib comctl32.lib shell32.lib"
 				OutputFile="$(OutDir)/Chewing.ime"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Release"
