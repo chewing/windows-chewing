@@ -17,13 +17,13 @@ protected:
 
 	TCHAR compStr[256];
 	BYTE compAttr[ 256/sizeof(TCHAR) ];
-	DWORD compClause[2];
+	DWORD compClause[257];
 
 	TCHAR resultReadStr[256];
 	DWORD resultReadClause[2];
 
 	TCHAR resultStr[256];
-	DWORD resultClause[2];
+	DWORD resultClause[257];
 
 // private data;
 	TCHAR showMsg[50];

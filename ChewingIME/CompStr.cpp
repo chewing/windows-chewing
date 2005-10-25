@@ -142,4 +142,35 @@ void CompStr::beforeGenerateMsg(void)
 	resultReadClause[0] = 0;
 	resultReadClause[1] = cs.dwResultReadClauseLen = 0;
 	cs.dwResultReadClauseLen = 0;//sizeof(resultReadClause);
+
+	if( compStr[0] == 0 )	// If quick commit
+		cs.dwCompClauseLen = 0;	// No clause info
+	else	{	// This composition string contains Chinese characters
+		int i;
+		TCHAR* pstr = compStr;
+		for( i = 0; i < cs.dwCompStrLen; ++i )	{
+			compClause[ i ] = (pstr - compStr);
+			pstr = _tcsinc( pstr );
+			if( ! *pstr )
+				break;
+		}
+		compClause[++i] = cs.dwCompStrLen;
+		cs.dwCompClauseLen = (i+1) * sizeof(DWORD);
+	}
+
+	if( resultStr[0] == 0 )	// If no result string
+		cs.dwResultClauseLen = 0;	// No clause info
+	else	{	// This composition string contains Chinese characters
+		int i;
+		TCHAR* pstr = resultStr;
+		for( i = 0; i < cs.dwResultStrLen; ++i )	{
+			resultClause[ i ] = (pstr - resultStr);
+			pstr = _tcsinc( pstr );
+			if( ! *pstr )
+				break;
+		}
+		resultClause[++i] = cs.dwResultStrLen;
+		cs.dwResultStrLen = (i+1) * sizeof(DWORD);
+	}
+
 }
