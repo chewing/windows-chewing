@@ -267,7 +267,7 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 		}
 	case ID_CONFIG:
 	case ID_ABOUT:
-		{
+		try {
 			HWND top = hwnd;
 			HWND desktop = GetDesktopWindow(), parent = NULL;
 			while( (parent=GetParent(top)) != desktop && parent )
@@ -278,7 +278,10 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 			else
 				DialogBox(g_dllInst, LPCTSTR(IDD_ABOUT), top, (DLGPROC)AboutDlgProc);
 			EnableWindow( hwnd, TRUE );
-		}
+		}   catch (...)
+        {
+            OutputDebugString("Using die wnd");
+        }
 		break;
 	case ID_WEBSITE:
 		ShellExecute( NULL, "open", _T("http://chewing.csie.net/"), NULL, NULL, SW_SHOWNORMAL );
