@@ -170,7 +170,7 @@ void CompStr::beforeGenerateMsg(void)
 				break;
 		}
 		resultClause[++i] = cs.dwResultStrLen;
-		cs.dwResultStrLen = (i+1) * sizeof(DWORD);
+		cs.dwResultClauseLen = (i+1) * sizeof(DWORD);
 	}
 
 }

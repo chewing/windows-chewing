@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Taiwan) resources
+// 中文 (台灣) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
 #ifdef _WIN32
@@ -27,18 +27,18 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
@@ -47,7 +47,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -70,13 +69,13 @@ BEGIN
     BEGIN
         BLOCK "040404b0"
         BEGIN
-            VALUE "FileDescription", "新酷音輸入法\0"
-            VALUE "FileVersion", "0, 0, 2, 0\0"
-            VALUE "InternalName", "ChewingIME\0"
-            VALUE "LegalCopyright", "Copyright (C) 2005\0"
-            VALUE "OriginalFilename", "ChewingIME.dll\0"
-            VALUE "ProductName", "Win32 Chewing 中文輸入法\0"
-            VALUE "ProductVersion", "0, 0, 2, 0\0"
+            VALUE "FileDescription", "新酷音輸入法"
+            VALUE "FileVersion", "0, 0, 2, 0"
+            VALUE "InternalName", "ChewingIME"
+            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "OriginalFilename", "ChewingIME.dll"
+            VALUE "ProductName", "Win32 Chewing 中文輸入法"
+            VALUE "ProductVersion", "0, 0, 2, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -84,8 +83,6 @@ BEGIN
         VALUE "Translation", 0x404, 1200
     END
 END
-
-#endif    // !_MAC
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,12 +92,12 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON                ICON    DISCARDABLE     "mainicon.ico"
-IDI_CONFIG              ICON    DISCARDABLE     "config.ico"
-IDI_CHI                 ICON    DISCARDABLE     "chi.ico"
-IDI_ENG                 ICON    DISCARDABLE     "eng.ico"
-IDI_FULL                ICON    DISCARDABLE     "full.ico"
-IDI_HALF                ICON    DISCARDABLE     "half.ico"
+IDI_ICON                ICON                    "mainicon.ico"
+IDI_CONFIG              ICON                    "config.ico"
+IDI_CHI                 ICON                    "chi.ico"
+IDI_ENG                 ICON                    "eng.ico"
+IDI_FULL                ICON                    "full.ico"
+IDI_HALF                ICON                    "half.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -108,11 +105,11 @@ IDI_HALF                ICON    DISCARDABLE     "half.ico"
 //
 
 IDD_CONFIG DIALOGEX 0, 0, 227, 199
-STYLE DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
-    WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | 
+    WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 CAPTION "新酷音輸入法設定"
-FONT 9, "MS Shell Dlg"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "預設",IDC_KB1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,
                     21,75,10
@@ -168,15 +165,15 @@ BEGIN
 END
 
 IDD_ABOUT DIALOGEX 0, 0, 259, 215
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
 CAPTION "關於新酷音輸入法"
-FONT 9, "MS Sans Serif"
+FONT 9, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "",IDC_STATIC,7,101,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,17,111,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.2.0 Release candidate 4\n\n發行日期：2005.10.23\n\n授權方式： GNU General Public License\n\n軟體原作者：洪任諭  (以 libchewing 為基礎)\n\n其他協力開發者：seamxr",
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.2.0 Release candidate 5\n\n發行日期：2005.10.23\n\n授權方式： GNU General Public License\n\n軟體原作者：洪任諭  (以 libchewing 為基礎)\n\n其他協力開發者：seamxr",
                     IDC_STATIC,75,7,162,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP | 
                     SS_REALSIZEIMAGE,7,7,59,63
@@ -191,7 +188,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO MOVEABLE PURE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_CONFIG, DIALOG
     BEGIN
@@ -217,14 +214,14 @@ END
 // Bitmap
 //
 
-IDB_COOL                BITMAP  MOVEABLE PURE   "icon.bmp"
+IDB_COOL                BITMAP                  "icon.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_POPUP MENU DISCARDABLE 
+IDR_POPUP MENU 
 BEGIN
     POPUP "POPUP"
     BEGIN
@@ -244,14 +241,14 @@ END
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_CHI_ENG              "中文/英數 模式切換 ( Shift )"
     ID_FULL_HALF            "全半形切換 ( Shift + Space )"
     ID_MENU                 "新酷音輸入法設定"
 END
 
-#endif    // Chinese (Taiwan) resources
+#endif    // 中文 (台灣) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
