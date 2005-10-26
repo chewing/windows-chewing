@@ -807,6 +807,15 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
+static int _InvertCase(int key)
+{
+	if( key >= 'A' && key <= 'Z' )
+		key = tolower(key);
+	else if( key >= 'a' && key <= 'z' )
+		key = toupper( key );
+    return  key;
+}
+
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate )
 {
 	bool isChinese = imc.isChinese();
@@ -988,10 +997,12 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			{
 				if( IsKeyToggled( keystate[VK_CAPITAL] ) )
 				{
-					if( key >= 'A' && key <= 'Z' )
-						key = tolower(key);
-					else if( key >= 'a' && key <= 'z' )
-						key = toupper( key );
+                    key = _InvertCase(key);
+                    if ( IsKeyDown(keystate[VK_SHIFT]) )
+                    {
+                        g_chewing->Key( key );
+                        return TRUE;
+                    }
 				}
 				if( g_shiftCapital && key >= 'A' && key <= 'Z' )
 				{
