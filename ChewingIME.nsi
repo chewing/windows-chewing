@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.2.0rc5"
+!define PRODUCT_VERSION "0.2.0"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -89,7 +89,7 @@ Section -AdditionalIcons
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\新酷音輸入法"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk" "$INSTDIR\Chewing.chm"
-  CreateShortCut "$SMPROGRAMS\新酷音輸入法\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -135,7 +135,6 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\ch_index.dat"
   Delete "$SYSDIR\IME\Chewing\dict.dat"
   Delete "$SYSDIR\IME\Chewing\fonetree.dat"
-  Delete "$SYSDIR\IME\Chewing\hash.dat"
   Delete "$SYSDIR\IME\Chewing\ph_index.dat"
   Delete "$SYSDIR\IME\Chewing\us_freq.dat"
   Delete "$SYSDIR\IME\Chewing\Chewing.chm"
