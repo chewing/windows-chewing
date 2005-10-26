@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by ChewingIME.rc
 //
 #define IDI_ICON                        5
@@ -50,13 +50,17 @@
 #define ID_DICT_BUGREPORT               40005
 #define ID_BUGREPORT                    40006
 #define ID_CHEWING_HELP                 40009
+#define ID_DICT                         40015
+#define ID_SIMPDICT                     40016
+#define ID_LITTLEDICT                   40017
+#define ID_PROVERBDICT                  40018
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
-#define _APS_NEXT_COMMAND_VALUE         40010
+#define _APS_NEXT_COMMAND_VALUE         40021
 #define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           106
 #endif

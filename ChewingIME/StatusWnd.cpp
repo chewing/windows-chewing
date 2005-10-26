@@ -300,5 +300,19 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 			ShellExecute( NULL, "open", path, NULL, NULL, SW_SHOWMAXIMIZED );
 			break;
 		}
+	case ID_DICT:
+	case ID_SIMPDICT:
+	case ID_LITTLEDICT:
+	case ID_PROVERBDICT:
+		{
+			LPCTSTR url[]={
+			_T("http://140.111.34.46/dict/"),
+			_T("http://140.111.34.46/jdict/main/cover/main.htm"),
+			_T("http://140.111.1.43/"),
+			_T("http://140.111.34.46/chengyu/sort_pho.htm")};
+			ShellExecute( NULL, "open", url[ id - ID_DICT ], NULL, NULL, SW_SHOWNORMAL );
+			break;
+		}
+
 	}
 }
