@@ -19,5 +19,4 @@ public:
 	void updateSize(void);
 	HFONT font;
 	bool create(HWND imeUIWnd);
-	void show(void);
 };

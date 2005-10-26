@@ -111,7 +111,10 @@ void Tooltip::showTip(int x, int y, LPCTSTR text, DWORD duration)
 	ReleaseDC(hwnd, dc);
 
 	SetWindowPos( hwnd, HWND_TOPMOST, x, y, rc.right + 4, rc.bottom + 4, SWP_NOACTIVATE );
-	ShowWindow( hwnd, SW_SHOWNA );
+	if( IsWindowVisible(hwnd) )
+		InvalidateRect( hwnd, NULL, TRUE );
+	else
+		ShowWindow( hwnd, SW_SHOWNA );
 	if( duration > 0 )
 	{
 		if(timerID)

@@ -297,16 +297,13 @@ bool CandWnd::create(HWND imeUIWnd)
 	return !!hwnd;
 }
 
+#if 0
 void CandWnd::show(void)
 {
-	static int time = 0;
-	time++;
-	if(time == 1)
-		time = 2;
 	HIMC hIMC = getIMC();
-	IMCLock imc(hIMC);
 	if( !hIMC )
 		return;
+	IMCLock imc(hIMC);
 
 	setFont( font );
 	updateSize();
@@ -381,3 +378,5 @@ void CandWnd::show(void)
 	move( pt.x, pt.y );
 	IMEChildWnd::show();
 }
+
+#endif

@@ -29,7 +29,6 @@ protected:
 	void closeStatusWnd(void);
 	void openStatusWnd(HIMC hIMC);
 	void openCandWnd(void);
-	void updateCandWnd(void);
 	void closeCandWnd(void);
 
 public:
@@ -38,4 +37,11 @@ public:
 	LRESULT onComposition(HIMC hIMC, WPARAM wp , LPARAM lp);
 	POINT getCompWndPos(IMCLock& imc);
 //	void setCompWndPos(IMCLock& imc);
+	POINT getCandWndPos(IMCLock& imc);
+	HIMC getIMC(){	return (HIMC)GetWindowLong( hwnd, IMMGWL_IMC );	}
+protected:
+	void showCandWnd(void);
+public:
+	void showUserNotify(IMCLock& imc);
 };
+

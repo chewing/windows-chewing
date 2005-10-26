@@ -13,6 +13,8 @@
 #include <windows.h>
 #include <multimon.h>
 
+#include <assert.h>
+
 IMEUI::IMEUI(HWND hUIWnd) : hwnd(hUIWnd)
 {
 	fixedCompWndPos.x = fixedCompWndPos.y = 0;
@@ -24,8 +26,7 @@ IMEUI::~IMEUI(void)
 
 LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 {
-    if ( hIMC==NULL )
-    {
+    if ( hIMC==NULL )    {
         return  0;
     }
 
@@ -41,7 +42,7 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 		openCandWnd();
 		break;
 	case IMN_CHANGECANDIDATE:
-		updateCandWnd();
+		showCandWnd();
 		break;
 	case IMN_CLOSECANDIDATE:
 		closeCandWnd();
@@ -80,19 +81,8 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 			switch( lp )
 			{
 			case 0:
-				{
-					IMCLock imc(hIMC);
-					CompStr* cs = imc.getCompStr();
-					LPCTSTR msg = cs->getShowMsg();
-					if( *msg )
-					{
-						POINT pt = getCompWndPos(imc);
-						tooltip.showTip(pt.x, pt.y + 22, msg, 1500);
-					}
-					else if(tooltip.isVisible())
-						tooltip.hideTip();
-					break;
-				}
+				showUserNotify(IMCLock( hIMC ));
+				break;
 			}
 		}
 	case IMN_GUIDELINE:
@@ -265,21 +255,9 @@ void IMEUI::openCandWnd(void)
 	if( !candWnd.isWindow() )
 		candWnd.create(hwnd);
 
-	if( candWnd.isVisible() )
-		candWnd.refresh();
-	else
-		candWnd.show();
+	showCandWnd();
 }
 
-void IMEUI::updateCandWnd(void)
-{
-	if( !candWnd.isWindow() )
-		candWnd.create(hwnd);
-
-	candWnd.refresh();
-//	candWnd.updateSize();
-	candWnd.show();
-}
 
 void IMEUI::closeCandWnd(void)
 {
@@ -415,4 +393,119 @@ void IMEUI::setCompWndPos(IMCLock& imc)
 	compWnd.move(pt.x, pt.y);
 }
 */
+
+
+POINT IMEUI::getCandWndPos(IMCLock& imc)
+{
+	POINT pt;
+	pt.x = pt.y = 0;
+	if( !imc.getIC() )
+		return pt;
+
+	pt = imc.getIC()->cfCandForm[0].ptCurrentPos;
+	DWORD style = imc.getIC()->cfCandForm[0].dwStyle;
+	if( g_fixCompWnd )
+		style = CFS_DEFAULT;
+
+	switch( style )
+	{
+	case CFS_CANDIDATEPOS:
+		break;
+	case CFS_EXCLUDE:
+		{
+			RECT rc = imc.getIC()->cfCandForm[0].rcArea;
+			RECT &area = imc.getIC()->cfCandForm[0].rcArea;
+			RECT crc, intersect_rc;
+			// Be sure to create candWnd
+			bool has_cand = (bool)candWnd.isWindow();
+			int w, h;
+			if( has_cand )	{
+				GetWindowRect(candWnd.getHwnd(), &crc);
+				w = crc.right - crc.left;
+				h = crc.bottom - crc.top;
+				crc.left = pt.x;	crc.top = pt.y;
+				crc.right = crc.left + w;
+				crc.bottom = crc.top + h;
+			}
+			else {
+			// FIXME: Temporary hack for tooltip.
+			// We currently use getCandWndPos() to determine the 
+			// position of tooltip.
+				w = 22;
+				h = 22;
+			}
+
+			InflateRect( &rc, 1, 1 );
+
+			RECT wrc;
+			getWorkingArea(&wrc, imc.getIC()->hWnd);
+			MapWindowPoints( HWND_DESKTOP, imc.getIC()->hWnd, (LPPOINT)&wrc, 2 );
+
+			if( ! has_cand || IntersectRect( &intersect_rc, &rc, &crc ) ){
+				if( imc.isVerticalComp() ){
+					if( (pt.x = area.left - w) < wrc.left )
+						pt.x = area.right;
+				}
+				else{
+					if( (pt.y = area.bottom) > wrc.bottom )
+						pt.y = area.top - h;
+				}
+			}
+			break;
+		}
+	case CFS_DEFAULT:
+	default:
+		{
+			IMEUILock lock( hwnd );
+			IMEUI* ui = lock.getIMEUI();
+			if( ! ui )
+				break;
+			if( g_fixCompWnd )	{
+				ui->compWnd.getRelativeCandPos(imc, &pt);
+				ClientToScreen(ui->compWnd.getHwnd(), &pt);
+			}
+			else {
+				pt = ui->getCompWndPos(imc);
+				ui->compWnd.getCandPos(imc, &pt);
+			}
+		}
+	}
+
+	if( ! g_fixCompWnd )
+		ClientToScreen( imc.getIC()->hWnd, &pt );
+
+	return pt;
+}
+
+void IMEUI::showCandWnd(void)
+{
+	if( ! candWnd.isWindow() )
+		candWnd.create(hwnd);
+
+	candWnd.updateSize();
+
+	POINT pt = getCandWndPos( IMCLock(getIMC()) );
+	candWnd.move( pt.x, pt.y );
+
+	if( candWnd.isVisible() )
+		candWnd.refresh();
+	else
+		candWnd.show();
+}
+
+void IMEUI::showUserNotify(IMCLock& imc)
+{
+	CompStr* cs = imc.getCompStr();
+	LPCTSTR msg = cs->getShowMsg();
+	if( *msg )
+	{
+//		POINT pt = getCompWndPos(imc);
+//		tooltip.showTip(pt.x, pt.y + 22, msg, 1500);
+		POINT pt = getCandWndPos(imc);
+		tooltip.showTip(pt.x, pt.y, msg, 1500);
+	}
+	else if(tooltip.isVisible())
+		tooltip.hideTip();
+}
+
 

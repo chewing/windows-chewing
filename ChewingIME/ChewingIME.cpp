@@ -187,9 +187,13 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				}
 				HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 				g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+				if( g_candPerRow < 1 )	g_candPerRow = 1;
+				if( g_candPerRow > 10 )	g_candPerRow = 10;
 
 				spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
 				int cand_per_page = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+				if( cand_per_page < 7 )	g_candPerRow = 7;
+				if( cand_per_page > 10 )	g_candPerRow = 10;
 				g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
 
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
