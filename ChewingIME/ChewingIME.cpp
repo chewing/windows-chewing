@@ -47,6 +47,7 @@ static const char* g_selKeys[]={
 	"asdfzxcv89",
 	"asdfjkl789",
 	"aoeuhtn789",
+    "1234qweras",
 	NULL
 };
 
@@ -57,6 +58,7 @@ static const char* g_selKeys[]={
 		_T("asdfzxcv89"),
 		_T("asdfjkl789"),
 		_T("aoeuhtn789"),
+		_T("1234qweras"),
 		NULL
 	};
 	const TCHAR** g_selKeyNames = g_selKeyNameStrs;
