@@ -25,6 +25,7 @@ extern DWORD g_hideStatusWnd;
 extern DWORD g_enableShift;
 extern DWORD g_fixCompWnd;
 extern DWORD g_ColorCandWnd;
+extern DWORD g_ColoredCompCursor;
 
 extern ChewingClient* g_chewing;
 

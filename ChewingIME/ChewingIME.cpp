@@ -38,6 +38,7 @@ DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
 DWORD g_ColorCandWnd = true;
+DWORD g_ColoredCompCursor = false;
 DWORD g_selKeyType = 0;
 DWORD g_selAreaLen = 50;
 
@@ -99,6 +100,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
 		RegQueryValueEx( hk, "ColorCandWnd", 0, &type, (LPBYTE)&g_ColorCandWnd, &size );
+		RegQueryValueEx( hk, "ColorCompCursor", 0, &type, (LPBYTE)&g_ColoredCompCursor, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
 		RegCloseKey( hk );
@@ -132,6 +134,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ColorCandWnd"), 0, REG_DWORD, (LPBYTE)&g_ColorCandWnd, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("ColorCompCursor"), 0, REG_DWORD, (LPBYTE)&g_ColoredCompCursor, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -157,6 +160,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
 			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
+			CheckDlgButton( hwnd, IDC_BLOCK_CURSOR, g_ColoredCompCursor );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -207,6 +211,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
 				g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
+				g_ColoredCompCursor = IsDlgButtonChecked( hwnd, IDC_BLOCK_CURSOR );
 
 				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
 				if( g_selKeyType < 0 )
@@ -910,10 +915,17 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		switch( key )
 		{
 		case VK_NEXT:
+        case VK_SPACE:// allow space to PgDn 
 			key = VK_RIGHT;
 			break;
 		case VK_PRIOR:
 			key = VK_LEFT;
+            break;
+        // Fix #15218, allow backspace/enter to close cand win
+        case    VK_BACK: 
+        case    VK_RETURN:
+            key = VK_ESCAPE;
+            break;
 		}
 	}
 	else if( imc.isVerticalComp() && ! g_fixCompWnd )

@@ -114,7 +114,18 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 //		int selstart = indexToXPos( CompSelStart );
 //		int selend = indexToXPos( CompSelEnd );
 		int cursor = indexToXPos( compStr, cursorPos );
-		BitBlt( memdc, cursor, 0, 2, rc.bottom, memdc, cursor, 0, NOTSRCCOPY );
+        if ( g_ColoredCompCursor==false )
+        {
+		    BitBlt( memdc, cursor, 0, 2, rc.bottom, memdc, cursor, 0, NOTSRCCOPY );
+        }
+        else
+        {
+            // #15235, block cursor
+		    int curWidth;
+            curWidth = indexToXPos(compStr, 
+                (int)(_tcsinc(compStr.c_str()+cursorPos)-(compStr.c_str()+cursorPos)))-2;
+		    BitBlt( memdc, cursor, 0, curWidth, rc.bottom, memdc, cursor, 0, DSTINVERT );
+        }
 	}
 
 	InflateRect( &rc, 1, 1 );
