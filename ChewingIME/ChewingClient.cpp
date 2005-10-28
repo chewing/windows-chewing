@@ -11,13 +11,15 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys )
+ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys, bool AdvAfterSel)
 	: serverWnd(NULL), chewingID(0), sharedMem(INVALID_HANDLE_VALUE)
 	, spaceAsSelection(spaceAsSel)
 	, keyLayout(kbLayout)
+    , advAfterSelection(AdvAfterSel)
 {
 	ConnectServer();
 	SelKey((char*)selKeys);
+    SetAdvanceAfterSelection(advAfterSelection);
     pSelKeys = (char*)selKeys;
 }
 
@@ -102,6 +104,12 @@ int ChewingClient::DoubleTab()
 // Return the i-th selection key, i >= 0.
 char ChewingClient::SelKey(int i)
 {	return (char)SendMessage( serverWnd, ChewingServer::cmdGetSelKey, i, chewingID);	}
+
+void ChewingClient::SetAdvanceAfterSelection(bool bDo)
+{
+    SendMessage( serverWnd, ChewingServer::cmdAdvanceAfterSelection, 
+                (bDo==true)?1 :0, chewingID);
+}
 
 void ChewingClient::SelKey(char* selkey)
 {

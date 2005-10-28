@@ -15,7 +15,7 @@
 class ChewingClient  
 {
 public:
-	ChewingClient( int kbLayout, bool spaceAsSel = true, const char* selKeys="1234567890" );
+	ChewingClient( int kbLayout, bool spaceAsSel = true, const char* selKeys="1234567890", bool AdvAfterSel=true);
 	~ChewingClient();
 
 public:
@@ -47,6 +47,7 @@ public:
 	// Return the i-th selection key, i >= 0.
 	char SelKey(int i);
 	void SelKey(char* selkey);
+    void SetAdvanceAfterSelection(bool bDo);
 
 	char* ZuinStr();
 	char* CommitStr();
@@ -91,6 +92,7 @@ public:
 	void ConnectServer(void);
 protected:
 	bool spaceAsSelection;
+    bool advAfterSelection;
 	int keyLayout;
 public:
 	int ShowMsgLen(void);

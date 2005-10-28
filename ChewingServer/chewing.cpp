@@ -238,6 +238,11 @@ bool Chewing::GetFullShape(void)
 	return !!cd->bFullShape;
 }
 
+void Chewing::SetAdvanceAfterSelection(int bDo)
+{
+    cd->bAutoShiftCur = bDo;
+}
+
 bool Chewing::LoadDataFiles(const char *dataDir, const char *hashDir)
 {
     ReadTree( (char*)dataDir );

@@ -46,6 +46,7 @@
 #define IDC_CAND_PER_PAGE_SPIN          1022
 #define IDC_COLOR_CANDIDATE             1023
 #define IDC_BLOCK_CURSOR                1024
+#define IDC_ADV_AFTER_SEL               1025
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005

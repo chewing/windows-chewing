@@ -43,8 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /W3 /GX /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "NDEBUG" /D "USE_BINARY_DAT" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "DISABLE_ATEXIT" /YX /FD /c
-# SUBTRACT CPP /O<none>
+# ADD CPP /nologo /W3 /GX /Zi /Od /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "NDEBUG" /D "USE_BINARY_DAT" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "DISABLE_ATEXIT" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x404 /d "NDEBUG"

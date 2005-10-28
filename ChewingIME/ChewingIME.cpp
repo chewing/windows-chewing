@@ -39,6 +39,7 @@ DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
 DWORD g_ColorCandWnd = true;
 DWORD g_ColoredCompCursor = false;
+DWORD g_AdvanceAfterSelection = true;
 DWORD g_selKeyType = 0;
 DWORD g_selAreaLen = 50;
 
@@ -101,6 +102,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
 		RegQueryValueEx( hk, "ColorCandWnd", 0, &type, (LPBYTE)&g_ColorCandWnd, &size );
 		RegQueryValueEx( hk, "ColorCompCursor", 0, &type, (LPBYTE)&g_ColoredCompCursor, &size );
+		RegQueryValueEx( hk, "AdvanceAfterSelection", 0, &type, (LPBYTE)&g_AdvanceAfterSelection, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
 		RegCloseKey( hk );
@@ -114,6 +116,8 @@ void LoadConfig()
 
 	if( g_chewing )
 		g_chewing->SelKey( (char*)g_selKeys[g_selKeyType] );
+    if ( g_chewing!=NULL )
+        g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 }
 
 
@@ -135,6 +139,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ColorCandWnd"), 0, REG_DWORD, (LPBYTE)&g_ColorCandWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ColorCompCursor"), 0, REG_DWORD, (LPBYTE)&g_ColoredCompCursor, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("AdvanceAfterSelection"), 0, REG_DWORD, (LPBYTE)&g_AdvanceAfterSelection, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -161,6 +166,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
 			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
 			CheckDlgButton( hwnd, IDC_BLOCK_CURSOR, g_ColoredCompCursor );
+			CheckDlgButton( hwnd, IDC_ADV_AFTER_SEL, g_AdvanceAfterSelection );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -212,6 +218,10 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
 				g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
 				g_ColoredCompCursor = IsDlgButtonChecked( hwnd, IDC_BLOCK_CURSOR );
+                g_AdvanceAfterSelection = IsDlgButtonChecked( hwnd, IDC_ADV_AFTER_SEL);
+
+                if ( g_chewing!=NULL )
+                    g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 
 				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
 				if( g_selKeyType < 0 )
@@ -558,7 +568,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 ChewingClient* LoadChewingEngine()
 {
 	return new ChewingClient( int(g_keyboardLayout), 
-		g_spaceAsSelection, g_selKeys[g_selKeyType] );
+		g_spaceAsSelection, g_selKeys[g_selKeyType], g_AdvanceAfterSelection);
 }
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
