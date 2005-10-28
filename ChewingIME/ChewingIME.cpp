@@ -660,9 +660,19 @@ BOOL CommitBuffer( IMCLock& imc )
 
 	if( *cs->getCompStr() )
 	{
-		// FIXME: If candidate window is opened, this
-		//        will cause problems.
-		if( g_chewing )
+		// FIX #15284.
+        //  If candidate wnd is open, send ESC key to lib, 
+        //  then submit composition string, close cand wnd
+    	if( g_chewing->Candidate() > 0 )
+        {
+            g_chewing->Esc();
+            g_chewing->Enter();
+            GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_CLOSECANDIDATE, 1 );
+            CandList* candList = (CandList*)ImmLockIMCC(imc.getIC()->hCandInfo);
+            candList->setTotalCount(0);
+        }
+
+        if( g_chewing )
 		{
 			g_chewing->Enter();	// Commit
 			char* cstr = NULL;
