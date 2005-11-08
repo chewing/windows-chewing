@@ -56,6 +56,7 @@ class Chewing
 
   char* ZuinStr();
   char* CommitStr();
+  uint16* PhoneSeq();
   char* CommitStr(int from);
   char* CommitStr(int from, int to);
   int   CommitReady();

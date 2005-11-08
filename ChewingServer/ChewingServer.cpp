@@ -105,6 +105,7 @@ ChewingServer::~ChewingServer()
 {
 	CloseHandle(sharedMem);
 	TerminateChewing();
+    OutputDebugString("Chewing server down.");
 }
 
 bool ChewingServer::run()
@@ -164,8 +165,25 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
                 return  ~((LRESULT)(Chewing*)(iterT->second));
             }
         }
-        return  0;
-
+        return  -1; /* return -1 here, so clinet side can identify 
+                       its response from server or API failed */
+    case    cmdLastPhoneSeq:
+        {
+            uint16 *sbuf = GetLastPhoneSeq();
+		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
+									    0, 0, CHEWINGSERVER_BUF_SIZE );
+            for ( int lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
+            {
+                if ( sbuf[lop]==0 )
+                {
+                    break;
+                }
+                obuf[lop] = sbuf[lop];
+            }
+            obuf[lop] = 0;
+		    UnmapViewOfFile( obuf );
+            return  lop;
+        }
     case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -228,6 +246,7 @@ bool ChewingServer::startServer()
 		SetEvent(evt);
 		CloseHandle(evt);
 	}
+    OutputDebugString("Chewing server up.");
 
 //	SetPriorityClass( hprocess, NORMAL_PRIORITY_CLASS );
 	return true;
@@ -280,3 +299,4 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 	}
 	return 0;
 }
+

@@ -81,6 +81,7 @@ public:
 		cmdSetKeyboardLayout,
 		cmdSetHsuSelectionKeyType,
 		cmdSetSelAreaLen,
+        cmdAdvanceAfterSelection,
 
 		// char* (void)
 		cmdZuinStr,
@@ -98,7 +99,8 @@ public:
 
 		cmdAddClient,
 		cmdRemoveClient,
-        cmdEcho
+        cmdEcho,
+        cmdLastPhoneSeq
 	};
 
 public:

@@ -43,7 +43,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /W3 /GX /Zi /Od /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "NDEBUG" /D "USE_BINARY_DAT" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "DISABLE_ATEXIT" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\..\libchewing\branches\win32\include" /I "..\Include" /D "NDEBUG" /D "USE_BINARY_DAT" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "DISABLE_ATEXIT" /FR /YX /FD /c
+# SUBTRACT CPP /Z<none>
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x404 /d "NDEBUG"
@@ -53,7 +54,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /map /debug /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /map /machine:I386
+# SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "ChewingServer - Win32 Debug"
 

@@ -99,7 +99,8 @@ public:
 
 		cmdAddClient,
 		cmdRemoveClient,
-        cmdEcho
+        cmdEcho,
+        cmdLastPhoneSeq
 	};
 
 public:

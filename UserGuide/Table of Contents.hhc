@@ -23,6 +23,10 @@
 			<param name="Local" value="config.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="詞庫編輯工具">
+			<param name="Local" value="PhraseEd.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="已知問題及解決方法">
 			<param name="Local" value="knownissue.htm">
 			</OBJECT>

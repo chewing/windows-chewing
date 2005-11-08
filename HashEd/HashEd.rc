@@ -1,0 +1,231 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (Taiwan) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
+#pragma code_page(950)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 1\r\n"
+    "#pragma code_page(950)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\HashEd.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.cht\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\HashEd.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 259, 203
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "關於 新酷音本地詞庫編輯器"
+FONT 9, "新細明體"
+BEGIN
+    GROUPBOX        "",IDC_STATIC,7,87,245,90
+    LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
+                    IDC_STATIC,18,97,224,75
+    LTEXT           "新酷音本地詞庫編輯器\n\n版本： 0.0.1\n\n發行日期：2005.11.9\n\n授權方式： GNU General Public License\n\n工具原作者：seamxr\n",
+                    IDC_STATIC,90,7,162,79
+    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,
+                    59,63
+    LTEXT           "題字：翁政銓",IDC_STATIC,13,74,49,8
+    PUSHBUTTON      "確定 (&O)",IDOK,104,182,50,14
+END
+
+IDD_HASHED_DIALOG DIALOGEX 0, 0, 425, 303
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "PhraseEd"
+FONT 10, "新細明體"
+BEGIN
+    EDITTEXT        IDC_NEW_PHRASE_EDIT,13,245,141,15,ES_AUTOHSCROLL
+    PUSHBUTTON      "新增詞彙",IDC_ADD_PHRASE,162,245,61,16
+    PUSHBUTTON      "刪除",IDC_DEL_PHRASE,341,209,70,14
+    GROUPBOX        "本地詞庫",IDC_BANNER,7,7,411,223
+    PUSHBUTTON      "匯入詞庫檔",IDC_IMPORT,225,274,61,22
+    PUSHBUTTON      "存入本地詞庫",IDC_SAVE,357,274,61,22
+    CONTROL         "List1",IDC_PHRASE_LIST,"SysListView32",LVS_LIST | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,13,16,399,189,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "尋找詞彙",IDC_FIND_PHRASE,230,245,61,16
+    GROUPBOX        "功能",IDC_STATIC,7,234,411,34
+    PUSHBUTTON      "另存成新檔",IDC_SAVE_AS,291,274,61,22
+    PUSHBUTTON      "關於本工具",IDC_ABOUT,7,274,61,22
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,0,1
+ PRODUCTVERSION 0,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040404b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "Chewing local phrase editor\0"
+            VALUE "FileVersion", "0, 0, 0, 1\0"
+            VALUE "InternalName", "PhraseEd\0"
+            VALUE "LegalCopyright", "Copyright (C) 2005\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "PhraseEd.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "PhraseEd Application\0"
+            VALUE "ProductVersion", "0, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x404, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 252
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 196
+    END
+
+    IDD_HASHED_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 418
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 296
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_COOL                BITMAP  MOVEABLE PURE   "icon.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ABOUTBOX            "關於 PhraseEd(&A)..."
+END
+
+#endif    // Chinese (Taiwan) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE 4, 1
+#pragma code_page(950)
+#endif //_WIN32
+#include "res\HashEd.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.cht\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
