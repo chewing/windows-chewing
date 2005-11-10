@@ -40,6 +40,7 @@ DWORD g_fixCompWnd = false;
 DWORD g_ColorCandWnd = true;
 DWORD g_ColoredCompCursor = false;
 DWORD g_AdvanceAfterSelection = true;
+DWORD g_FontSize = DEF_FONT_SIZE;
 DWORD g_selKeyType = 0;
 DWORD g_selAreaLen = 50;
 
@@ -103,6 +104,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "ColorCandWnd", 0, &type, (LPBYTE)&g_ColorCandWnd, &size );
 		RegQueryValueEx( hk, "ColorCompCursor", 0, &type, (LPBYTE)&g_ColoredCompCursor, &size );
 		RegQueryValueEx( hk, "AdvanceAfterSelection", 0, &type, (LPBYTE)&g_AdvanceAfterSelection, &size );
+        RegQueryValueEx( hk, "DefFontSize", 0, &type, (LPBYTE)&g_FontSize, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
 		RegCloseKey( hk );
@@ -118,6 +120,8 @@ void LoadConfig()
 		g_chewing->SelKey( (char*)g_selKeys[g_selKeyType] );
     if ( g_chewing!=NULL )
         g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
+    if ( g_FontSize>64 || g_FontSize<4 )
+        g_FontSize = DEF_FONT_SIZE;
 }
 
 
@@ -140,6 +144,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("ColorCandWnd"), 0, REG_DWORD, (LPBYTE)&g_ColorCandWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ColorCompCursor"), 0, REG_DWORD, (LPBYTE)&g_ColoredCompCursor, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("AdvanceAfterSelection"), 0, REG_DWORD, (LPBYTE)&g_AdvanceAfterSelection, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("DefFontSize"), 0, REG_DWORD, (LPBYTE)&g_FontSize, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -179,6 +184,11 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			::SendMessage( spin, UDM_SETPOS, 0, 
                            (LPARAM) MAKELONG ((short) cand_per_page , 0));
 
+			spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
+			::SendMessage( spin, UDM_SETRANGE32, 4, 64 );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) g_FontSize , 0));
+
 			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
 			const TCHAR** pselkeys = g_selKeyNames;
 			while( *pselkeys )
@@ -208,6 +218,12 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				if( cand_per_page > 10 )	g_candPerRow = 10;
 				g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
 
+				spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
+				int tFontSize = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+				if( tFontSize < 4 )     tFontSize = 4;
+				if( tFontSize > 64 )	tFontSize = 64;
+				g_FontSize = tFontSize;
+
 				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
 				g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
 				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
@@ -226,7 +242,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
 				if( g_selKeyType < 0 )
 					g_selKeyType = 0;
-				EndDialog(hwnd, IDOK);
+
+                EndDialog(hwnd, IDOK);
 			}
 			break;
 		case IDCANCEL:

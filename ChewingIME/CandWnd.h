@@ -17,6 +17,9 @@ protected:
 public:
 	void getSize(int* w, int* h);
 	void updateSize(void);
-	HFONT font;
 	bool create(HWND imeUIWnd);
+    void UpdateFont();
+
+    HFONT font;
+    int   font_size;
 };

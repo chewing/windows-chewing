@@ -16,6 +16,8 @@ const LPCTSTR g_statusWndClass = _T("ChewingStatus");
 
 #define	WM_IME_RELOADCONFIG		(WM_APP+1)
 
+#define DEF_FONT_SIZE           16
+
 extern const TCHAR** g_selKeyNames;
 extern DWORD g_selKeyType;
 
@@ -26,6 +28,7 @@ extern DWORD g_enableShift;
 extern DWORD g_fixCompWnd;
 extern DWORD g_ColorCandWnd;
 extern DWORD g_ColoredCompCursor;
+extern DWORD g_FontSize;
 
 extern ChewingClient* g_chewing;
 

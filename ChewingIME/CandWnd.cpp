@@ -13,13 +13,26 @@
 #include <tchar.h>
 #include <windows.h>
 
-CandWnd::CandWnd()
+
+void CandWnd::UpdateFont()
 {
+    if ( font_size==g_FontSize )
+        return;
+    
+    font_size = g_FontSize;
+    if ( font!=NULL )
+        DeleteObject(font);
 	font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	LOGFONT lf;
 	GetObject( font, sizeof(lf), &lf);
-	lf.lfHeight = 16;
+	lf.lfHeight = font_size;
 	font = CreateFontIndirect( &lf );
+}
+
+CandWnd::CandWnd()
+{
+    font_size = 0;
+    UpdateFont();
 }
 
 CandWnd::~CandWnd(void)
@@ -114,6 +127,8 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 	HDC hDC = ps.hdc;
 	HFONT oldFont;
 	RECT rc;
+
+    UpdateFont();
 
 	oldFont = (HFONT)SelectObject(hDC, font);
 

@@ -47,6 +47,9 @@
 #define IDC_COLOR_CANDIDATE             1023
 #define IDC_BLOCK_CURSOR                1024
 #define IDC_ADV_AFTER_SEL               1025
+#define IDC_FONT_SIZE                   1026
+#define IDC_COMP_FONT                   1027
+#define IDC_FONT_SIZE_SPIN              1028
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
@@ -63,7 +66,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40021
-#define _APS_NEXT_CONTROL_VALUE         1024
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
