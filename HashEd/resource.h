@@ -6,6 +6,14 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_HASHED_DIALOG               102
+#define IDS_ALLOW_CHI_STRING            102
+#define IDS_INPUT_RULE                  103
+#define IDS_PHRASE_EXIST                104
+#define IDS_SAVE_CONFIRM                105
+#define IDS_SAVE_BTN_FACE               106
+#define IDS_NUM_OF_PHRASES              107
+#define IDS_LOADING                     108
+#define IDS_SUGGEST_DO_SAVE             109
 #define IDB_COOL                        122
 #define IDR_MAINFRAME                   128
 #define IDC_PHRASE_LIST                 1001

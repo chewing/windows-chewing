@@ -15,8 +15,9 @@ class CHashContext
 public:
     /**
      *  Load specify hash.dat
+     *  retval -1   find bad data entry
      */
-    bool load_hash(const char *file, bool doClear=true);
+    int load_hash(const char *file, bool doClear=true);
 
     /**
      *  Save current context to target file
@@ -31,7 +32,7 @@ public:
     /**
      *  Delete redundancy phrase
      */
-    void arrange_phrase();
+    bool arrange_phrase();
 
     /**
      *  Fro debug purpose only.
@@ -91,6 +92,10 @@ public:
     /**
      */
     void clear();
+
+    /**
+     */
+    static BOOL _isDbcsString(char *str);
 
     CHashContext();
     ~CHashContext();

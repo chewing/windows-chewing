@@ -42,7 +42,8 @@ public:
     uint16  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];
     int     m_NumPhoneSeq;
     char    m_string[(MAX_PHONE_SEQ_LEN+1)*2];
-    TCHAR m_strHashFolder[ MAX_PATH + 1 ];
+    char    m_msgStr[256];
+    TCHAR   m_strHashFolder[ MAX_PATH + 1 ];
 
 // Implementation
 protected:
@@ -76,6 +77,8 @@ protected:
     void UpdateBanner(const char *message=NULL);
     void SelItem(int idx);
     void Reload(char* hashfile, bool bClearContext);
+    char *GetStringFromTab(int id);
+
 public:
 	void onCommand(UINT cmd);
 };

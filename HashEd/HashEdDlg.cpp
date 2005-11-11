@@ -106,7 +106,7 @@ void CHashEdDlg::ReloadListCtrl()
 {
 	ShowWindow( m_listing, SW_HIDE );
     HASH_ITEM *pItem;
-    int lop, idx, count = m_context.get_phrase_count();
+    int lop, count = m_context.get_phrase_count();
 
 	ListView_DeleteAllItems( m_listing );
     for ( lop=0; lop<count; ++lop )
@@ -204,18 +204,17 @@ void CHashEdDlg::OnAddPhrase()
     BOOL bMatch;
 
     if ( strlen(m_string)==0 )    return;
-	if ( _isDbcsString(m_string)==FALSE )
+	if ( CHashContext::_isDbcsString(m_string)==FALSE )
 	{
-		MessageBox(m_hWnd, "請輸入中文字串。", NULL, MB_OK );
+		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
+                   NULL, MB_OK );
 		return;
 	}
 
 	if ( (int)strlen(m_string)/2!=m_NumPhoneSeq )
 	{
-		MessageBox(m_hWnd, 
-            "請依照以下方法輸入:\n\n"
-            "1. 使用新酷音輸入法輸入中文。\n"
-            "2. 一次完成整個句子，才按下 enter 鍵。\n", NULL, MB_OK );
+		MessageBox(m_hWnd, GetStringFromTab(IDS_INPUT_RULE),
+                   NULL, MB_OK );
 		return;
 	}
 
@@ -224,7 +223,7 @@ void CHashEdDlg::OnAddPhrase()
 	{
         char strtemp[128];
         SelItem(tt);
-        sprintf( strtemp, "「%s」已經存在。", m_string );
+        sprintf( strtemp, GetStringFromTab(IDS_PHRASE_EXIST), m_string);
 		MessageBox(m_hWnd, strtemp, NULL, MB_OK);
 		return;
 	}
@@ -249,24 +248,6 @@ void CHashEdDlg::OnAddPhrase()
     UpdateBanner();
 }
 
-BOOL CHashEdDlg::_isDbcsString(char *str)
-{
-	char *pNextChar, *pCurChar;
-
-	pCurChar = str;
-	while ( *pCurChar!=NULL )
-	{
-		pNextChar = CharNext(pCurChar);
-		if ( (int)(pNextChar-pCurChar)!=2 )
-		{
-			return	FALSE;
-		}
-		pCurChar = pNextChar;
-	};
-
-	return	TRUE;
-}
-
 void CHashEdDlg::OnKillfocusNewPhraseEdit() 
 {
 	// TODO: Add your control notification handler code here
@@ -287,9 +268,10 @@ void CHashEdDlg::OnFindPhrase()
     GetWindowText(m_edtPhrase, tstring, sizeof(tstring));
     tstring[sizeof(tstring)-1] = '\0';
     if ( strlen(tstring)==0 )   return;
-	if ( _isDbcsString(tstring)==FALSE )
+	if ( CHashContext::_isDbcsString(tstring)==FALSE )
 	{
-		MessageBox(m_hWnd, "請輸入中文字串。", NULL, MB_OK);
+		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
+                   NULL, MB_OK);
 		return;
 	}
     
@@ -337,14 +319,24 @@ void CHashEdDlg::OnImport()
 void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 {
     char strtemp[MAX_PATH + 100];
+    int iret, iWarning = 0;
 
-    sprintf( strtemp, "正在載入 %s", hashfile);
+    sprintf( strtemp, GetStringFromTab(IDS_LOADING), hashfile);
     UpdateBanner( strtemp);
 
-    m_context.load_hash(hashfile, bClearContext);
+    if ( m_context.load_hash(hashfile, bClearContext)==-1 )
+        iWarning = 1;
+
     m_context.sort_phrase();
-    m_context.arrange_phrase();
+
+    if ( m_context.arrange_phrase()==false )
+        iWarning = 1;
+
     ReloadListCtrl();
+
+    if ( iWarning!=0 )
+        MessageBox(m_hWnd, GetStringFromTab(IDS_SUGGEST_DO_SAVE), 
+		           NULL, MB_OK );
 
     UpdateBanner();
 }
@@ -366,17 +358,15 @@ void CHashEdDlg::OnSave()
      TCHAR strTemp[100];
 	 TCHAR strpath[MAX_PATH+1];
 
-    if ( MessageBox(m_hWnd, "確定要以目前正在編輯的內容取代本地詞庫檔案嗎？\n"
-                       "此過程將會包含重新載入詞庫，可能需要一點時間。\n", 
-					   NULL, 
-                       MB_YESNO ) !=IDYES )
+    if ( MessageBox(m_hWnd, GetStringFromTab(IDS_SAVE_CONFIRM), 
+		            NULL, MB_YESNO ) !=IDYES )
     {
         return;
     }
     //  ui...
     _enable_buttons(FALSE);
     GetWindowText( m_btnSave, strTemp, sizeof(strTemp) );
-    SetWindowText( m_btnSave, "存檔中...");
+    SetWindowText( m_btnSave, GetStringFromTab(IDS_SAVE_BTN_FACE));
 
     //
     sprintf( strpath, "%s\\hash.dat", m_strHashFolder );
@@ -461,9 +451,8 @@ void CHashEdDlg::UpdateBanner(const char *message)
     {
         char banner[64];
 
-        sprintf(banner, 
-            "編輯區內共有 %d 個詞彙。", 
-            m_context.get_phrase_count());
+        sprintf(banner, GetStringFromTab(IDS_NUM_OF_PHRASES), 
+                m_context.get_phrase_count());
 
         SetWindowText(m_banner, banner);
     }
@@ -541,14 +530,13 @@ void CHashEdDlg::OnTimer(UINT nIDEvent)
     {
         TCHAR strFile[MAX_PATH + 1];
 
+        KillTimer(m_hWnd, 553);
         GetHashLocation();
-    
         _stprintf( strFile, "%s\\hash.dat", m_strHashFolder );
-
+        
         m_context._connect_server();
 		Reload( strFile, true );
 
-        KillTimer(m_hWnd, 553);
         _enable_buttons(TRUE);
     }
 }
@@ -583,4 +571,14 @@ void CHashEdDlg::onCommand(UINT cmd)
 		EndDialog( m_hWnd, cmd );
 		break;
 	}
+}
+
+char* CHashEdDlg::GetStringFromTab(int id)
+{
+    if ( LoadString(GetModuleHandle(NULL),
+                    id, m_msgStr, sizeof(m_msgStr))==0 )
+    {
+        m_msgStr[0] = '\0';
+    }
+    return  m_msgStr;
 }

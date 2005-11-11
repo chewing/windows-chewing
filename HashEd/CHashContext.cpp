@@ -38,13 +38,13 @@ void CHashContext::clear()
     pool.clear();
 }
 
-bool CHashContext::load_hash(const char *file, bool doClear)
+int CHashContext::load_hash(const char *file, bool doClear)
 {
     FILE *fHashFile;
     HASH_ITEM *hitem;
     char strBuf[256];
     int i, lop;
-    bool badItem;
+    bool badItem, badStr;
 
     if ( doClear )
         clear();
@@ -59,11 +59,19 @@ bool CHashContext::load_hash(const char *file, bool doClear)
         return  false;
     }
 
+    badStr = false;
     while   ( 1 )
     {
         badItem = false;
         if ( fscanf(fHashFile, "%s", strBuf)!=1 )
             break;
+
+        if ( CHashContext::_isDbcsString(strBuf)==FALSE )
+        {
+            badStr = true;
+            fseek(fHashFile, FIELD_SIZE-strlen(strBuf)-1, SEEK_CUR);
+            continue;
+        }
 
         i = strlen(strBuf);
         hitem = (HASH_ITEM*) calloc(1, sizeof(HASH_ITEM));
@@ -96,10 +104,12 @@ bool CHashContext::load_hash(const char *file, bool doClear)
     }
 
 _handle_load_err:
-    if ( badItem )
-        release__HASH_ITEM(hitem);
     fclose(fHashFile);
-    return  true;
+    if ( badItem ) {
+        release__HASH_ITEM(hitem);
+        return  0;
+    }
+    return  (badStr==false)?1 :-1;
 }
 
 static int _PhoneSeqTheSame(const uint16 p1[], const uint16 p2[])
@@ -130,10 +140,11 @@ void CHashContext::sort_phrase()
     std::stable_sort(pool.begin( ), pool.end( ), _Comp);
 }
 
-void CHashContext::arrange_phrase()
+bool CHashContext::arrange_phrase()
 {
     std::vector<HASH_ITEM*>::iterator iter;
     HASH_ITEM *pItem, *pPivot;
+    bool bDup = true;
     
     iter = pool.begin();
     pPivot = NULL;
@@ -147,6 +158,7 @@ void CHashContext::arrange_phrase()
             { }
             else
             {   /* duplicated item */
+                bDup = false;
                 release__HASH_ITEM(pItem);
                 iter = pool.erase(iter);
                 continue;
@@ -155,6 +167,7 @@ void CHashContext::arrange_phrase()
         pPivot = pItem;
         ++iter;
     }
+    return  bDup;
 }
 
 //  for debug purpose
@@ -369,6 +382,24 @@ int main(int argc, char* argv[])
     printf(context.get_phrase_by_id(343)->data.wordSeq);
 
 	return 0;
+}
+
+BOOL CHashContext::_isDbcsString(char *str)
+{
+	char *pNextChar, *pCurChar;
+
+	pCurChar = str;
+	while ( *pCurChar!=NULL )
+	{
+		pNextChar = CharNext(pCurChar);
+		if ( (int)(pNextChar-pCurChar)!=2 )
+		{
+			return	FALSE;
+		}
+		pCurChar = pNextChar;
+	};
+
+	return	TRUE;
 }
 
 CHashContext::CHashContext()
