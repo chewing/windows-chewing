@@ -4,7 +4,10 @@
 #include "stdafx.h"
 #include "HashEd.h"
 #include "HashEdDlg.h"
+#include ".\hasheddlg.h"
 
+#include <shlobj.h>
+#include <tchar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,197 +16,112 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CAboutDlg dialog used for App About
-
-class CAboutDlg : public CDialog
-{
-public:
-	CAboutDlg();
-
-// Dialog Data
-	//{{AFX_DATA(CAboutDlg)
-	enum { IDD = IDD_ABOUTBOX };
-	//}}AFX_DATA
-
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CAboutDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	//{{AFX_MSG(CAboutDlg)
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
-{
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	//}}AFX_DATA_MAP
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
 // CHashEdDlg dialog
 
-CHashEdDlg::CHashEdDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CHashEdDlg::IDD, pParent)
+CHashEdDlg::CHashEdDlg()
 {
-	//{{AFX_DATA_INIT(CHashEdDlg)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = ::LoadIcon( (HINSTANCE)GetModuleHandle(NULL), (LPCTSTR)IDR_MAINFRAME);
 }
 
-void CHashEdDlg::DoDataExchange(CDataExchange* pDX)
+BOOL CHashEdDlg::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CHashEdDlg)
-	DDX_Control(pDX, IDC_ABOUT, m_btnAbout);
-	DDX_Control(pDX, IDC_BANNER, m_banner);
-	DDX_Control(pDX, IDC_SAVE_AS, m_btnSaveAs);
-	DDX_Control(pDX, IDC_FIND_PHRASE, m_btnFindPhrase);
-	DDX_Control(pDX, IDC_PHRASE_LIST, m_listing);
-	DDX_Control(pDX, IDC_ADD_PHRASE, m_btnAddPhrase);
-	DDX_Control(pDX, IDC_DEL_PHRASE, m_btnDelPhrase);
-	DDX_Control(pDX, IDC_IMPORT, m_Import);
-	DDX_Control(pDX, IDC_NEW_PHRASE_EDIT, m_edtPhrase);
-	DDX_Control(pDX, IDC_SAVE, m_btnSave);
-	//}}AFX_DATA_MAP
+	CHashEdDlg* self;
+	if( msg == WM_INITDIALOG )
+	{
+		::SetWindowLongPtr(hwnd, DWL_USER, lp);
+		self = (CHashEdDlg*)lp;
+		self->m_hWnd = hwnd;
+		return self->OnInitDialog();
+	}
+	self = (CHashEdDlg*)::GetWindowLongPtr(hwnd, DWL_USER);
+	if( !self )
+		return FALSE;
+	return self->wndProc( msg, wp, lp );
 }
 
-BEGIN_MESSAGE_MAP(CHashEdDlg, CDialog)
-	//{{AFX_MSG_MAP(CHashEdDlg)
-	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
-	ON_EN_UPDATE(IDC_NEW_PHRASE_EDIT, OnUpdateNewPhraseEdit)
-	ON_EN_CHANGE(IDC_NEW_PHRASE_EDIT, OnChangeNewPhraseEdit)
-	ON_BN_CLICKED(IDC_ADD_PHRASE, OnAddPhrase)
-	ON_EN_KILLFOCUS(IDC_NEW_PHRASE_EDIT, OnKillfocusNewPhraseEdit)
-	ON_BN_CLICKED(IDC_FIND_PHRASE, OnFindPhrase)
-	ON_BN_CLICKED(IDC_IMPORT, OnImport)
-	ON_BN_CLICKED(IDC_SAVE, OnSave)
-	ON_BN_CLICKED(IDC_DEL_PHRASE, OnDelPhrase)
-	ON_BN_CLICKED(IDC_SAVE_AS, OnSaveAs)
-	ON_BN_CLICKED(IDC_ABOUT, OnAbout)
-	ON_WM_TIMER()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+LRESULT CHashEdDlg::wndProc(UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+		case WM_COMMAND:
+		{
+			UINT id = LOWORD(wp);
+			switch( HIWORD(wp) )
+			{
+			case EN_UPDATE:
+				if( id == IDC_NEW_PHRASE_EDIT )
+					OnUpdateNewPhraseEdit();
+				break;
+			case EN_CHANGE:
+				if( id == IDC_NEW_PHRASE_EDIT )
+					OnChangeNewPhraseEdit();
+				break;
+			case EN_KILLFOCUS:
+				if( id == IDC_NEW_PHRASE_EDIT )
+					OnKillfocusNewPhraseEdit();
+				break;
+			default:
+				onCommand( id );
+				break;
+			}
+		}
+		case WM_TIMER:
+			OnTimer( wp );
+			break;
+	}
+	return FALSE;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CHashEdDlg message handlers
 
 BOOL CHashEdDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
-
-	// Add "About..." menu item to system menu.
-
-	// IDM_ABOUTBOX must be in the system command range.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
-	{
-		CString strAboutMenu;
-		strAboutMenu.LoadString(IDS_ABOUTBOX);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
-	}
-
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
-	
+	SendMessage(m_hWnd, WM_SETICON, ICON_BIG, (LPARAM)m_hIcon);			// Set big icon
+	SendMessage(m_hWnd, WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);			// Set big icon
+
+	m_btnAbout = GetDlgItem( m_hWnd, IDC_ABOUT );
+	m_banner = GetDlgItem(  m_hWnd, IDC_BANNER );
+	m_btnSaveAs = GetDlgItem(  m_hWnd, IDC_SAVE_AS );
+	m_btnFindPhrase = GetDlgItem(  m_hWnd, IDC_FIND_PHRASE );
+	m_listing = GetDlgItem(  m_hWnd, IDC_PHRASE_LIST );
+	m_btnAddPhrase = GetDlgItem(  m_hWnd, IDC_ADD_PHRASE );
+	m_btnDelPhrase = GetDlgItem(  m_hWnd, IDC_DEL_PHRASE );
+	m_Import = GetDlgItem( m_hWnd, IDC_IMPORT );
+	m_edtPhrase = GetDlgItem( m_hWnd, IDC_NEW_PHRASE_EDIT );
+	m_btnSave = GetDlgItem( m_hWnd, IDC_SAVE );
+
 	// TODO: Add extra initialization here
     _enable_buttons(FALSE);
-    SetTimer(553, 10, NULL);
-    
+    SetTimer(m_hWnd, 553, 10, NULL);
+
     return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
 void CHashEdDlg::ReloadListCtrl()
 {
+	ShowWindow( m_listing, SW_HIDE );
     HASH_ITEM *pItem;
     int lop, idx, count = m_context.get_phrase_count();
 
-    m_listing.DeleteAllItems();
+	ListView_DeleteAllItems( m_listing );
     for ( lop=0; lop<count; ++lop )
     {
         pItem = m_context.get_phrase_by_id(lop);
-        idx = m_listing.InsertItem(lop, pItem->data.wordSeq);
-        m_listing.SetItemData(idx, (DWORD)pItem);
+		LVITEM item = {0};
+		item.iItem = lop;
+		item.pszText = pItem->data.wordSeq;
+		item.lParam = (LPARAM)pItem;
+		item.mask = LVIF_TEXT|LVIF_PARAM;
+
+		int i = ListView_InsertItem(m_listing, &item);
+		i = i;
     }
-}
-
-void CHashEdDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialog::OnSysCommand(nID, lParam);
-	}
-}
-
-// If you add a minimize button to your dialog, you will need the code below
-//  to draw the icon.  For MFC applications using the document/view model,
-//  this is automatically done for you by the framework.
-
-void CHashEdDlg::OnPaint() 
-{
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // device context for painting
-
-		SendMessage(WM_ICONERASEBKGND, (WPARAM) dc.GetSafeHdc(), 0);
-
-		// Center icon in client rectangle
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
-		CDialog::OnPaint();
-	}
-}
-
-// The system calls this to obtain the cursor to display while the user drags
-//  the minimized window.
-HCURSOR CHashEdDlg::OnQueryDragIcon()
-{
-	return (HCURSOR) m_hIcon;
+	ShowWindow( m_listing, SW_SHOW );
 }
 
 void CHashEdDlg::OnUpdateNewPhraseEdit() 
@@ -229,7 +147,12 @@ void CHashEdDlg::OnChangeNewPhraseEdit()
 
 int CHashEdDlg::_isMatch(char *string, int id)
 {
-    HASH_ITEM *pItem = (HASH_ITEM*) m_listing.GetItemData(id);
+	LVITEM lv_item;
+	lv_item.iItem = id;
+	lv_item.mask = LVIF_PARAM;
+	ListView_GetItem(m_listing, &lv_item);
+
+	HASH_ITEM *pItem = (HASH_ITEM*) lv_item.lParam;
     return  strcmp(string, pItem->data.wordSeq);
 }
 
@@ -237,7 +160,7 @@ int CHashEdDlg::find(char *tok, BOOL &bExactMatch, int hi, int lo)
 {
     int p, cmp;
     
-    p = m_listing.GetItemCount()-1;
+    p = ListView_GetItemCount(m_listing)-1;
     if ( hi==-1 )
         hi = p;
     if ( lo==-1 )
@@ -268,9 +191,9 @@ int CHashEdDlg::find(char *tok, BOOL &bExactMatch, int hi, int lo)
 
 void CHashEdDlg::SelItem(int idx) 
 {
-    m_listing.SetItemState(idx, LVIS_FOCUSED|LVIS_SELECTED,
-                                LVIS_FOCUSED|LVIS_SELECTED);
-	m_listing.EnsureVisible(idx, FALSE);
+	ListView_SetItemState( m_listing, idx, LVIS_FOCUSED|LVIS_SELECTED, 
+										   LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_EnsureVisible( m_listing, idx, FALSE);
 }
 
 void CHashEdDlg::OnAddPhrase() 
@@ -283,41 +206,46 @@ void CHashEdDlg::OnAddPhrase()
     if ( strlen(m_string)==0 )    return;
 	if ( _isDbcsString(m_string)==FALSE )
 	{
-		AfxMessageBox("請輸入中文字串。");
+		MessageBox(m_hWnd, "請輸入中文字串。", NULL, MB_OK );
 		return;
 	}
 
 	if ( (int)strlen(m_string)/2!=m_NumPhoneSeq )
 	{
-		AfxMessageBox(
+		MessageBox(m_hWnd, 
             "請依照以下方法輸入:\n\n"
             "1. 使用新酷音輸入法輸入中文。\n"
-            "2. 一次完成整個句子，才按下 enter 鍵。\n");
+            "2. 一次完成整個句子，才按下 enter 鍵。\n", NULL, MB_OK );
 		return;
 	}
 
     tt = find(m_string, bMatch);
     if ( bMatch==TRUE )
 	{
-        CString strtemp;
+        char strtemp[128];
         SelItem(tt);
-        strtemp.Format("「%s」已經存在。", m_string);
-		AfxMessageBox(strtemp);
+        sprintf( strtemp, "「%s」已經存在。", m_string );
+		MessageBox(m_hWnd, strtemp, NULL, MB_OK);
 		return;
 	}
 
 	pItem = m_context.append_phrase(m_string, m_PhoneSeq);
 
-    tt = m_listing.InsertItem(m_listing.GetItemCount(), m_string);
-    m_listing.SetItemState(tt, LVIS_FOCUSED|LVIS_SELECTED,
-                               LVIS_FOCUSED|LVIS_SELECTED);
-	tt = m_listing.EnsureVisible(tt, FALSE);
-    m_listing.SetItemData(tt, (DWORD)pItem);
+	LVITEM lv_item;
+	lv_item.iItem = ListView_GetItemCount(m_listing);
+	lv_item.pszText = m_string;
+	lv_item.lParam = (LPARAM)pItem;
+	lv_item.mask = LVIF_TEXT|LVIF_PARAM;
+
+    tt = ListView_InsertItem( m_listing, &lv_item );
+    ListView_SetItemState( m_listing, tt, LVIS_FOCUSED|LVIS_SELECTED,
+										  LVIS_FOCUSED|LVIS_SELECTED);
+	tt = ListView_EnsureVisible( m_listing, tt, FALSE);
 
     strcpy(m_string, "");
     m_NumPhoneSeq = 0;
     m_PhoneSeq[0] = 0;
-    m_edtPhrase.SetWindowText("");
+    SetWindowText(m_edtPhrase, NULL);
     UpdateBanner();
 }
 
@@ -342,7 +270,7 @@ BOOL CHashEdDlg::_isDbcsString(char *str)
 void CHashEdDlg::OnKillfocusNewPhraseEdit() 
 {
 	// TODO: Add your control notification handler code here
-    m_edtPhrase.GetWindowText(m_string, sizeof(m_string));
+    GetWindowText(m_edtPhrase, m_string, sizeof(m_string));
     m_string[sizeof(m_string)-1] = '\0';
 	m_NumPhoneSeq = m_context._get_phone_seq_from_server(m_PhoneSeq);
 }
@@ -356,12 +284,12 @@ void CHashEdDlg::OnFindPhrase()
     int     idx, beep;
     BOOL    bMatch;
 
-    m_edtPhrase.GetWindowText(tstring, sizeof(tstring));
+    GetWindowText(m_edtPhrase, tstring, sizeof(tstring));
     tstring[sizeof(tstring)-1] = '\0';
     if ( strlen(tstring)==0 )   return;
 	if ( _isDbcsString(tstring)==FALSE )
 	{
-		AfxMessageBox("請輸入中文字串。");
+		MessageBox(m_hWnd, "請輸入中文字串。", NULL, MB_OK);
 		return;
 	}
     
@@ -379,19 +307,28 @@ void CHashEdDlg::OnFindPhrase()
 
 void CHashEdDlg::OnImport() 
 {
-	// TODO: Add your control notification handler code here
-    CFileDialog FileDlg(TRUE, NULL/*"dat\0\0"*/, "hash",
-                        OFN_ENABLESIZING|OFN_HIDEREADONLY|
-                        OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,
-                        "Chewing hash data file(*.dat)|*.dat|All files(*.*)|*.*||");
-    if ( FileDlg.DoModal()==IDCANCEL ) 
+	TCHAR file_name[MAX_PATH + 1] = "hash.dat";
+	TCHAR file_title[MAX_PATH + 1] = "hash";
+	OPENFILENAME ofn = {0};
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.Flags = OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST;
+	ofn.hwndOwner = m_hWnd;
+	ofn.hInstance = (HINSTANCE)GetModuleHandle( NULL );
+	ofn.lpstrFilter = "Chewing hash data file (*.dat)\0*.dat\0All files (*.*)\0*.*\0\0";
+	ofn.lpstrDefExt = "dat";
+	ofn.lpstrFile = file_name;
+	ofn.nMaxFile = sizeof(file_name)/sizeof(TCHAR);
+	ofn.lpstrFileTitle = file_title;
+	ofn.nMaxFileTitle = sizeof(file_title)/sizeof(TCHAR);
+
+    if ( !GetOpenFileName( &ofn ) ) 
     {
+		DWORD err = CommDlgExtendedError ();
         return;
     }
 
     _enable_buttons(FALSE);
-    
-    Reload((LPSTR)(LPCTSTR)FileDlg.GetPathName(), false);
+    Reload( file_name, false);
 
     _enable_buttons(TRUE);
     UpdateBanner();
@@ -399,10 +336,10 @@ void CHashEdDlg::OnImport()
 
 void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 {
-    CString strtemp;
+    char strtemp[MAX_PATH + 100];
 
-    strtemp.Format("正在載入 %s", hashfile);
-    UpdateBanner((LPCTSTR)strtemp);
+    sprintf( strtemp, "正在載入 %s", hashfile);
+    UpdateBanner( strtemp);
 
     m_context.load_hash(hashfile, bClearContext);
     m_context.sort_phrase();
@@ -428,30 +365,32 @@ void CHashEdDlg::GetHashLocation()
 void CHashEdDlg::OnSave() 
 {
 	// TODO: Add your control notification handler code here
-    CString strTemp, strpath;
+     TCHAR strTemp[100];
+	 string strpath;
 
-    if ( AfxMessageBox("確定要以目前正在編輯的內容取代本地詞庫檔案嗎？\n"
+    if ( MessageBox(m_hWnd, "確定要以目前正在編輯的內容取代本地詞庫檔案嗎？\n"
                        "此過程將會包含重新載入詞庫，可能需要一點時間。\n", 
-                       MB_YESNO)!=IDYES )
+					   NULL, 
+                       MB_YESNO ) !=IDYES )
     {
         return;
     }
     //  ui...
     _enable_buttons(FALSE);
-    m_btnSave.GetWindowText(strTemp);
-    m_btnSave.SetWindowText("存檔中...");
+    GetWindowText( m_btnSave, strTemp, sizeof(strTemp) );
+    SetWindowText( m_btnSave, "存檔中...");
 
     //
     strpath = m_strHashFolder+"\\hash.dat";
-    _save((LPCTSTR)strpath, FALSE);
+    _save(strpath.c_str(), FALSE);
     
     strpath = m_strHashFolder;
     strpath += "\\hash.dat";
-    Reload((LPSTR)(LPCTSTR)strpath, true);
+    Reload( (char*)strpath.c_str(), true);
 
     //  ui...
     _enable_buttons(TRUE);
-    m_btnSave.SetWindowText(strTemp);
+    SetWindowText( m_btnSave, strTemp );
 }
 
 void CHashEdDlg::OnDelPhrase() 
@@ -460,21 +399,28 @@ void CHashEdDlg::OnDelPhrase()
     HASH_ITEM *pItem;
     int selItem;
 
-    selItem = m_listing.GetSelectionMark();
-    if ( selItem==-1 )  return;
+	selItem = ListView_GetSelectionMark(m_listing);
 
-    pItem = (HASH_ITEM*) m_listing.GetItemData(selItem);
-    m_listing.DeleteItem(selItem);
+	if ( selItem==-1 )  return;
+
+	LVITEM lv_item;
+	lv_item.iItem = selItem;
+	lv_item.mask = LVIF_PARAM;
+	ListView_GetItem( m_listing, &lv_item );
+	pItem = (HASH_ITEM*) lv_item.lParam;
+
+    ListView_DeleteItem(m_listing, selItem);
     m_context.del_phrase_by_id(selItem);//pItem->item_index);
 
-    m_listing.UpdateWindow();
+    UpdateWindow( m_listing );
     UpdateBanner();
 }
 
 void CHashEdDlg::_save(const char *pathfile, BOOL bSaveNoSwap)
 {
     SYSTEMTIME syst;
-    CString strHashOld, strTempfile, strHashFile, strTemp;
+    string strTempfile, strHashFile, strTemp;
+	char strHashOld[MAX_PATH];
 
     strTemp = m_strHashFolder+"\\hash.dat";
     GetLocalTime(&syst);
@@ -482,30 +428,30 @@ void CHashEdDlg::_save(const char *pathfile, BOOL bSaveNoSwap)
     strHashFile = pathfile;
     strTempfile = pathfile;
     strTempfile += ".new";
-    strHashOld.Format("%s.%04d%02d%02d.%02d%02d%02d.bak",
+    sprintf(strHashOld, "%s.%04d%02d%02d.%02d%02d%02d.bak",
         pathfile, syst.wYear, syst.wMonth, syst.wDay,
         syst.wHour, syst.wMinute, syst.wSecond);
-    DeleteFile(strTempfile);
+    DeleteFile(strTempfile.c_str());
 
     //  prepare Hash_new.dat file
     m_context.sort_phrase();
     m_context.arrange_phrase();
 
     if ( bSaveNoSwap==TRUE &&
-         strTemp.CompareNoCase(strHashFile)!=0 )
+         strcmpi( strTemp.c_str(), strHashFile.c_str()) != 0 )
     {
-        m_context.save_hash((LPSTR)(LPCTSTR)strHashFile);
+        m_context.save_hash((LPSTR)strHashFile.c_str());
         return;
     }
 
-    m_context.save_hash((LPSTR)(LPCTSTR)strTempfile);
+    m_context.save_hash((LPSTR)strTempfile.c_str());
     
     //  shutdown server
     m_context.shutdown_server();
     
     //  swap new & current file.
-    MoveFile((LPCTSTR)strHashFile, (LPCTSTR)strHashOld);
-    MoveFile((LPCTSTR)strTempfile, (LPCTSTR)strHashFile);
+	MoveFile((LPCTSTR)strHashFile.c_str(), (LPCTSTR)strHashOld);
+    MoveFile((LPCTSTR)strTempfile.c_str(), (LPCTSTR)strHashFile.c_str());
     
     //  launch server
     m_context._connect_server();
@@ -521,55 +467,73 @@ void CHashEdDlg::UpdateBanner(const char *message)
             "編輯區內共有 %d 個詞彙。", 
             m_context.get_phrase_count());
 
-        m_banner.SetWindowText(banner);
+        SetWindowText(m_banner, banner);
     }
     else
-        m_banner.SetWindowText(message);
+        SetWindowText(m_banner, message);
 }
 
 void CHashEdDlg::OnSaveAs() 
 {
-	// TODO: Add your control notification handler code here
-    CString strTemp;
-    CFileDialog FileDlg(FALSE, NULL/*"dat\0\0"*/, "hash",
-                        OFN_ENABLESIZING|OFN_HIDEREADONLY|
-                        OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,
-                        "All files(*.*)|*.*||");
-    if ( FileDlg.DoModal()==IDCANCEL ) 
+	TCHAR file_name[MAX_PATH + 1] = "hash.dat";
+	TCHAR file_title[MAX_PATH + 1] = "hash";
+	OPENFILENAME ofn = {0};
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.Flags = OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST;
+	ofn.hwndOwner = m_hWnd;
+	ofn.hInstance = (HINSTANCE)GetModuleHandle( NULL );
+	ofn.lpstrFilter = "Chewing hash data file (*.dat)\0*.dat\0All files (*.*)\0*.*\0\0";
+	ofn.lpstrDefExt = "dat";
+	ofn.lpstrFile = file_name;
+	ofn.nMaxFile = sizeof(file_name)/sizeof(TCHAR);
+	ofn.lpstrFileTitle = file_title;
+	ofn.nMaxFileTitle = sizeof(file_title)/sizeof(TCHAR);
+
+    if ( !GetSaveFileName( &ofn ) ) 
     {
+		DWORD err = CommDlgExtendedError ();
         return;
     }
 
+    TCHAR strTemp[64];
     _enable_buttons(FALSE);
-    m_btnSaveAs.GetWindowText(strTemp);
-    m_btnSaveAs.SetWindowText("Saving...");
+    GetWindowText( m_btnSaveAs, strTemp, sizeof(strTemp) );
+    SetWindowText( m_btnSaveAs, "Saving..." );
 
     //
-    _save((LPCTSTR)FileDlg.GetPathName(), TRUE);
+    _save( file_name, TRUE);
     
     //  ui...
     _enable_buttons(TRUE);
-    m_btnSaveAs.SetWindowText(strTemp);
-    
+    SetWindowText( m_btnSaveAs, strTemp );
 }
 
 void CHashEdDlg::_enable_buttons(BOOL bEnable)
 {
-	m_btnSaveAs.EnableWindow(bEnable);
-	m_btnFindPhrase.EnableWindow(bEnable);
-	m_btnAddPhrase.EnableWindow(bEnable);
-	m_btnDelPhrase.EnableWindow(bEnable);
-	m_Import.EnableWindow(bEnable);
-	m_btnSave.EnableWindow(bEnable);
-    m_btnAbout.EnableWindow(bEnable);
+	EnableWindow(m_btnSaveAs, bEnable);
+	EnableWindow(m_btnFindPhrase, bEnable);
+	EnableWindow(m_btnAddPhrase, bEnable);
+	EnableWindow(m_btnDelPhrase, bEnable);
+	EnableWindow(m_Import, bEnable);
+	EnableWindow(m_btnSave, bEnable);
+    EnableWindow(m_btnAbout, bEnable);
 }
+
+static BOOL AboutDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if( msg == WM_COMMAND )
+	{
+		EndDialog( hwnd, LOWORD(wp) );
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
 void CHashEdDlg::OnAbout() 
 {
 	// TODO: Add your control notification handler code here
-    CAboutDlg dlgAbout;
-
-    dlgAbout.DoModal();
+	DialogBox( (HINSTANCE)GetModuleHandle(NULL), LPCTSTR(IDD_ABOUTBOX), m_hWnd, (DLGPROC)AboutDlgProc );
 }
 
 void CHashEdDlg::OnTimer(UINT nIDEvent) 
@@ -577,7 +541,7 @@ void CHashEdDlg::OnTimer(UINT nIDEvent)
 	// TODO: Add your message handler code here and/or call default
     if ( nIDEvent==553 )
     {
-        CString strFile;
+        string strFile;
 
         GetHashLocation();
     
@@ -585,11 +549,41 @@ void CHashEdDlg::OnTimer(UINT nIDEvent)
         strFile += "\\hash.dat";
 
         m_context._connect_server();
-        Reload((LPSTR)(LPCTSTR)strFile, true);
+		Reload((LPSTR)(LPCTSTR)strFile.c_str(), true);
 
-        KillTimer(553);
+        KillTimer(m_hWnd, 553);
         _enable_buttons(TRUE);
     }
-	
-	CDialog::OnTimer(nIDEvent);
+}
+
+void CHashEdDlg::onCommand(UINT cmd)
+{
+	switch( cmd )
+	{
+	case IDC_ADD_PHRASE:
+		OnAddPhrase();
+		break;
+	case IDC_FIND_PHRASE:
+		OnFindPhrase();
+		break;
+	case IDC_IMPORT:
+		OnImport();
+		break;
+	case IDC_SAVE:
+		OnSave();
+		break;
+	case IDC_DEL_PHRASE:
+		OnDelPhrase();
+		break;
+	case IDC_SAVE_AS:
+		OnSaveAs();
+		break;
+	case IDC_ABOUT:
+		OnAbout();
+		break;
+	case IDOK:
+	case IDCANCEL:
+		EndDialog( m_hWnd, cmd );
+		break;
+	}
 }

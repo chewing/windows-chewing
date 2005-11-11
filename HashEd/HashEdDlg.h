@@ -5,7 +5,7 @@
 #define AFX_HASHEDDLG_H__35818C20_FC7D_4643_ABE9_61774E0F5CBC__INCLUDED_
 
 #include "chashcontext.h"
-
+#include <string>
 
 #if _MSC_VER > 1000
 #pragma once
@@ -14,64 +14,58 @@
 /////////////////////////////////////////////////////////////////////////////
 // CHashEdDlg dialog
 
-class CHashEdDlg : public CDialog
+using namespace std;
+
+class CHashEdDlg
 {
 // Construction
 public:
-	CHashEdDlg(CWnd* pParent = NULL);	// standard constructor
+	CHashEdDlg();	// standard constructor
+	int DoModal(){
+		return DialogBoxParam( (HINSTANCE)GetModuleHandle(NULL), LPCTSTR(IDD), 
+								HWND_DESKTOP, (DLGPROC)wndProc, LPARAM(this) );
+	}
 
 // Dialog Data
-	//{{AFX_DATA(CHashEdDlg)
 	enum { IDD = IDD_HASHED_DIALOG };
-	CButton	m_btnAbout;
-	CButton	m_banner;
-	CButton	m_btnSaveAs;
-	CButton	m_btnFindPhrase;
-	CListCtrl	m_listing;
-	CButton	m_btnAddPhrase;
-	CButton	m_btnDelPhrase;
-	CButton	m_Import;
-	CEdit	m_edtPhrase;
-	CButton	m_btnSave;
-	//}}AFX_DATA
+	HWND	m_btnAbout;
+	HWND	m_banner;
+	HWND	m_btnSaveAs;
+	HWND	m_btnFindPhrase;
+	HWND	m_listing;	// List control
+	HWND	m_btnAddPhrase;
+	HWND	m_btnDelPhrase;
+	HWND	m_Import;
+	HWND	m_edtPhrase;
+	HWND	m_btnSave;
 
     CHashContext    m_context;
     uint16  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];
     int     m_NumPhoneSeq;
     char    m_string[(MAX_PHONE_SEQ_LEN+1)*2];
-    CString m_strHashFolder;
-
-
-
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CHashEdDlg)
-	protected:          
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	//}}AFX_VIRTUAL
+    string m_strHashFolder;
 
 // Implementation
 protected:
+	HWND m_hWnd;
+
 	HICON m_hIcon;
 
+	static BOOL wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT wndProc(UINT msg, WPARAM wp, LPARAM lp);
 	// Generated message map functions
-	//{{AFX_MSG(CHashEdDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnUpdateNewPhraseEdit();
-	afx_msg void OnChangeNewPhraseEdit();
-	afx_msg void OnAddPhrase();
-	afx_msg void OnKillfocusNewPhraseEdit();
-	afx_msg void OnFindPhrase();
-	afx_msg void OnImport();
-	afx_msg void OnSave();
-	afx_msg void OnDelPhrase();
-	afx_msg void OnSaveAs();
-	afx_msg void OnAbout();
-	afx_msg void OnTimer(UINT nIDEvent);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+	void OnUpdateNewPhraseEdit();
+	void OnChangeNewPhraseEdit();
+	void OnAddPhrase();
+	void OnKillfocusNewPhraseEdit();
+	void OnFindPhrase();
+	void OnImport();
+	void OnSave();
+	void OnDelPhrase();
+	void OnSaveAs();
+	void OnAbout();
+	void OnTimer(UINT nIDEvent);
 
     BOOL _isDbcsString(char *str);
     int _isMatch(char *string, int id);
@@ -83,6 +77,8 @@ protected:
     void UpdateBanner(const char *message=NULL);
     void SelItem(int idx);
     void Reload(char* hashfile, bool bClearContext);
+public:
+	void onCommand(UINT cmd);
 };
 
 //{{AFX_INSERT_LOCATION}}

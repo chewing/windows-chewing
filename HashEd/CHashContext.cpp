@@ -1,11 +1,14 @@
 // HashEdit.cpp : Defines the entry point for the console application.
 //
 
-#include <stdafx.h>
+#include "stdafx.h"
 #include <string.h>
 #include <algorithm>
 #include <tchar.h>
-#include "hash.h"
+extern "C"
+{
+	#include "hash.h"
+}
 #include "chewingserver.h"
 #include "chashcontext.h"
 
@@ -187,6 +190,26 @@ void CHashContext::list_phrase()
     }
     fclose(foFile);
 }
+
+
+void HashItem2String( char *str, HASH_ITEM *pItem )
+{
+	int i, len;
+	char buf[ FIELD_SIZE ];
+
+	sprintf( str, "%s ", pItem->data.wordSeq );
+	len = strlen( pItem->data.wordSeq ) / 2;
+	for ( i = 0; i < len; i++ ) {
+		sprintf( buf, "%hu ", pItem->data.phoneSeq[ i ] );
+		strcat( str, buf );
+	}
+	sprintf( 
+		buf, "%d %d %d %d",
+		pItem->data.userfreq, pItem->data.recentTime, 
+		pItem->data.maxfreq, pItem->data.origfreq );
+	strcat( str, buf );
+}
+
 
 bool CHashContext::save_hash(const char *destFile)
 {
