@@ -351,14 +351,12 @@ void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 
 void CHashEdDlg::GetHashLocation()
 {
-    char    hashdir[MAX_PATH];
     LPITEMIDLIST pidl;
-    m_strHashFolder = "c:\\";
+    strcpy( m_strHashFolder, "c:\\" );
 	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
 	{
-		SHGetPathFromIDList(pidl, hashdir);
-		_tcscat(hashdir, _T("\\Chewing") );
-        m_strHashFolder = hashdir;
+		SHGetPathFromIDList(pidl, m_strHashFolder);
+		_tcscat(m_strHashFolder, _T("\\Chewing") );
     }
 }
 
@@ -366,7 +364,7 @@ void CHashEdDlg::OnSave()
 {
 	// TODO: Add your control notification handler code here
      TCHAR strTemp[100];
-	 string strpath;
+	 TCHAR strpath[MAX_PATH+1];
 
     if ( MessageBox(m_hWnd, "確定要以目前正在編輯的內容取代本地詞庫檔案嗎？\n"
                        "此過程將會包含重新載入詞庫，可能需要一點時間。\n", 
@@ -381,12 +379,10 @@ void CHashEdDlg::OnSave()
     SetWindowText( m_btnSave, "存檔中...");
 
     //
-    strpath = m_strHashFolder+"\\hash.dat";
-    _save(strpath.c_str(), FALSE);
+    sprintf( strpath, "%s\\hash.dat", m_strHashFolder );
+    _save( strpath , FALSE);
     
-    strpath = m_strHashFolder;
-    strpath += "\\hash.dat";
-    Reload( (char*)strpath.c_str(), true);
+    Reload( strpath, true);
 
     //  ui...
     _enable_buttons(TRUE);
@@ -419,39 +415,41 @@ void CHashEdDlg::OnDelPhrase()
 void CHashEdDlg::_save(const char *pathfile, BOOL bSaveNoSwap)
 {
     SYSTEMTIME syst;
-    string strTempfile, strHashFile, strTemp;
-	char strHashOld[MAX_PATH];
+    TCHAR strHashOld[MAX_PATH+1];
+	TCHAR strTempfile[MAX_PATH+1];
+	TCHAR strHashFile[MAX_PATH+1];
+	TCHAR strTemp[MAX_PATH+1];
 
-    strTemp = m_strHashFolder+"\\hash.dat";
+    sprintf( strTemp, "%s\\hash.dat", m_strHashFolder );
     GetLocalTime(&syst);
     //  locate hash.dat
-    strHashFile = pathfile;
-    strTempfile = pathfile;
-    strTempfile += ".new";
+    strcpy( strHashFile, pathfile );
+    sprintf( strTempfile, "%s.new", pathfile );
+
     sprintf(strHashOld, "%s.%04d%02d%02d.%02d%02d%02d.bak",
         pathfile, syst.wYear, syst.wMonth, syst.wDay,
         syst.wHour, syst.wMinute, syst.wSecond);
-    DeleteFile(strTempfile.c_str());
+    DeleteFile( strTempfile );
 
     //  prepare Hash_new.dat file
     m_context.sort_phrase();
     m_context.arrange_phrase();
 
     if ( bSaveNoSwap==TRUE &&
-         strcmpi( strTemp.c_str(), strHashFile.c_str()) != 0 )
+         strcmpi( strTemp, strHashFile ) != 0 )
     {
-        m_context.save_hash((LPSTR)strHashFile.c_str());
+        m_context.save_hash( strHashFile );
         return;
     }
 
-    m_context.save_hash((LPSTR)strTempfile.c_str());
+    m_context.save_hash( strTempfile );
     
     //  shutdown server
     m_context.shutdown_server();
     
     //  swap new & current file.
-	MoveFile((LPCTSTR)strHashFile.c_str(), (LPCTSTR)strHashOld);
-    MoveFile((LPCTSTR)strTempfile.c_str(), (LPCTSTR)strHashFile.c_str());
+	MoveFile( strHashFile, strHashOld);
+    MoveFile( strTempfile, strHashFile);
     
     //  launch server
     m_context._connect_server();
@@ -541,15 +539,14 @@ void CHashEdDlg::OnTimer(UINT nIDEvent)
 	// TODO: Add your message handler code here and/or call default
     if ( nIDEvent==553 )
     {
-        string strFile;
+        TCHAR strFile[MAX_PATH + 1];
 
         GetHashLocation();
     
-        strFile = m_strHashFolder;
-        strFile += "\\hash.dat";
+        _stprintf( strFile, "%s\\hash.dat", m_strHashFolder );
 
         m_context._connect_server();
-		Reload((LPSTR)(LPCTSTR)strFile.c_str(), true);
+		Reload( strFile, true );
 
         KillTimer(m_hWnd, 553);
         _enable_buttons(TRUE);

@@ -5,7 +5,6 @@
 #define AFX_HASHEDDLG_H__35818C20_FC7D_4643_ABE9_61774E0F5CBC__INCLUDED_
 
 #include "chashcontext.h"
-#include <string>
 
 #if _MSC_VER > 1000
 #pragma once
@@ -43,7 +42,7 @@ public:
     uint16  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];
     int     m_NumPhoneSeq;
     char    m_string[(MAX_PHONE_SEQ_LEN+1)*2];
-    string m_strHashFolder;
+    TCHAR m_strHashFolder[ MAX_PATH + 1 ];
 
 // Implementation
 protected:
