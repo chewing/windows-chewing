@@ -194,6 +194,7 @@ void CHashEdDlg::SelItem(int idx)
 	ListView_SetItemState( m_listing, idx, LVIS_FOCUSED|LVIS_SELECTED, 
 										   LVIS_FOCUSED|LVIS_SELECTED);
 	ListView_EnsureVisible( m_listing, idx, FALSE);
+    ListView_SetSelectionMark( m_listing, idx);
 }
 
 void CHashEdDlg::OnAddPhrase() 
@@ -240,12 +241,14 @@ void CHashEdDlg::OnAddPhrase()
     ListView_SetItemState( m_listing, tt, LVIS_FOCUSED|LVIS_SELECTED,
 										  LVIS_FOCUSED|LVIS_SELECTED);
 	tt = ListView_EnsureVisible( m_listing, tt, FALSE);
+    ListView_RedrawItems(m_listing, tt, tt);
 
     strcpy(m_string, "");
     m_NumPhoneSeq = 0;
     m_PhoneSeq[0] = 0;
     SetWindowText(m_edtPhrase, NULL);
     UpdateBanner();
+    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::OnKillfocusNewPhraseEdit() 
@@ -285,6 +288,8 @@ void CHashEdDlg::OnFindPhrase()
     MessageBeep(beep);
 
     SelItem(idx);
+    ListView_RedrawItems(m_listing, idx, idx);
+    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::OnImport() 
@@ -339,6 +344,7 @@ void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 		           NULL, MB_OK );
 
     UpdateBanner();
+    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::GetHashLocation()
@@ -396,7 +402,7 @@ void CHashEdDlg::OnDelPhrase()
 	pItem = (HASH_ITEM*) lv_item.lParam;
 
     ListView_DeleteItem(m_listing, selItem);
-    m_context.del_phrase_by_id(selItem);//pItem->item_index);
+    m_context.del_phrase_by_id(pItem->item_index);
 
     UpdateWindow( m_listing );
     UpdateBanner();

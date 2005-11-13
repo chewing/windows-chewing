@@ -137,7 +137,18 @@ static bool _Comp(HASH_ITEM *p1, HASH_ITEM *p2)
 
 void CHashContext::sort_phrase()
 {
+    //  sort
     std::stable_sort(pool.begin( ), pool.end( ), _Comp);
+    //  re-index items
+    std::vector<HASH_ITEM*>::iterator iter;
+    int id = 0;
+    iter = pool.begin();
+    while ( iter!=pool.end() )
+    {
+        ((HASH_ITEM*) *iter)->item_index = id;
+        ++iter;
+        ++id;
+    };
 }
 
 bool CHashContext::arrange_phrase()
@@ -265,11 +276,24 @@ void CHashContext::del_phrase_by_id(int index)
     {
         return;
     }
-
-    HASH_ITEM *pItem = pool[index];
-    release__HASH_ITEM(pItem);
-
-    pool.erase(pool.begin()+index);
+    //  search the item
+    int hi=pool.size()-1, lo=0 , p, v;
+    while ( hi>=lo )
+    {
+        p = (hi+lo)/2;
+        v = pool[p]->item_index-index;
+        
+        if ( v>0 )
+            hi = p-1;
+        else if ( v<0 )
+            lo = p+1;
+        else
+        {
+            release__HASH_ITEM(pool[p]);
+            pool.erase(pool.begin()+p);
+            break;
+        }
+    };
 }
 
 HASH_ITEM* CHashContext::append_phrase(const char *str, uint16 *phoneSeq)

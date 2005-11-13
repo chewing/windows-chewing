@@ -952,7 +952,6 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		switch( key )
 		{
 		case VK_NEXT:
-        case VK_SPACE:// allow space to PgDn 
 			key = VK_RIGHT;
 			break;
 		case VK_PRIOR:
