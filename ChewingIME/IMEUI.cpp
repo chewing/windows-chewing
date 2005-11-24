@@ -120,7 +120,7 @@ BOOL IMEUI::registerUIClasses()
 	wc.hCursor			= LoadCursor( NULL, IDC_ARROW );
 	wc.hIcon			= NULL;
 	wc.lpszMenuName		= (LPTSTR)NULL;
-	wc.lpszClassName	= g_pcmanIMEClass;
+	wc.lpszClassName	= g_chewingIMEClass;
 	wc.hbrBackground	= NULL;
 	wc.hIconSm			= NULL;
 	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) 
@@ -276,7 +276,7 @@ bool IMEUI::getWorkingArea(RECT* rc, HWND app_wnd)
 
 void IMEUI::unregisterUIClasses()
 {
-	UnregisterClass(g_pcmanIMEClass, g_dllInst);
+	UnregisterClass(g_chewingIMEClass, g_dllInst);
 	UnregisterClass(g_candWndClass, g_dllInst);
 	UnregisterClass(g_compWndClass, g_dllInst);
 	UnregisterClass(g_statusWndClass, g_dllInst);

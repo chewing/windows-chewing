@@ -21,6 +21,7 @@
 
 HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
+bool g_useUnicode = true;	// Under Windows 95, IME has no unicode support
 
 long g_shiftPressedTime = -1;
 
@@ -292,7 +293,7 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 
 BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lpszOptions)
 {
-	_tcscpy( lpszUIClass, _T(g_pcmanIMEClass) );
+	_tcscpy( lpszUIClass, _T(g_chewingIMEClass) );
 	lpIMEInfo->fdwConversionCaps = IME_CMODE_NOCONVERSION | IME_CMODE_FULLSHAPE | IME_CMODE_CHINESE;
 	lpIMEInfo->fdwSentenceCaps = IME_SMODE_NONE;
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
@@ -318,7 +319,7 @@ static BOOL CALLBACK ReloadAllChewingInst(HWND hwnd, LPARAM lp)
 {
 	TCHAR tmp[12];
 	GetClassName( hwnd, tmp, 11 );
-	if( 0 == _tcscmp( tmp, g_pcmanIMEClass ) )
+	if( 0 == _tcscmp( tmp, g_chewingIMEClass ) )
 		SendMessage( hwnd, WM_IME_RELOADCONFIG, 0, 0 );
 	return TRUE;
 }
@@ -831,7 +832,17 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			DisableThreadLibraryCalls((HMODULE)hModule);
 			g_dllInst = (HINSTANCE)hModule;
 
-			g_isWindowNT = (GetVersion() < 0x80000000);
+			OSVERSIONINFO osv = {0};
+			osv.dwOSVersionInfoSize = sizeof(osv);
+			GetVersionEx( &osv );
+			
+			g_isWindowNT = (osv.dwPlatformId == VER_PLATFORM_WIN32_NT);
+
+			if( osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )	{
+				// We are under Windows 95, 98, ME
+				if( osv.dwMajorVersion == 4 && osv.dwMinorVersion == 0 )	// Windows  95
+					g_useUnicode = false;	// There is no unicode IME support in Windows 95
+			}
 
 			if( !IMEUI::registerUIClasses() )
 				return FALSE;
