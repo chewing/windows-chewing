@@ -23,6 +23,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HashEd", "HashEd\HashEd.vcp
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChewingServerUTF8", "ChewingServer\ChewingServerUTF8.vcproj", "{FF074876-659D-4BFD-9361-6E22C99BABE2}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dat2binUTF8", "dat2bin\dat2binUTF8.vcproj", "{791C2C49-234F-4F00-99A7-788E4291DBB5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -49,6 +57,14 @@ Global
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Debug.Build.0 = Debug|Win32
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Release.ActiveCfg = Release|Win32
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Release.Build.0 = Release|Win32
+		{FF074876-659D-4BFD-9361-6E22C99BABE2}.Debug.ActiveCfg = Debug|Win32
+		{FF074876-659D-4BFD-9361-6E22C99BABE2}.Debug.Build.0 = Debug|Win32
+		{FF074876-659D-4BFD-9361-6E22C99BABE2}.Release.ActiveCfg = Release|Win32
+		{FF074876-659D-4BFD-9361-6E22C99BABE2}.Release.Build.0 = Release|Win32
+		{791C2C49-234F-4F00-99A7-788E4291DBB5}.Debug.ActiveCfg = Debug|Win32
+		{791C2C49-234F-4F00-99A7-788E4291DBB5}.Debug.Build.0 = Debug|Win32
+		{791C2C49-234F-4F00-99A7-788E4291DBB5}.Release.ActiveCfg = Release|Win32
+		{791C2C49-234F-4F00-99A7-788E4291DBB5}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

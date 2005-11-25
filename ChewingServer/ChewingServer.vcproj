@@ -22,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include,..\ChewingIME"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include"
 				PreprocessorDefinitions="DISABLE_ATEXIT;USE_BINARY_DAT;WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
