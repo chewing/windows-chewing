@@ -253,20 +253,20 @@ void CandWnd::getSize(int* w, int* h)
 	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
-		TCHAR cand[64];
+		wchar_t cand[64];
 		if( i < pageEnd )
-			wsprintf ( cand, _T("%s"), candList->getCand(i) );
+			swprintf ( cand, L"%s", candList->getCand(i) );
 		else
 		{
 			int page = 1 + candList->getPageStart() / candList->getPageSize();
 			int totalPage = candList->getTotalCount() / candList->getPageSize();
 			if( candList->getTotalCount() % candList->getPageSize() )
 				++totalPage;
-			wsprintf ( cand, _T("%d/%d"), page, totalPage );
+			swprintf ( cand, L"%d/%d", page, totalPage );
 		}
 
-		int len = _tcslen( cand );
-		GetTextExtentPoint32(hDC, cand, len, &candsz);
+		int len = wcslen( cand );
+		GetTextExtentPoint32W(hDC, cand, len, &candsz);
 		width += candsz.cx + 4;
 		width += selkey_w;
 
