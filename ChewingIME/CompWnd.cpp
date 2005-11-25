@@ -87,7 +87,7 @@ LRESULT CompWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 
 void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 {
-	string compStr = getDisplayedCompStr(imc);
+	wstring compStr = getDisplayedCompStr(imc);
 	int cursorPos = getDisplayedCursorPos(imc);
 
 	HFONT oldFont;
@@ -109,7 +109,7 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 	{
 		SetTextColor( memdc, GetSysColor( COLOR_WINDOWTEXT ) );
 		SetBkColor( memdc, GetSysColor( COLOR_WINDOW ) );
-		ExtTextOut( memdc, 1, 1, ETO_OPAQUE, &rc, compStr.c_str(), 
+		ExtTextOutW( memdc, 1, 1, ETO_OPAQUE, &rc, compStr.c_str(), 
 			compStr.length(), NULL);
 //		int selstart = indexToXPos( CompSelStart );
 //		int selend = indexToXPos( CompSelEnd );
@@ -122,9 +122,13 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
         {
             // #15235, block cursor
 		    int curWidth;
-            curWidth = indexToXPos(compStr, 
+/*            curWidth = indexToXPos(compStr, 
                 (int)(_tcsinc(compStr.c_str()+cursorPos)-(compStr.c_str()+cursorPos)))-2;
-		    BitBlt( memdc, cursor, 0, curWidth, rc.bottom, memdc, cursor, 0, DSTINVERT );
+*/
+			/// FIXME: Temporarily changed to 2
+			curWidth = 2;
+
+			BitBlt( memdc, cursor, 0, curWidth, rc.bottom, memdc, cursor, 0, DSTINVERT );
         }
 	}
 
@@ -147,6 +151,11 @@ void CompWnd::setFont(LOGFONT* lf)
 {
 	LOGFONT lf2;
 	memcpy( &lf2, lf, sizeof( lf2) );
+	if( g_useUnicode )	{
+		// Convert unicode font face to ANSI encoding
+		WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)lf->lfFaceName, wcslen( (LPCWSTR)lf->lfFaceName)+1, 
+								lf2.lfFaceName, sizeof(lf2.lfFaceName), NULL, NULL );
+	}
 
 	if( abs(lf2.lfHeight) < 16 )
 		lf2.lfHeight = 16;
@@ -162,8 +171,8 @@ void CompWnd::getSize(int* w, int* h)
 	HDC dc = GetDC( hwnd );
 	HGDIOBJ oldfont = SelectObject( dc, font );
 	SIZE size;
-	string compStr = getDisplayedCompStr();
-	GetTextExtentPoint( dc, compStr.c_str(), compStr.length(), &size );
+	wstring compStr = getDisplayedCompStr();
+	GetTextExtentPointW( dc, compStr.c_str(), compStr.length(), &size );
 	SelectObject( dc, oldfont );
 	ReleaseDC( hwnd, dc );
 	*w = size.cx + 4;
@@ -184,14 +193,14 @@ void CompWnd::setCursorPos(int pos)
 }
 */
 
-int CompWnd::indexToXPos( string compStr, int idx)
+int CompWnd::indexToXPos( wstring compStr, int idx)
 {
 	if( compStr.empty() || idx <=0 )
 		return 2;
 	HDC dc = GetDC( hwnd );
 	HGDIOBJ oldfont = SelectObject( dc, font );
 	SIZE size;
-	GetTextExtentPoint( dc, compStr.c_str(), idx, &size );
+	GetTextExtentPointW( dc, compStr.c_str(), idx, &size );
 	SelectObject( dc, oldfont );
 	ReleaseDC( hwnd, dc );
 	return size.cx + 2;
@@ -199,12 +208,12 @@ int CompWnd::indexToXPos( string compStr, int idx)
 
 
 
-string CompWnd::getDisplayedCompStr(IMCLock& imc)
+wstring CompWnd::getDisplayedCompStr(IMCLock& imc)
 {
 	CompStr* compStr = imc.getCompStr();
 	if( compStr )
-		return string( compStr->getCompStr() );
-	return string("");
+		return wstring( compStr->getCompStr() );
+	return wstring( L"" );
 }
 
 int CompWnd::getDisplayedCursorPos(IMCLock& imc)
@@ -241,7 +250,7 @@ void CompWnd::getRelativeCandPos(IMCLock& imc, POINT* pt)
 	INPUTCONTEXT* ic = imc.getIC();
 	if(!ic)
 		return;
-	string compstr = imc.getCompStr()->getCompStr();
+	wstring compstr = imc.getCompStr()->getCompStr();
 	pt->x = indexToXPos( compstr, getDisplayedCursorPos());
 	pt->y = (rc.bottom - rc.top);
 

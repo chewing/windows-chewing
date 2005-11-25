@@ -191,7 +191,7 @@ int ChewingClient::TotalPage()
 int ChewingClient::CurrentPage()
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdCurrentPage, 0, chewingID);	}
 
-// Return the i-th selection wchar, i >= 0.
+// Return the i-th selection wchar_t, i >= 0.
 char* ChewingClient::Selection(int i)
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdSelection, i, chewingID);

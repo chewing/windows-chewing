@@ -11,32 +11,32 @@ public:
 	~CompStr(void);
 protected:
 	COMPOSITIONSTRING cs;
-	TCHAR readStr[256];
+	wchar_t readStr[256];	// unicode string
 	BYTE readAttr[ 256/sizeof(TCHAR) ];
 	DWORD readClause[2];
 
-	TCHAR compStr[256];
+	wchar_t compStr[256];	// unicode string
 	BYTE compAttr[ 256/sizeof(TCHAR) ];
 	DWORD compClause[257];
 
-	TCHAR resultReadStr[256];
+	wchar_t resultReadStr[256];	// unicode string
 	DWORD resultReadClause[2];
 
-	TCHAR resultStr[256];
+	wchar_t resultStr[256];	// unicode string
 	DWORD resultClause[257];
 
 // private data;
-	TCHAR showMsg[50];
+	wchar_t showMsg[50];
 
 public:
-	TCHAR* getCompStr()	{	return &compStr[0];	}
-	TCHAR* getResultStr()	{	return &resultStr[0];	}
-	TCHAR* getShowMsg()	{	return &showMsg[0];	}
+	wchar_t* getCompStr()	{	return &compStr[0];	}
+	wchar_t* getResultStr()	{	return &resultStr[0];	}
+	wchar_t* getShowMsg()	{	return &showMsg[0];	}
 	DWORD getCursorPos()	{	return cs.dwCursorPos;	}
-	void setCompStr(LPCTSTR compstr);
-	void setResultStr(LPCTSTR resultstr);
-	void setShowMsg(LPCTSTR showmsg);
+	void setCompStr(LPCWSTR comp_str);
+	void setResultStr(LPCWSTR result_str);
+	void setShowMsg(LPCWSTR show_msg);
 	void setCursorPos(int pos);
-	void setZuin(const char* zuin);
+	void setZuin(LPCWSTR zuin);
 	void beforeGenerateMsg(void);
 };

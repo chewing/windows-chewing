@@ -71,7 +71,7 @@ public:
 	int TotalPage();
 	int CurrentPage();
 
-	// Return the i-th selection wchar, i >= 0.
+	// Return the i-th selection wchar_t, i >= 0.
 	char* Selection(int i);
 	void SetFullShape(bool full);
 	bool GetFullShape(void);

@@ -5,7 +5,7 @@
 static LPCTSTR tooltipClass = _T("Tooltip");
 
 Tooltip::Tooltip(void)
-: timerID(0)
+: timerID(0), text(NULL)
 {
 }
 
@@ -13,6 +13,8 @@ Tooltip::~Tooltip(void)
 {
 	if( timerID )
 		KillTimer( hwnd, timerID );
+	if( text )
+		free( text );
 }
 
 BOOL Tooltip::registerClass(void)
@@ -76,9 +78,7 @@ LRESULT Tooltip::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 
 void Tooltip::onPaint(PAINTSTRUCT& ps)
 {
-	int len = GetWindowTextLength( hwnd ) + 1;
-	TCHAR* text = new TCHAR[len];
-	len = GetWindowText( hwnd, text, len );
+	int len = wcslen(text);
 	RECT rc, textrc = {0};
 	GetClientRect( hwnd, &rc );
 
@@ -88,29 +88,32 @@ void Tooltip::onPaint(PAINTSTRUCT& ps)
 	SetTextColor(ps.hdc, GetSysColor(COLOR_INFOTEXT) );
 	HGDIOBJ old_font = SelectObject( ps.hdc, GetStockObject(DEFAULT_GUI_FONT));
 
-	DrawText( ps.hdc, text, len, &textrc, DT_CALCRECT|DT_NOPREFIX|DT_NOCLIP );
-	rc.top += (rc.bottom - textrc.bottom)/2;
-	rc.left += (rc.right - textrc.right)/2;
-	DrawText( ps.hdc, text, len, &rc, DT_NOPREFIX|DT_NOCLIP );
+	SIZE size;
+	GetTextExtentPoint32W( ps.hdc, text, len, &size );
+	rc.top += (rc.bottom - size.cy)/2;
+	rc.left += (rc.right - size.cx)/2;
+	ExtTextOutW( ps.hdc, rc.left, rc.top, 0, &textrc, text, len, NULL );
 
 	SelectObject( ps.hdc, old_font );
-	delete []text;
 }
 
-void Tooltip::showTip(int x, int y, LPCTSTR text, DWORD duration)
+void Tooltip::showTip(int x, int y, LPCWSTR tip_text, DWORD duration)
 {
 	if( !isWindow() )
 		create();
 
-	SetWindowText(hwnd, text);
-	RECT rc = {0};
+	if( text )
+		free( text );
+	text = wcsdup( tip_text );
+
+	SIZE size = {0};
 	HDC dc = GetDC(hwnd);
 	HGDIOBJ old_font = SelectObject( dc, GetStockObject(DEFAULT_GUI_FONT));
-	DrawText( dc, text, _tcslen(text), &rc, DT_NOCLIP|DT_NOPREFIX|DT_CALCRECT );
+	GetTextExtentPointW( dc, text, wcslen(text), &size );
 	SelectObject( dc, old_font );
 	ReleaseDC(hwnd, dc);
 
-	SetWindowPos( hwnd, HWND_TOPMOST, x, y, rc.right + 4, rc.bottom + 4, SWP_NOACTIVATE );
+	SetWindowPos( hwnd, HWND_TOPMOST, x, y, size.cx + 4, size.cy + 4, SWP_NOACTIVATE );
 	if( IsWindowVisible(hwnd) )
 		InvalidateRect( hwnd, NULL, TRUE );
 	else

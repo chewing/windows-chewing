@@ -294,17 +294,24 @@ BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
 BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lpszOptions)
 {
 	_tcscpy( lpszUIClass, _T(g_chewingIMEClass) );
+
 	lpIMEInfo->fdwConversionCaps = IME_CMODE_NOCONVERSION | IME_CMODE_FULLSHAPE | IME_CMODE_CHINESE;
 	lpIMEInfo->fdwSentenceCaps = IME_SMODE_NONE;
 	lpIMEInfo->fdwUICaps = UI_CAP_2700;
 	lpIMEInfo->fdwSCSCaps = 0;
 	lpIMEInfo->fdwSelectCaps = SELECT_CAP_CONVERSION;
 	lpIMEInfo->fdwProperty = /*IME_PROP_IGNORE_UPKEYS|*/IME_PROP_AT_CARET|IME_PROP_KBD_CHAR_FIRST|
-						#ifdef	UNICODE
-							 IME_PROP_UNICODE|
-						#endif
 							 IME_PROP_CANDLIST_START_FROM_1|IME_PROP_COMPLETE_ON_UNSELECT
 							 |IME_PROP_END_UNLOAD;
+
+	if( g_useUnicode )	{
+		 lpIMEInfo->fdwProperty |= IME_PROP_UNICODE;
+#ifndef UNICODE
+		int len = strlen( g_chewingIMEClass );
+		MultiByteToWideChar( CP_ACP, 0, g_chewingIMEClass, len+1, (LPWSTR)lpszUIClass, len+1 );
+#endif
+	}
+
 /*
 	if(g_isWindowsNT && (DWORD(lpszOptions) & IME_SYSTEMINFO_WINLOGON ))
 	{
@@ -438,14 +445,15 @@ BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 		{
 			for( int i = 0; i < g_chewing->TotalChoice(); ++i )
 			{
-				char* cand =  g_chewing->Selection( i );
-				if( cand )
-				{
-					candList->setCand( i , cand );
+				char* cand = g_chewing->Selection( i );
+				if( cand )	{
+					wchar_t wcand[10];
+					MultiByteToWideChar( CP_ACP, 0, cand, strlen(cand)+1, wcand, sizeof(wcand)/sizeof(wchar_t) );
+					candList->setCand( i , wcand );
 					free(cand);
 				}
 				else
-					candList->setCand( i , "" );
+					candList->setCand( i , L"" );
 			}
 		}
 		ImmUnlockIMCC( hCandInfo );
@@ -519,40 +527,54 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( g_chewing->CommitReady() )	{
 		char* cstr = g_chewing->CommitStr();
 		if( cstr )	{
-			cs->setResultStr(cstr);
+			wchar_t wcstr[256];
+			MultiByteToWideChar( CP_ACP, 0, cstr, strlen(cstr)+1, wcstr, sizeof(wcstr)/sizeof(wchar_t) );
+
+		//	wcstr[0] = 0x5803;	// This is only for test purpose
+			cs->setResultStr( wcstr );
 			free(cstr);
 		}
 		else
-			cs->setResultStr("");
+			cs->setResultStr( L"" );
 	}
 	else
-		cs->setResultStr("");
+		cs->setResultStr( L"" );
 
 	if( g_chewing->BufferLen() )	{
 		char* chibuf = g_chewing->Buffer();
 		if(chibuf)	{
-			cs->setCompStr(chibuf);
+			wchar_t wchibuf[256];
+			MultiByteToWideChar( CP_ACP, 0, chibuf, strlen(chibuf)+1, wchibuf, sizeof(wchibuf)/sizeof(wchar_t) );
+
+		//	wchibuf[0] = 0x5803;	// This is only for test purpose
+			cs->setCompStr(wchibuf);
+
 			free(chibuf);
 		}
 	}
 	else
-		cs->setCompStr("");
+		cs->setCompStr( L"" );
 
 	int cursorpos = g_chewing->CursorPos();
-	TCHAR* pcompstr = cs->getCompStr();
-	for( int i = 0; i < cursorpos && *pcompstr; ++i )
-		pcompstr = _tcsinc(pcompstr);
-	cursorpos = int(pcompstr - cs->getCompStr());
-
+	if( !g_useUnicode )	{
+		// This should be fix to support Win 95 ANSI mode
+/*		CHAR* pcompstr = cs->getCompStr();
+		for( int i = 0; i < cursorpos && *pcompstr; ++i )
+			pcompstr = _tcsinc(pcompstr);
+		cursorpos = int(pcompstr - cs->getCompStr());
+*/	}
 	cs->setCursorPos( cursorpos );
 
 	char* zuin = g_chewing->ZuinStr();
 	if( zuin )	{
-		cs->setZuin(zuin);
+		wchar_t wzuin[32];
+		MultiByteToWideChar( CP_ACP, 0, zuin, strlen(zuin)+1, wzuin, sizeof(wzuin)/sizeof(wchar_t) );
+		cs->setZuin(wzuin);
+
 		free(zuin);
 	}
 	else
-		cs->setZuin("");
+		cs->setZuin( L"" );
 
 	cs->beforeGenerateMsg();
 
@@ -710,8 +732,8 @@ BOOL CommitBuffer( IMCLock& imc )
 			}
 		}
 		cs->setResultStr( cs->getCompStr() );
-		cs->setZuin("");
-		cs->setCompStr("");
+		cs->setZuin( L"" );
+		cs->setCompStr( L"" );
 		cs->setCursorPos(0);
 		cs->beforeGenerateMsg();
 
@@ -778,8 +800,8 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 			case CPS_CONVERT:
 				break;
 			case CPS_CANCEL:
-				cs->setCompStr("");
-				cs->setZuin("");
+				cs->setCompStr( L"" );
+				cs->setZuin( L"" );
 				break;
 			}
 		}
@@ -945,7 +967,9 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				char* msg = g_chewing->ShowMsg();
 				if( msg )
 				{
-					cs->setShowMsg(msg);
+					wchar_t wmsg[100];
+					MultiByteToWideChar( CP_ACP, 0, msg, strlen(msg)+1, wmsg, sizeof(wmsg)/sizeof(wchar_t) );
+					cs->setShowMsg( wmsg );
 					free(msg);
 					GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );
 				}

@@ -205,7 +205,15 @@ bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 		getBtnRect( idx, rc );
 		POINT pt;	pt.x = rc.left;	pt.y = rc.bottom;
 		ClientToScreen( hwnd, &pt );
-		tooltip->showTip( pt.x, pt.y, buttons[idx].tooltip.c_str(), 6000 );
+
+		int len = MultiByteToWideChar( CP_ACP, 0, buttons[idx].tooltip.c_str(), 
+								buttons[idx].tooltip.length(), NULL, 0 );
+		wchar_t* wtip = new wchar_t[len + 1];
+		MultiByteToWideChar( CP_ACP, 0, buttons[idx].tooltip.c_str(), 
+								buttons[idx].tooltip.length()+1, wtip, len + 1 );
+
+		tooltip->showTip( pt.x, pt.y, wtip, 6000 );
+		delete wtip;
 	}
 
 	drawBtn( dc, idx );

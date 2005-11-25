@@ -184,7 +184,7 @@ typedef struct tagSTYLEBUFA {
 } STYLEBUFA, *PSTYLEBUFA, NEAR *NPSTYLEBUFA, FAR *LPSTYLEBUFA;
 typedef struct tagSTYLEBUFW {
     DWORD       dwStyle;
-    WCHAR       szDescription[STYLE_DESCRIPTION_SIZE];
+    wchar_t       szDescription[STYLE_DESCRIPTION_SIZE];
 } STYLEBUFW, *PSTYLEBUFW, NEAR *NPSTYLEBUFW, FAR *LPSTYLEBUFW;
 #ifdef UNICODE
 typedef STYLEBUFW STYLEBUF;
@@ -220,7 +220,7 @@ typedef struct tagIMEMENUITEMINFOW {
     HBITMAP     hbmpChecked;
     HBITMAP     hbmpUnchecked;
     DWORD       dwItemData;
-    WCHAR       szString[IMEMENUITEM_STRING_SIZE];
+    wchar_t       szString[IMEMENUITEM_STRING_SIZE];
     HBITMAP     hbmpItem;
 } IMEMENUITEMINFOW, *PIMEMENUITEMINFOW, NEAR *NPIMEMENUITEMINFOW, FAR *LPIMEMENUITEMINFOW;
 #ifdef UNICODE
@@ -237,7 +237,7 @@ typedef LPIMEMENUITEMINFOA LPIMEMENUITEMINFO;
 
 typedef struct tagIMECHARPOSITION {
     DWORD       dwSize;
-    DWORD       dwCharPos;
+    DWORD       dwchar_tPos;
     POINT       pt;
     UINT        cLineHeight;
     RECT        rcDocument;

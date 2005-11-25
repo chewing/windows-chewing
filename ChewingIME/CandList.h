@@ -16,15 +16,11 @@ public:
 	void setPageStart(int i){ cl.dwPageStart = i;
 							cl.dwSelection = i;}
 	int getPageStart(){ return cl.dwPageStart; }
-	void setCand(int i, LPCTSTR cand);
-	LPCTSTR getCand(int i){ return candStr[i]; }
+	void setCand(int i, LPCWSTR cand);
+	LPCWSTR getCand(int i){ return candStr[i]; }
 protected:
     CANDIDATEINFO  ci;
     CANDIDATELIST  cl;
     DWORD offset[240-1];
-#ifdef	UNICODE
-    TCHAR candStr[240][8];
-#else
-    TCHAR candStr[240][16];
-#endif
+	wchar_t candStr[240][8];	// unicode string
 };

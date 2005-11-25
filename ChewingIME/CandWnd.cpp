@@ -150,20 +150,20 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 	int selkey_w = 0;
     DWORD   colorIdx, colorBody;
 	SIZE candsz;
-	GetTextExtentPoint32(hDC, "m.", 2, &candsz);
+	GetTextExtentPoint32W(hDC, L"m.", 2, &candsz);
 	selkey_w = candsz.cx;
 
 	for( int i = candList->getPageStart(); i <= pageEnd; ++i )
 	{
 		++num;
 
-		TCHAR cand[64];
-		TCHAR selKey[4]="1.";
+		wchar_t cand[64];
+		TCHAR selKey[4] = _T("1.");
 		if( i < pageEnd )
 		{
 			LPCTSTR selKeys = g_selKeyNames[g_selKeyType];
 			selKey[0] = selKeys[(i - candList->getPageStart())];
-			_tcscpy( cand, candList->getCand(i) );
+			wcscpy( cand, candList->getCand(i) );
             _DecideCandStringcolor(colorIdx, colorBody, FALSE);
 		}
 		else
@@ -174,12 +174,12 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			int totalPage = candList->getTotalCount() / candList->getPageSize();
 			if( candList->getTotalCount() % candList->getPageSize() )
 				++totalPage;
-			wsprintf ( cand, _T("  %d/%d"), page, totalPage );
+			swprintf( cand, L"  %d/%d", page, totalPage );
             _DecideCandStringcolor(colorIdx, colorBody, TRUE);
 		}
 
-		int len = _tcslen( cand );
-		GetTextExtentPoint32(hDC, cand, len, &candsz);
+		int len = wcslen( cand );
+		GetTextExtentPoint32W(hDC, cand, len, &candsz);
 		candsz.cx += 4;
 		candsz.cy += 2;
 		cand_rc.bottom = cand_rc.top + candsz.cy;
@@ -194,8 +194,8 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 			cand_rc.left = cand_rc.right;
 		}
 		cand_rc.right = cand_rc.left + candsz.cx;
-        SetTextColor( hDC, colorBody);
-		ExtTextOut( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
+        SetTextColor( hDC, colorBody );
+		ExtTextOutW( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
 
 		if( num >= items_per_row && i < pageEnd )

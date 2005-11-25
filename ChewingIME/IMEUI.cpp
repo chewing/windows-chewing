@@ -496,7 +496,7 @@ void IMEUI::showCandWnd(void)
 void IMEUI::showUserNotify(IMCLock& imc)
 {
 	CompStr* cs = imc.getCompStr();
-	LPCTSTR msg = cs->getShowMsg();
+	LPCWSTR msg = cs->getShowMsg();
 	if( *msg )
 	{
 //		POINT pt = getCompWndPos(imc);

@@ -25,8 +25,8 @@ CandList::~CandList(void)
 {
 }
 
-void CandList::setCand( int i, LPCTSTR cand )
+void CandList::setCand( int i, LPCWSTR cand )
 {
-	_tcscpy( candStr[i], cand );
+	wcscpy( candStr[i], cand );
 }
 
