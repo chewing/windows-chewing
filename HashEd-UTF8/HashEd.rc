@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Taiwan) resources
+// 中文 (台灣) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
 #ifdef _WIN32
@@ -27,18 +27,18 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -66,17 +66,18 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\HashEd.ico"
+IDR_MAINFRAME           ICON                    "res\\HashEd.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 259, 217
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ABOUTBOX DIALOGEX 0, 0, 259, 217
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 CAPTION "關於 新酷音本地詞庫編輯器"
-FONT 9, "新細明體"
+FONT 9, "新細明體", 0, 0, 0x0
 BEGIN
     GROUPBOX        "",IDC_STATIC,7,102,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
@@ -90,8 +91,8 @@ BEGIN
 END
 
 IDD_HASHED_DIALOG DIALOGEX 0, 0, 425, 304
-STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_VISIBLE | 
-    WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
 CAPTION "PhraseEd"
 FONT 9, "新細明體", 400, 0, 0x88
@@ -113,7 +114,6 @@ BEGIN
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -136,13 +136,13 @@ BEGIN
     BEGIN
         BLOCK "040404b0"
         BEGIN
-            VALUE "FileDescription", "Chewing local phrase editor\0"
-            VALUE "FileVersion", "0, 0, 0, 1\0"
-            VALUE "InternalName", "PhraseEd\0"
-            VALUE "LegalCopyright", "Copyright (C) 2005\0"
-            VALUE "OriginalFilename", "PhraseEd.EXE\0"
-            VALUE "ProductName", "PhraseEd Application\0"
-            VALUE "ProductVersion", "0, 0, 0, 1\0"
+            VALUE "FileDescription", "Chewing local phrase editor"
+            VALUE "FileVersion", "0, 0, 0, 1"
+            VALUE "InternalName", "PhraseEd"
+            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "OriginalFilename", "PhraseEd.EXE"
+            VALUE "ProductName", "PhraseEd Application"
+            VALUE "ProductVersion", "0, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -151,8 +151,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -160,7 +158,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO MOVEABLE PURE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -186,14 +184,14 @@ END
 // Bitmap
 //
 
-IDB_COOL                BITMAP  MOVEABLE PURE   "icon.bmp"
+IDB_COOL                BITMAP                  "icon.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDS_ABOUTBOX            "關於 PhraseEd(&A)..."
     IDS_ALLOW_CHI_STRING    "請輸入中文字串。"
@@ -206,7 +204,7 @@ BEGIN
     IDS_SUGGEST_DO_SAVE     "載入過程發現詞彙錯誤或重複，\n請執行一次「存入本地詞庫」，\n以製作一個正確的新檔案。"
 END
 
-#endif    // Chinese (Taiwan) resources
+#endif    // 中文 (台灣) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
