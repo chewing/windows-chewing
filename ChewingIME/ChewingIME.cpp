@@ -307,8 +307,8 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 	if( g_useUnicode )	{
 		 lpIMEInfo->fdwProperty |= IME_PROP_UNICODE;
 #ifndef UNICODE
-		int len = strlen( g_chewingIMEClass );
-		MultiByteToWideChar( CP_ACP, 0, g_chewingIMEClass, len+1, (LPWSTR)lpszUIClass, len+1 );
+		int len = strlen(g_chewingIMEClass);
+		MultiByteToWideChar( CP_ACP, 0, g_chewingIMEClass, len, (LPWSTR)lpszUIClass, len+1 );
 #endif
 	}
 
@@ -448,7 +448,7 @@ BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 				char* cand = g_chewing->Selection( i );
 				if( cand )	{
 					wchar_t wcand[10];
-					MultiByteToWideChar( CP_UTF8, 0, cand, strlen(cand)+1, wcand, sizeof(wcand)/sizeof(wchar_t) );
+					MultiByteToWideChar( CP_UTF8, 0, cand, -1, wcand, sizeof(wcand)/sizeof(wchar_t) );
 					candList->setCand( i , wcand );
 					free(cand);
 				}
@@ -528,7 +528,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		char* cstr = g_chewing->CommitStr();
 		if( cstr )	{
 			wchar_t wcstr[256];
-			MultiByteToWideChar( CP_UTF8, 0, cstr, strlen(cstr)+1, wcstr, sizeof(wcstr)/sizeof(wchar_t) );
+			MultiByteToWideChar( CP_UTF8, 0, cstr, -1, wcstr, sizeof(wcstr)/sizeof(wchar_t) );
 
 		//	wcstr[0] = 0x5803;	// This is only for test purpose
 			cs->setResultStr( wcstr );
@@ -544,7 +544,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		char* chibuf = g_chewing->Buffer();
 		if(chibuf)	{
 			wchar_t wchibuf[256];
-			MultiByteToWideChar( CP_UTF8, 0, chibuf, strlen(chibuf)+1, wchibuf, sizeof(wchibuf)/sizeof(wchar_t) );
+			MultiByteToWideChar( CP_UTF8, 0, chibuf, -1, wchibuf, sizeof(wchibuf)/sizeof(wchar_t) );
 
 		//	wchibuf[0] = 0x5803;	// This is only for test purpose
 			cs->setCompStr(wchibuf);
@@ -568,7 +568,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	char* zuin = g_chewing->ZuinStr();
 	if( zuin )	{
 		wchar_t wzuin[32];
-		MultiByteToWideChar( CP_UTF8, 0, zuin, strlen(zuin)+1, wzuin, sizeof(wzuin)/sizeof(wchar_t) );
+		MultiByteToWideChar( CP_UTF8, 0, zuin, -1, wzuin, sizeof(wzuin)/sizeof(wchar_t) );
 		cs->setZuin(wzuin);
 
 		free(zuin);
@@ -968,7 +968,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				if( msg )
 				{
 					wchar_t wmsg[100];
-					MultiByteToWideChar( CP_UTF8, 0, msg, strlen(msg)+1, wmsg, sizeof(wmsg)/sizeof(wchar_t) );
+					MultiByteToWideChar( CP_UTF8, 0, msg, -1, wmsg, sizeof(wmsg)/sizeof(wchar_t) );
 					cs->setShowMsg( wmsg );
 					free(msg);
 					GenerateIMEMessage( imc.getHIMC(), WM_IME_NOTIFY, IMN_PRIVATE, 0 );

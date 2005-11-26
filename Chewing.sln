@@ -35,6 +35,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HashEd-UTF8", "HashEd-UTF8\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "big52utf8", "big52utf8\big52utf8.vcproj", "{FEA2192A-7A54-46C9-A194-16B2B4268C26}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -73,6 +77,10 @@ Global
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Debug.Build.0 = Debug|Win32
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Release.ActiveCfg = Release|Win32
 		{269E68D9-551A-4A1B-8DEF-A8C6DA04DA2A}.Release.Build.0 = Release|Win32
+		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Debug.ActiveCfg = Debug|Win32
+		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Debug.Build.0 = Debug|Win32
+		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Release.ActiveCfg = Release|Win32
+		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
