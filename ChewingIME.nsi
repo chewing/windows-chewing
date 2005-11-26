@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.2.0.1"
+!define PRODUCT_VERSION "0.2.5b"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -66,20 +66,20 @@ FunctionEnd
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
   SetOverwrite on
-  File "..\libchewing\trunk\data\us_freq.dat"
-  File /oname=ph_index.dat "..\libchewing\trunk\data\ph_index.dat"
-  File /oname=fonetree.dat "..\libchewing\trunk\data\fonetree.dat"
-  File "..\libchewing\trunk\data\dict.dat"
-  File /oname=ch_index.dat "..\libchewing\trunk\data\ch_index.dat"
+  File "..\libchewing\branches\utf8\data\us_freq.dat"
+  File /oname=ph_index.dat "..\libchewing\branches\utf8\data\ph_index.dat"
+  File /oname=fonetree.dat "..\libchewing\branches\utf8\data\fonetree.dat"
+  File "..\libchewing\branches\utf8\data\dict.dat"
+  File /oname=ch_index.dat "..\libchewing\branches\utf8\data\ch_index.dat"
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "UserGuide\chewing.chm"
   File "Installer\Release\Installer.exe"
   File "ChewingServer\Release\ChewingServer.exe"
-  File "HashEd\Release\PhraseEd.exe"
+;  File "HashEd\Release\PhraseEd.exe"
+  File /oname=$TEMP\big52utf8.exe "big52utf8\Release\big52utf8.exe"
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
-; File "..\libchewing\branches\win32\win32\Release\libchewing.dll"
 
   IfErrors 0 +2
     Call OnInstError
@@ -90,7 +90,7 @@ Section -AdditionalIcons
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\新酷音輸入法"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk" "$INSTDIR\Chewing.chm"
-  CreateShortCut "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk" "$INSTDIR\PhraseEd.exe"
+;  CreateShortCut "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk" "$INSTDIR\PhraseEd.exe"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
@@ -102,6 +102,12 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
   Exec '"$SYSDIR\IME\Chewing\Installer.exe"'
+
+  IfFileExists $APPDATA\Chewing\uhash.dat +3 0
+  SetShellVarContext current
+  ExecWait '"$TEMP\big52utf8.exe" $APPDATA\Chewing\hash.dat'
+
+  Delete $TEMP\big52utf8.exe
 
   IfErrors 0 +2
     Call OnInstError
@@ -142,7 +148,7 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\Chewing.chm"
   Delete "$SYSDIR\IME\Chewing\Installer.exe"
   Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
-  Delete "$SYSDIR\IME\Chewing\PhraseEd.exe"
+;  Delete "$SYSDIR\IME\Chewing\PhraseEd.exe"
 
 ;  IfErrors 0 +2
 ;    Call un.onError

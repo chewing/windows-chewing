@@ -16,13 +16,9 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hprev, LPSTR lpCmd, int nShow )
 			CloseHandle( hHashFile );
 
 			// Backup original file
-			TCHAR backup_path[MAX_PATH];
-			wsprintf( backup_path, "%s.big5", lpCmd );
-			hHashFile = CreateFile( backup_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL );
-			if( hHashFile != INVALID_HANDLE_VALUE )	{
-				WriteFile( hHashFile, buf, size, &size, NULL );
-				CloseHandle( hHashFile );
-			}
+//			TCHAR filepath[MAX_PATH];
+//			wsprintf( filepath, "%s.big5", lpCmd );
+//			MoveFile( lpCmd, filepath );
 
 			DWORD usize = MultiByteToWideChar( 950, 0, buf, size + 1, NULL, 0 );
 			wchar_t* ubuf = new wchar_t[usize];
@@ -30,6 +26,10 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hprev, LPSTR lpCmd, int nShow )
 				usize = MultiByteToWideChar( 950, 0, buf, size + 1, ubuf, usize );
 				size = WideCharToMultiByte( CP_UTF8, 0, ubuf, usize, NULL, 0, NULL, NULL );
 				size = WideCharToMultiByte( CP_UTF8, 0, ubuf, usize, buf, size, NULL, NULL );
+
+				TCHAR* name = _tcsrchr( lpCmd, '\\' );
+				if( name )
+					strcpy( (name + 1), _T("uhash.dat") );
 
 				hHashFile = CreateFile( lpCmd, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL );
 				if( hHashFile != INVALID_HANDLE_VALUE )	{

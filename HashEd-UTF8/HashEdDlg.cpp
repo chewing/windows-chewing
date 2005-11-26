@@ -9,6 +9,8 @@
 #include <shlobj.h>
 #include <tchar.h>
 
+#include "hash.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -294,8 +296,8 @@ void CHashEdDlg::OnFindPhrase()
 
 void CHashEdDlg::OnImport() 
 {
-	TCHAR file_name[MAX_PATH + 1] = "hash.dat";
-	TCHAR file_title[MAX_PATH + 1] = "hash";
+	TCHAR file_name[MAX_PATH + 1] = HASH_FILE;
+	TCHAR file_title[MAX_PATH + 1] = "uhash";	// utf8 version
 	OPENFILENAME ofn = {0};
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.Flags = OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST;
@@ -375,7 +377,7 @@ void CHashEdDlg::OnSave()
     SetWindowText( m_btnSave, GetStringFromTab(IDS_SAVE_BTN_FACE));
 
     //
-    sprintf( strpath, "%s\\hash.dat", m_strHashFolder );
+    _stprintf( strpath, _T("%s\\%s"), m_strHashFolder, HASH_FILE );
     _save( strpath , FALSE);
     
     Reload( strpath, true);
@@ -416,7 +418,7 @@ void CHashEdDlg::_save(const char *pathfile, BOOL bSaveNoSwap)
 	TCHAR strHashFile[MAX_PATH+1];
 	TCHAR strTemp[MAX_PATH+1];
 
-    sprintf( strTemp, "%s\\hash.dat", m_strHashFolder );
+    _stprintf( strTemp, _T("%s\\%s"), m_strHashFolder, HASH_FILE );
     GetLocalTime(&syst);
     //  locate hash.dat
     strcpy( strHashFile, pathfile );
@@ -538,7 +540,7 @@ void CHashEdDlg::OnTimer(UINT nIDEvent)
 
         KillTimer(m_hWnd, 553);
         GetHashLocation();
-        _stprintf( strFile, "%s\\hash.dat", m_strHashFolder );
+        _stprintf( strFile, _T("%s\\%s"), m_strHashFolder, HASH_FILE );
         
         m_context._connect_server();
 		Reload( strFile, true );

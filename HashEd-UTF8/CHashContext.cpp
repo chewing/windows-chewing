@@ -8,9 +8,9 @@
 
 #include <assert.h>
 
+#include "hash.h"
 extern "C"
 {
-	#include "hash.h"
 	#include "chewing-utf8-util.h"
 }
 #include "chewingserver.h"
@@ -400,11 +400,12 @@ void CHashContext::shutdown_server()
                             ChewingServer::cmdEcho, 0, 0)!=0 );
 }
 
+#if 0
 int main(int argc, char* argv[])
 {
     CHashContext context;
 
-    context.load_hash("hash.dat");
+    context.load_hash( HASH_FILE );
     context.sort_phrase();
     context.arrange_phrase();
     context.list_phrase();
@@ -414,6 +415,7 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+#endif
 
 BOOL CHashContext::isChineseString(char *str)
 {
