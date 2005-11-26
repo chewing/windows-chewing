@@ -95,7 +95,7 @@ public:
 
     /**
      */
-    static BOOL _isDbcsString(char *str);
+    static BOOL isChineseString(char *str);
 
     CHashContext();
     ~CHashContext();

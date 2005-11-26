@@ -5,9 +5,13 @@
 #include <string.h>
 #include <algorithm>
 #include <tchar.h>
+
+#include <assert.h>
+
 extern "C"
 {
 	#include "hash.h"
+	#include "chewing-utf8-util.h"
 }
 #include "chewingserver.h"
 #include "chashcontext.h"
@@ -66,38 +70,40 @@ int CHashContext::load_hash(const char *file, bool doClear)
         if ( fscanf(fHashFile, "%s", strBuf)!=1 )
             break;
 
-        if ( CHashContext::_isDbcsString(strBuf)==FALSE )
+		if ( CHashContext::isChineseString(strBuf)==FALSE )
         {
             badStr = true;
             fseek(fHashFile, FIELD_SIZE-strlen(strBuf)-1, SEEK_CUR);
             continue;
         }
 
-        i = strlen(strBuf);
         hitem = (HASH_ITEM*) calloc(1, sizeof(HASH_ITEM));
-	    hitem->data.wordSeq = (char*) malloc(i+1);
-        hitem->data.phoneSeq = (uint16*) calloc(i+1, sizeof(uint16));
-        strcpy(hitem->data.wordSeq, strBuf);
-        hitem->data.wordSeq[i] = '\0';
 
-        /* read phoneSeq */
-        for ( lop=0; lop<i/2; lop++ )
-        {
-            if ( fscanf(fHashFile, "%d", &hitem->data.phoneSeq[lop])!=1 )
-            {
+		int word_len = strlen( strBuf );
+		hitem->data.wordSeq = (char*)calloc( word_len + 1, sizeof(char) );
+		strcpy( hitem->data.wordSeq, strBuf );
+
+		/* read phoneSeq */
+		int len = ueStrLen(hitem->data.wordSeq);
+		hitem->data.phoneSeq = (uint16*)calloc( len + 1, sizeof(uint16) );
+		for ( i = 0; i < len; i++ )
+			if ( fscanf( fHashFile, "%hu", &( hitem->data.phoneSeq[ i ] ) ) != 1 )
+			{
                 badItem = true;
-                goto _handle_load_err;
-            }
-        }
-        
-        /* read userfreq & recentTime, etc. */
-        if ( fscanf(fHashFile, "%d %d %d %d", 
-                &(hitem->data.userfreq), &(hitem->data.recentTime),
-                &(hitem->data.maxfreq), &(hitem->data.origfreq))!=4 )
-        {
+                goto _handle_load_err;			
+			}
+		hitem->data.phoneSeq[ len ] = 0;
+
+		/* read userfreq & recentTime */
+		if ( fscanf( fHashFile, "%d %d %d %d", 
+			&(hitem->data.userfreq), 
+			&(hitem->data.recentTime),
+			&(hitem->data.maxfreq), 
+			&(hitem->data.origfreq) ) != 4 )
+		{
             badItem = true;
             goto _handle_load_err;
-        }
+		}
 
         pool.push_back(hitem);
         hitem->item_index = pool.size();
@@ -222,7 +228,7 @@ void HashItem2String( char *str, HASH_ITEM *pItem )
 	char buf[ FIELD_SIZE ];
 
 	sprintf( str, "%s ", pItem->data.wordSeq );
-	len = strlen( pItem->data.wordSeq ) / 2;
+	len = ueStrLen(pItem->data.wordSeq);
 	for ( i = 0; i < len; i++ ) {
 		sprintf( buf, "%hu ", pItem->data.phoneSeq[ i ] );
 		strcat( str, buf );
@@ -233,6 +239,7 @@ void HashItem2String( char *str, HASH_ITEM *pItem )
 		pItem->data.maxfreq, pItem->data.origfreq );
 	strcat( str, buf );
 }
+
 
 
 bool CHashContext::save_hash(const char *destFile)
@@ -408,21 +415,15 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-BOOL CHashContext::_isDbcsString(char *str)
+BOOL CHashContext::isChineseString(char *str)
 {
-	char *pNextChar, *pCurChar;
-
-	pCurChar = str;
-	while ( *pCurChar!=NULL )
-	{
-		pNextChar = CharNext(pCurChar);
-		if ( (int)(pNextChar-pCurChar)!=2 )
-		{
+	while ( *str != NULL )	{
+		int len = ueBytesFromChar( (unsigned char)*str );
+		if ( len <= 1 )	{
 			return	FALSE;
 		}
-		pCurChar = pNextChar;
+		str += len;
 	};
-
 	return	TRUE;
 }
 

@@ -205,7 +205,7 @@ void CHashEdDlg::OnAddPhrase()
     BOOL bMatch;
 
     if ( strlen(m_string)==0 )    return;
-	if ( CHashContext::_isDbcsString(m_string)==FALSE )
+	if ( CHashContext::isChineseString(m_string)==FALSE )
 	{
 		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
                    NULL, MB_OK );
@@ -271,7 +271,7 @@ void CHashEdDlg::OnFindPhrase()
     GetWindowText(m_edtPhrase, tstring, sizeof(tstring));
     tstring[sizeof(tstring)-1] = '\0';
     if ( strlen(tstring)==0 )   return;
-	if ( CHashContext::_isDbcsString(tstring)==FALSE )
+	if ( CHashContext::isChineseString(tstring)==FALSE )
 	{
 		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
                    NULL, MB_OK);

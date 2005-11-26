@@ -67,7 +67,6 @@ protected:
 	void OnAbout();
 	void OnTimer(UINT nIDEvent);
 
-    BOOL _isDbcsString(char *str);
     int _isMatch(char *string, int id);
     int find(char *tok, BOOL &bExactMatch, int hi=-1, int lo=-1);
     void GetHashLocation();
