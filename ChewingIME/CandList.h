@@ -21,6 +21,6 @@ public:
 protected:
     CANDIDATEINFO  ci;
     CANDIDATELIST  cl;
-    DWORD offset[240-1];
-	wchar_t candStr[240][8];	// unicode string
+    DWORD offset[1024-1];
+	wchar_t candStr[1024][8];	// unicode string
 };

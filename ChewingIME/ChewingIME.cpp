@@ -443,7 +443,8 @@ BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 
 		if(candList->getPageStart() == 0)
 		{
-			for( int i = 0; i < g_chewing->TotalChoice(); ++i )
+			int TotalChoice = g_chewing->TotalChoice();
+			for( int i = 0; i < TotalChoice; ++i )
 			{
 				char* cand = g_chewing->Selection( i );
 				if( cand )	{
