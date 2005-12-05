@@ -109,7 +109,7 @@ char* Chewing::CommitStr(int from) {
 }
 
 char* Chewing::CommitStr(int from, int to) {
-  char *s = (char*) calloc (1 + co->nCommitStr, sizeof(char) * WCH_SIZE);
+  char *s = (char*) calloc (1 + co->nCommitStr, sizeof(char) * MAX_UTF8_SIZE);
   if(from >= 0 && to < co->nCommitStr ) {
     for(int i=from; i <= to ; i++)
       strcat(s,(char*)(co->commitStr[i].s));
@@ -138,7 +138,7 @@ char* Chewing::Buffer(int from) {
 }
 char* Chewing::Buffer(int from,int to) {
   char *s;
-  s = (char*)calloc( 1+ BufferLen(), sizeof(char) * WCH_SIZE);
+  s = (char*)calloc( 1+ BufferLen(), sizeof(char) * MAX_UTF8_SIZE);
   if(from >= 0 && to < BufferLen() ) {
     for(int i = from; i <= to; i++) {
       strcat(s,(char*)(co->chiSymbolBuf[i].s));
@@ -265,7 +265,7 @@ int Chewing::ShowMsgLen(void)
 
 char* Chewing::ShowMsg(void)
 {
-	char *msg = (char*) calloc (1 + co->showMsgLen, sizeof(char) * WCH_SIZE);
+	char *msg = (char*) calloc (1 + co->showMsgLen, sizeof(char) * MAX_UTF8_SIZE);
 	for(int i = 0; i < co->showMsgLen ; ++i )
 		strcat(msg, (char*)(co->showMsg[i].s));
 	return msg;
