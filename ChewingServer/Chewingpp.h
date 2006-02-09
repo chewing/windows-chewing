@@ -6,6 +6,12 @@
 
 #include "chewing.h"
 
+#ifdef	MAX_UTF8_SIZE
+#define	MAX_CHAR_SIZE	(MAX_UTF8_SIZE)
+#else
+#define	MAX_CHAR_SIZE	(2)
+#endif
+
 class Chewing
 {
   ChewingData   *cd;
