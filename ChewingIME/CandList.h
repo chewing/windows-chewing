@@ -13,8 +13,9 @@ public:
 	int getTotalCount(){ return cl.dwCount; }
 	void setPageSize(int s){ cl.dwPageSize = s; }
 	int getPageSize(){ return cl.dwPageSize; }
-	void setPageStart(int i){ cl.dwPageStart = i;
-							cl.dwSelection = i;}
+	void setPageStart(int i){ cl.dwPageStart = i; }
+	void setSelection( int i ) { cl.dwSelection = i; }
+	int getSelection() { return cl.dwSelection; }
 	int getPageStart(){ return cl.dwPageStart; }
 	void setCand(int i, LPCWSTR cand);
 	LPCWSTR getCand(int i){ return candStr[i]; }

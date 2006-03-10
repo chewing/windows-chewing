@@ -111,8 +111,6 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 		SetBkColor( memdc, GetSysColor( COLOR_WINDOW ) );
 		ExtTextOutW( memdc, 1, 1, ETO_OPAQUE, &rc, compStr.c_str(), 
 			compStr.length(), NULL);
-//		int selstart = indexToXPos( CompSelStart );
-//		int selend = indexToXPos( CompSelEnd );
 		int cursor = indexToXPos( compStr, cursorPos );
         if ( g_ColoredCompCursor==false )
         {
@@ -121,12 +119,9 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
         else
         {
             // #15235, block cursor
-		    int curWidth;
-/*            curWidth = indexToXPos(compStr, 
-                (int)(_tcsinc(compStr.c_str()+cursorPos)-(compStr.c_str()+cursorPos)))-2;
-*/
+			int selend = indexToXPos( compStr, cursorPos + 1 );
+		    int curWidth = selend - cursor;
 			/// FIXME: Temporarily changed to 2
-			curWidth = 2;
 
 			BitBlt( memdc, cursor, 0, curWidth, rc.bottom, memdc, cursor, 0, DSTINVERT );
         }

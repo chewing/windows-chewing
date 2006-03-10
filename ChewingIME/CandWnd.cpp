@@ -158,7 +158,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 		++num;
 
 		wchar_t cand[64];
-		TCHAR selKey[4] = _T("1.");
+		TCHAR selKey[5] = _T("1.");
 		if( i < pageEnd )
 		{
 			LPCTSTR selKeys = g_selKeyNames[g_selKeyType];
@@ -197,6 +197,8 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
         SetTextColor( hDC, colorBody );
 		ExtTextOutW( hDC, cand_rc.left, cand_rc.top, ETO_OPAQUE, &cand_rc, cand, 
 			len, NULL);
+		if( g_cursorCandList && i == candList->getSelection() )
+			BitBlt(hDC, cand_rc.left, cand_rc.top, font_size * len, font_size, hDC, cand_rc.left, cand_rc.top, NOTSRCCOPY);
 
 		if( num >= items_per_row && i < pageEnd )
 		{

@@ -44,6 +44,9 @@ DWORD g_AdvanceAfterSelection = true;
 DWORD g_FontSize = DEF_FONT_SIZE;
 DWORD g_selKeyType = 0;
 DWORD g_selAreaLen = 50;
+DWORD g_cursorCandList = 1;
+DWORD g_enableCapsLock = 0;
+DWORD g_shiftFullShape = 1;
 
 static const char* g_selKeys[]={
 	"1234567890",
@@ -108,6 +111,9 @@ void LoadConfig()
         RegQueryValueEx( hk, "DefFontSize", 0, &type, (LPBYTE)&g_FontSize, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
 		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
+		RegQueryValueEx( hk, "CursorCandList", 0, &type, (LPBYTE)&g_cursorCandList, &size );
+		RegQueryValueEx( hk, "EnableCapsLock", 0, &type, (LPBYTE)&g_enableCapsLock, &size );
+		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
 		RegCloseKey( hk );
 	}
 
@@ -148,6 +154,9 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("DefFontSize"), 0, REG_DWORD, (LPBYTE)&g_FontSize, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("CursorCandList"), 0, REG_DWORD, (LPBYTE)&g_cursorCandList, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("EnableCapsLock"), 0, REG_DWORD, (LPBYTE)&g_enableCapsLock, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -173,6 +182,9 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
 			CheckDlgButton( hwnd, IDC_BLOCK_CURSOR, g_ColoredCompCursor );
 			CheckDlgButton( hwnd, IDC_ADV_AFTER_SEL, g_AdvanceAfterSelection );
+			CheckDlgButton( hwnd, IDC_CURSOR_CANDLIST, g_cursorCandList );
+			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
+			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -236,7 +248,9 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
 				g_ColoredCompCursor = IsDlgButtonChecked( hwnd, IDC_BLOCK_CURSOR );
                 g_AdvanceAfterSelection = IsDlgButtonChecked( hwnd, IDC_ADV_AFTER_SEL);
-
+				g_cursorCandList = IsDlgButtonChecked( hwnd, IDC_CURSOR_CANDLIST );
+				g_enableCapsLock = IsDlgButtonChecked( hwnd, IDC_ENABLE_CAPSLOCK );
+				g_shiftFullShape = IsDlgButtonChecked( hwnd, IDC_SHIFT_FULLSHAPE );
                 if ( g_chewing!=NULL )
                     g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 
@@ -402,9 +416,11 @@ void ToggleChiEngMode(HIMC hIMC)
 	{
 		if( isChinese )	// We need Chinese mode
 		{
-			if( !g_chewing->ChineseMode() )	// Chewing is in English mode
-				if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )	// no CapsLock
-					g_chewing->Capslock();	// Switch Chewing to Chinese mode
+			if( !g_chewing->ChineseMode() )	{// Chewing is in English mode
+				g_chewing->Capslock();
+				if( ! LOBYTE(GetKeyState(VK_CAPITAL)) && g_enableCapsLock )	// no CapsLock
+						g_chewing->Capslock();	// Switch Chewing to Chinese mode
+			}
 		}
 		else	// We need English mode
 		{
@@ -441,7 +457,13 @@ BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 		int old_total_count = candList->getTotalCount();
 		candList->setTotalCount( g_chewing->TotalChoice() );
 
-		if(candList->getPageStart() == 0)
+		if( candList->getSelection() < candList->getPageStart() ||
+			candList->getSelection() > candList->getTotalCount() ||
+			candList->getSelection() > candList->getPageStart() + candList->getPageSize() - 1 ) {
+				candList->setSelection( candList->getPageStart() );
+		}
+
+		if(candList->getPageStart() == 0 && candList->getSelection() == 0 )
 		{
 			int TotalChoice = g_chewing->TotalChoice();
 			for( int i = 0; i < TotalChoice; ++i )
@@ -567,12 +589,15 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	cs->setCursorPos( cursorpos );
 
 	char* zuin = g_chewing->ZuinStr();
+
 	if( zuin )	{
+
 		wchar_t wzuin[32];
 		MultiByteToWideChar( CP_UTF8, 0, zuin, -1, wzuin, sizeof(wzuin)/sizeof(wchar_t) );
 		cs->setZuin(wzuin);
-
+		
 		free(zuin);
+
 	}
 	else
 		cs->setZuin( L"" );
@@ -635,7 +660,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			return FALSE;
 		cl = new (cl) CandList;	// placement new
 
-		if( ! (ic->fdwInit & INIT_CONVERSION) )		// Initialize
+		if( (ic->fdwInit & INIT_CONVERSION) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
 
@@ -666,11 +691,11 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			{
 				if( g_chewing->ChineseMode() )
 				{
-					if(  LOBYTE(GetKeyState(VK_CAPITAL)) )
-						g_chewing->Capslock();
+					if(  LOBYTE(GetKeyState(VK_CAPITAL)) && g_enableCapsLock ) 
+							g_chewing->Capslock();
 				}
-				else if( ! LOBYTE(GetKeyState(VK_CAPITAL)) )
-					g_chewing->Capslock();
+				else if( ! LOBYTE(GetKeyState(VK_CAPITAL)) && g_enableCapsLock )
+						g_chewing->Capslock();
 			}
 		}
 		else
@@ -898,6 +923,11 @@ static int _InvertCase(int key)
     return  key;
 }
 
+bool _FilterKey( int key ) {
+	string table = "`~=+[{]}|\\'\"";
+	return table.find( key ) != -1;
+}
+
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate )
 {
 	bool isChinese = imc.isChinese();
@@ -912,23 +942,32 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			return FALSE;
 		if( ! (g_chewing = LoadChewingEngine()) )
 			return FALSE;
-		if( IsKeyToggled( keystate[VK_CAPITAL]) || !isChinese )
-			g_chewing->Capslock();	// switch to English mode
+		if( ( IsKeyToggled( keystate[VK_CAPITAL]) && g_enableCapsLock ) || !isChinese )
+				g_chewing->Capslock();	// switch to English mode
 	}
 	else
 	{
 		// Correct Chinese/English mode
-		if( g_chewing->ChineseMode() )
-		{
-			if( IsKeyToggled( keystate[VK_CAPITAL]) || !isChinese )
-				g_chewing->Capslock();
+		if( g_enableCapsLock ) {
+			if( g_chewing->ChineseMode() )
+			{
+				if( IsKeyToggled( keystate[VK_CAPITAL]) || !isChinese )
+						g_chewing->Capslock();
+			}
+			else if( !IsKeyToggled( keystate[VK_CAPITAL]) && isChinese )
+					g_chewing->Capslock();
 		}
-		else if( !IsKeyToggled( keystate[VK_CAPITAL]) && isChinese )
-			g_chewing->Capslock();
+		else if( isChinese ) {
+			if( !g_chewing->ChineseMode() ) {
+				g_chewing->Capslock();
+			}
+		}
+
+
 
 		CompStr* cs = imc.getCompStr();
-		// In English mode, Bypass chewing if there is no composition string
-		if( !cs || !*cs->getCompStr() )
+		// In English mode, Bypass chewing if there is no composition string but may be call symbol table!
+		if( ( !cs || !*cs->getCompStr() ) && !g_chewing->Candidate() )
 		{
 			if( isChinese )
 			{
@@ -977,27 +1016,98 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			}
 			else if( ! g_chewing->Candidate() )
 				return FALSE;
+
 			return ! g_chewing->KeystrokeIgnore();
 		}
 		else
 			return FALSE;
 	}
 
+	CandList* candList = imc.getCandList();
 	if( g_chewing->Candidate() > 0 )
-	{
-		switch( key )
-		{
-		case VK_NEXT:
-			key = VK_RIGHT;
-			break;
-		case VK_PRIOR:
-			key = VK_LEFT;
-            break;
-        // Fix #15218, allow backspace/enter to close cand win
-        case    VK_BACK: 
-        case    VK_RETURN:
-            key = VK_ESCAPE;
-            break;
+	{	
+		/* control candlsit cursor */
+		if( g_cursorCandList ) {
+			switch( key )
+			{
+			case VK_UP:
+				candList->setSelection( candList->getSelection() - g_candPerRow );
+				if( candList->getSelection() < 0 ) {
+					g_chewing->Up();
+					candList->setSelection( 0 );
+				}
+				if( candList->getSelection() < candList->getPageStart() ) {
+					g_chewing->Left();
+					candList->setSelection( 0 );
+				}
+				return ! g_chewing->KeystrokeIgnore();
+			case VK_DOWN:
+				candList->setSelection( candList->getSelection() + g_candPerRow );
+				if( candList->getSelection() > candList->getTotalCount() - 1 ) {
+					g_chewing->Down();
+					candList->setSelection( 0 );
+				}
+				if( candList->getSelection() - candList->getPageStart() > candList->getPageSize() - 1 ) {
+					g_chewing->Right();
+					candList->setSelection( 0 );
+				}
+				return ! g_chewing->KeystrokeIgnore();
+			case VK_LEFT:
+				if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == 0 ) {
+					g_chewing->Left();
+					if( g_chewing->CurrentPage() == g_chewing->TotalPage() - 1 ) {
+						g_chewing->Up();
+						candList->setSelection( 0 );
+					}
+				} else {
+					candList->setSelection( candList->getSelection() - 1 );
+				}
+				return ! g_chewing->KeystrokeIgnore();
+				break;
+			case VK_RIGHT:
+				if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == g_candPerRow - 1 ||
+					( ( candList->getSelection() % candList->getPageSize() ) == candList->getPageSize() - 1 ) ||
+					candList->getSelection() == candList->getTotalCount() - 1 ) {
+					g_chewing->Right();
+					if( g_chewing->CurrentPage() == 0 ) {
+						g_chewing->Down();
+						candList->setSelection( 0 );
+					}
+				} else {
+					candList->setSelection( candList->getSelection() + 1 );
+				}
+				return ! g_chewing->KeystrokeIgnore();
+				break;
+			case VK_NEXT:
+				key = VK_RIGHT;
+				break;
+			case VK_PRIOR:
+				key = VK_LEFT;
+				break;
+			case VK_RETURN:
+				key = *g_selKeyNames[ g_selKeyType ] + candList->getSelection() % candList->getPageSize();
+				candList->setSelection( 0 );
+				break;
+			case    VK_BACK:
+				key = VK_ESCAPE;
+				break;
+			}
+		}
+		else {
+			switch( key )
+			{
+			case VK_NEXT:
+				key = VK_RIGHT;
+				break;
+			case VK_PRIOR:
+				key = VK_LEFT;
+				break;
+			// Fix #15218, allow backspace/enter to close cand win
+			case    VK_BACK: 
+			case    VK_RETURN:
+				key = VK_ESCAPE;
+				break;
+			}
 		}
 	}
 	else if( imc.isVerticalComp() && ! g_fixCompWnd )
@@ -1017,7 +1127,6 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			break;
 		}
 	}
-
 	switch( key )
 	{
 	case VK_LEFT:
@@ -1034,9 +1143,11 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		break;
 	case VK_UP:
 		g_chewing->Up();
+		candList->setSelection( 0 );
 		break;
 	case VK_DOWN:
 		g_chewing->Down();
+		candList->setSelection( 0 );
 		break;
 	case VK_HOME:
 		g_chewing->Home();
@@ -1060,12 +1171,15 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		g_chewing->Tab();
 		break;
 	case VK_SPACE:
+		if( !g_chewing->Candidate() )
+			candList->setSelection( 0 );
 		g_chewing->Space();
 		break;
 	case VK_CAPITAL:
-		if( isChinese )
+		if( isChinese && g_enableCapsLock ) {
 			g_chewing->Capslock();
-			return FALSE;
+		}
+		return FALSE;
 		break;
 	default:
 		{
@@ -1085,39 +1199,75 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 
 			if( isChinese )
 			{
-				if( IsKeyToggled( keystate[VK_CAPITAL] ) )
-				{
-                    key = _InvertCase(key);
-                    if ( IsKeyDown(keystate[VK_SHIFT]) )
-                    {
-                        g_chewing->Key( key );
-                        return TRUE;
-                    }
-				}
-				if( g_shiftCapital && key >= 'A' && key <= 'Z' )
-				{
-					/// FIXME: Temporary hack to enable typing
-					//  capital English characters in Chinese mode
-					//  with shift key. There should be a better way.
-					//  We temporary switch to English mode here, and
-					//  that's ok since this wrong state will be corrected 
-					//  when FilterKeyByChewing() is called next time.
-					//  We always examine whether English/Chinese mode
-					//  is properly set and correct it in the beginning
-					//  of this function.
-					g_chewing->Capslock();
-					g_chewing->Key( key );
-					return TRUE;
+
+				//handle symbol
+				if( !g_shiftFullShape && !isalpha( key ) && !isFullShape )
+					if( IsKeyDown(keystate[VK_SHIFT]) || _FilterKey( key ) ) {
+						g_chewing->Capslock();
+						g_chewing->SetFullShape( FALSE );
+						g_chewing->Key( key );
+						return TRUE;
+					}
+				
+				if( !g_enableCapsLock ) {
+					if( IsKeyToggled( keystate[VK_CAPITAL] ) ) {
+						if( IsKeyDown(keystate[VK_SHIFT]) ) {
+							if( key >= 'a' && key <= 'z' ) {
+								if( !g_shiftCapital )
+									key = _InvertCase( key );
+								g_chewing->Capslock();
+								g_chewing->Key( key );
+								return TRUE;
+							}
+						}
+					}
+					else {
+						if( IsKeyDown(keystate[VK_SHIFT]) ) 
+							if( key >= 'A' && key <= 'Z' ) {
+								if( !g_shiftCapital )
+									key = _InvertCase( key );
+								g_chewing->Capslock();
+								g_chewing->Key( key );
+								return TRUE;
+							}
+					}
+				} 
+				else {
+					if( IsKeyToggled( keystate[VK_CAPITAL] ) )
+					{
+						key = _InvertCase(key);
+						if ( IsKeyDown(keystate[VK_SHIFT]) )
+						{
+							g_chewing->Key( key );
+							return TRUE;
+						}
+					}
+					if( g_shiftCapital && key >= 'A' && key <= 'Z' )
+					{
+						/// FIXME: Temporary hack to enable typing
+						//  capital English characters in Chinese mode
+						//  with shift key. There should be a better way.
+						//  We temporary switch to English mode here, and
+						//  that's ok since this wrong state will be corrected 
+						//  when FilterKeyByChewing() is called next time.
+						//  We always examine whether English/Chinese mode
+						//  is properly set and correct it in the beginning
+						//  of this function.
+						g_chewing->Capslock();
+						g_chewing->Key( key );
+						return TRUE;
+					}
+					else {
+						g_chewing->Key( key );
+						return TRUE;
+					}
 				}
 			}
-
-			if( key == VK_SPACE )
-				g_chewing->Space();
-			else
-				g_chewing->Key( key );
+			//if chewing is chinese mode and key is capital
+			if( isupper( key ) && g_chewing->ChineseMode() )	
+				key = tolower( key );
+			g_chewing->Key( key );
 		}
 	}
 	return ! g_chewing->KeystrokeIgnore();
 }
-
-

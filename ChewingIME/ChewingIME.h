@@ -30,6 +30,7 @@ extern DWORD g_fixCompWnd;
 extern DWORD g_ColorCandWnd;
 extern DWORD g_ColoredCompCursor;
 extern DWORD g_FontSize;
+extern DWORD g_cursorCandList;
 
 extern ChewingClient* g_chewing;
 
