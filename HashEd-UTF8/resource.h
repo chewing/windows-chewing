@@ -14,6 +14,7 @@
 #define IDS_NUM_OF_PHRASES              107
 #define IDS_LOADING                     108
 #define IDS_SUGGEST_DO_SAVE             109
+#define IDS_NOTFOUND                    110
 #define IDB_COOL                        122
 #define IDR_MAINFRAME                   128
 #define IDC_PHRASE_LIST                 1001
@@ -28,8 +29,6 @@
 #define IDC_ABOUT                       1009
 #define IDC_BANNER                      1010
 #define IDC_LIST1                       1011
-#define IDC_CUSTOM1                     1014
-#define IDC_PHRASELIST                  1014
 
 // Next default values for new objects
 // 

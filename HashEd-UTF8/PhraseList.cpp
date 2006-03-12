@@ -66,9 +66,24 @@ LRESULT CPhraseList::wndProc( UINT msg, WPARAM wp, LPARAM lp )
 	case WM_SETFONT:
 		onSetFont( (HFONT)wp );
 		break;
+	case WM_KILLFOCUS:
+	case WM_SETFOCUS:
+		if( sel >= 0 ) {
+			RECT rc;
+			getItemRect( sel, rc );
+			long scroll_pos = GetScrollPos( hwnd, SB_VERT ) * itemHeight;
+			OffsetRect( &rc, 0, -scroll_pos );
+			InvalidateRect( hwnd, &rc, TRUE );	// Redraw
+		}
+		break;
+	case WM_GETDLGCODE:
+		return DLGC_WANTARROWS;
 	case WM_CREATE:
 		ShowScrollBar( hwnd, SB_VERT, TRUE );
 		break;
+	case WM_KEYDOWN:
+		if( onKeyDown( wp, lp ) )
+			break;
 	default:
 		return DefWindowProc( hwnd, msg, wp, lp );
 	}
@@ -166,14 +181,17 @@ void CPhraseList::onPaint(void)
 				SetTextColor( ps.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT) );
 				SetBkColor( ps.hdc, GetSysColor(COLOR_HIGHLIGHT) );
 			}
-			const WCHAR* text = data[i].c_str();
+			const WCHAR* text = data[i].first.c_str();
 			ExtTextOutW( ps.hdc, 
 						item_rc.left + X_MARGIN,
 						item_rc.top + Y_MARGIN,
 						ETO_OPAQUE|ETO_CLIPPED, 
-						&item_rc, text, data[i].length(),
+						&item_rc, text, data[i].first.length(),
 						NULL );
 			if( i == sel ) {
+				if( GetFocus() == hwnd ){
+					DrawFocusRect( ps.hdc, &item_rc );
+				}
 				SetTextColor( ps.hdc, GetSysColor(COLOR_WINDOWTEXT) );
 				SetBkColor( ps.hdc, GetSysColor(COLOR_WINDOW) );
 			}
@@ -230,6 +248,9 @@ void CPhraseList::setCurSel(int idx)
 	int old = sel;
 	if( idx >= 0 && idx < count() )
 		sel = idx;
+	else {
+		return;
+	}
 	long scroll_pos = GetScrollPos( hwnd, SB_VERT ) * itemHeight;
 	if( !lock ) {
 		RECT rc;
@@ -261,23 +282,34 @@ int CPhraseList::count(void)
 	return data.size();
 }
 
-int CPhraseList::insertItem(int pos, std::wstring text)
+void CPhraseList::insertItem(int pos, std::wstring text, void* user_data)
 {
-	if( pos < 0 ) {
-		data.insert( data.end(), text );
+	if( pos < 0 || pos >= count() ) {
+		data.insert( data.end(), 
+			pair<wstring, void*>(text, user_data) );
 	}
-	else if( pos < count() ) {
-		data.insert( data.begin() + pos, text );
+	else {
+		data.insert( data.begin() + pos, 
+			pair<wstring, void*>(text, user_data) );
 	}
 	if( !lock )
 		recalcLayout();
-	return 0;
 }
 
-std::wstring CPhraseList::getItem( int idx )
+std::wstring CPhraseList::getItemText( int idx )
 {
-	wstring ret;
-	return ret;
+	if( idx < data.size() && idx >=0 ) {
+		return data[idx].first;
+	}
+	return wstring();
+}
+
+void* CPhraseList::getItemData( int idx )
+{
+	if( idx < data.size() && idx >=0 ) {
+		return data[idx].second;
+	}
+	return NULL;
 }
 
 void CPhraseList::deleteItem( int idx )
@@ -300,18 +332,6 @@ void CPhraseList::recalcLayout(void)
 	GetClientRect( hwnd, &rc );
 	onSize( 0, rc.right, rc.bottom );	// Recalc layout
 	InvalidateRect( hwnd, NULL, TRUE );	// Redraw
-}
-
-void CPhraseList::scrollToItem(int idx)
-{
-	if( !lock )
-		recalcLayout();
-}
-
-void CPhraseList::sortItems(bool ascending)
-{
-	if( !lock )
-		recalcLayout();
 }
 
 void CPhraseList::lockUpdate(void)
@@ -339,6 +359,47 @@ void CPhraseList::onSetFont(HFONT hfont)
 	ReleaseDC( hwnd, dc );
 }
 
+bool CPhraseList::onKeyDown(int key, LPARAM lp)
+{
+	int new_sel = -1;
+	switch( key )
+	{
+	case VK_LEFT:
+		new_sel = sel - 1;
+		if( sel < 0 )
+			new_sel = -1;
+		break;
+	case VK_RIGHT:
+		new_sel = sel + 1;
+		if( new_sel >= count() )
+			new_sel = -1;
+		break;
+	case VK_UP:
+		new_sel = sel - itemsPerRow;
+		if( new_sel < 0 )
+			new_sel = -1;
+		break;
+	case VK_DOWN:
+		new_sel = sel + itemsPerRow;
+		if( new_sel >= count() )
+			new_sel = -1;
+		break;
+	case VK_PRIOR:
+		onVScroll( SB_PAGEUP, 0 );
+		break;
+	case VK_NEXT:
+		onVScroll( SB_PAGEDOWN, 0 );
+		break;
+	default:
+		return false;
+	}
+	if( new_sel >= 0 ) {
+		setCurSel( new_sel );
+		ensureItemVisible( new_sel );
+	}
+	return true;
+}
+
 void CPhraseList::onMouseWheel(int delta)
 {
 	SCROLLINFO si;
@@ -359,4 +420,32 @@ void CPhraseList::onMouseWheel(int delta)
 		SetScrollInfo( hwnd, SB_VERT, &si, TRUE );
 		InvalidateRect( hwnd, NULL, TRUE );
 	}
+}
+
+void CPhraseList::ensureItemVisible(int idx)
+{
+	RECT item_rc;
+	RECT rc;
+	::GetClientRect( hwnd, &rc );
+
+	int scroll_pos = GetScrollPos( hwnd, SB_VERT );
+	getItemRect( idx, item_rc );
+	OffsetRect( &item_rc, 0, - (scroll_pos * itemHeight ) );
+
+	int y = idx / itemsPerRow;
+
+	if( item_rc.top < 0 ) {
+		scroll_pos = y;
+	}
+	else if( item_rc.bottom > rc.bottom ) {
+		int visible_lines = (rc.bottom / itemHeight);
+		int last_visible_line = (scroll_pos + visible_lines);
+		scroll_pos += ( y - last_visible_line );
+	}
+	else {
+		return;
+	}
+	SetScrollPos( hwnd, SB_VERT, scroll_pos, TRUE );
+	if( !lock )
+		recalcLayout();
 }

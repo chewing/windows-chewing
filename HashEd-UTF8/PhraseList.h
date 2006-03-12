@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <vector>
+#include <utility>
 #include <string>
 
 // This class is used to replace list view provided by Windows
@@ -19,14 +20,13 @@ public:
 	void setCurSel(int idx);
 	int getCurSel(void);
 	int count(void);
-	int insertItem( int pos, std::wstring text );
-	std::wstring getItem( int idx );
+	void insertItem( int pos, std::wstring text, void* user_data );
+	std::wstring getItemText( int idx );
+	void* getItemData( int idx );
 	void deleteItem( int idx );
 	void clear(void);
-	void scrollToItem(int idx);
 	void getItemRect( int idx, RECT& rc );
 
-	void sortItems(bool ascending);
 	void lockUpdate(void);
 	void unlockUpdate(void);
 
@@ -40,15 +40,18 @@ protected:
 	void recalcLayout(void);
 	void onSetFont(HFONT hfont);
 	void onMouseWheel(int delta);
+	bool onKeyDown(int key, LPARAM lp);
 
 protected:
 	HWND hwnd;
 	int sel;	// Current selected item;
 	int itemsPerRow;
 	int lineCount;
-	std::vector< std::wstring > data;
+	std::vector< std::pair<std::wstring, void*> > data;
 	bool lock;
 	int itemHeight;
 	HFONT font;
+public:
+	void ensureItemVisible(int idx);
 };
 

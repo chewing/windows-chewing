@@ -69,8 +69,8 @@ protected:
 	void OnAbout();
 	void OnTimer(UINT nIDEvent);
 
-    int _isMatch(char *string, int id);
-    int find(char *tok, BOOL &bExactMatch, int hi=-1, int lo=-1);
+    int _isMatch(const char *string, int id);
+    int find(const char *tok, BOOL &bExactMatch, int hi=-1, int lo=-1);
     void GetHashLocation();
     void _save(const char *pathfile, BOOL bSaveNoSwap);
     void _enable_buttons(BOOL bEnable);

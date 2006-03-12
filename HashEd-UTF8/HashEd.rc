@@ -97,6 +97,8 @@ EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
 CAPTION "PhraseEd"
 FONT 9, "新細明體", 400, 0, 0x88
 BEGIN
+    CONTROL         "",IDC_PHRASE_LIST,"PhraseList",WS_TABSTOP,12,21,417,183,
+                    WS_EX_CLIENTEDGE
     PUSHBUTTON      "新增詞彙",IDC_ADD_PHRASE,162,245,61,16
     PUSHBUTTON      "刪除",IDC_DEL_PHRASE,359,209,70,14
     GROUPBOX        "本地詞庫",IDC_BANNER,7,7,429,223
@@ -108,8 +110,6 @@ BEGIN
     PUSHBUTTON      "關於本工具",IDC_ABOUT,7,275,61,22
     CONTROL         "",IDC_NEW_PHRASE_EDIT,"RichEdit20A",ES_AUTOHSCROLL | 
                     WS_BORDER | WS_TABSTOP,13,245,141,15
-    CONTROL         "",IDC_PHRASE_LIST,"PhraseList",WS_TABSTOP,12,21,417,183,
-                    WS_EX_CLIENTEDGE
 END
 
 
@@ -195,12 +195,13 @@ BEGIN
     IDS_ABOUTBOX            "關於 PhraseEd(&A)..."
     IDS_ALLOW_CHI_STRING    "請輸入中文字串。"
     IDS_INPUT_RULE          "請依照以下方法輸入:\n\n1. 使用新酷音輸入法輸入中文。\n2. 一次完成整個句子，才按下 enter 鍵。\n"
-    IDS_PHRASE_EXIST        "「%s」已經存在。"
+    IDS_PHRASE_EXIST        "你輸入的詞彙已經存在。"
     IDS_SAVE_CONFIRM        "確定要以目前正在編輯的內容取代本地詞庫檔案嗎？\n此過程將會包含重新載入詞庫，可能需要一點時間。\n"
     IDS_SAVE_BTN_FACE       "存檔中..."
     IDS_NUM_OF_PHRASES      "編輯區內共有 %d 個詞彙。"
     IDS_LOADING             "正在載入 %s"
     IDS_SUGGEST_DO_SAVE     "載入過程發現詞彙錯誤或重複，\n請執行一次「存入本地詞庫」，\n以製作一個正確的新檔案。"
+    IDS_NOTFOUND            "找不到指定的詞彙"
 END
 
 #endif    // 中文 (台灣) resources

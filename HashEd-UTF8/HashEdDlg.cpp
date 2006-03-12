@@ -12,12 +12,42 @@
 #include "hash.h"
 
 #include "PhraseList.h"
+#include "Richedit.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+#include <string>
+
+using namespace std;
+
+// Encoding conversion tools
+
+string utf16_to_utf8( const WCHAR* wtext )
+{
+	char text[128] = "";
+	int len = WideCharToMultiByte( CP_UTF8, 0, wtext,
+									-1,
+									text, sizeof(text), NULL, NULL );
+	text[len] = 0;
+	return string( text );
+}
+
+wstring utf8_to_utf16( const char* text )
+{
+	WCHAR wtext[128] = L"";
+	int wlen = MultiByteToWideChar( CP_UTF8, 0, text, 
+									strlen(text),
+									wtext, sizeof(wtext) );
+	wtext[wlen] = 0;
+	return wstring( wtext );
+}
+
+static wstring RichEdit20_GetText( HWND edit );
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CHashEdDlg dialog
@@ -61,10 +91,6 @@ LRESULT CHashEdDlg::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 				if( id == IDC_NEW_PHRASE_EDIT )
 					OnChangeNewPhraseEdit();
 				break;
-			case EN_KILLFOCUS:
-				if( id == IDC_NEW_PHRASE_EDIT )
-					OnKillfocusNewPhraseEdit();
-				break;
 			default:
 				onCommand( id );
 				break;
@@ -98,6 +124,9 @@ BOOL CHashEdDlg::OnInitDialog()
 	m_edtPhrase = GetDlgItem( m_hWnd, IDC_NEW_PHRASE_EDIT );
 	m_btnSave = GetDlgItem( m_hWnd, IDC_SAVE );
 
+	// Init RichEdit 2.0
+	SendMessage( m_edtPhrase, EM_SETTEXTMODE, TM_PLAINTEXT|TM_MULTICODEPAGE, 0 );
+
 	// Get CPhraseList control
 	phraseList = CPhraseList::fromHandle( GetDlgItem(m_hWnd, IDC_PHRASE_LIST) );
 
@@ -123,8 +152,9 @@ void CHashEdDlg::ReloadListCtrl()
 										strlen(pItem->data.wordSeq),
 										wtext, sizeof(wtext) );
 		wtext[wlen] = 0;
-		phraseList->insertItem( -1, wtext );
+		phraseList->insertItem( -1, wtext, pItem );
     }
+	phraseList->setCurSel( 0 );
 	phraseList->unlockUpdate();
 }
 
@@ -149,15 +179,13 @@ void CHashEdDlg::OnChangeNewPhraseEdit()
 
 }
 
-int CHashEdDlg::_isMatch(char *string, int id)
+int CHashEdDlg::_isMatch(const char *str, int id)
 {
-	wstring wtext = phraseList->getItem( id );
-
-	//FIXME: convert to UTF-8
-    return -1; //strcmp(string, pItem->data.wordSeq);
+	HASH_ITEM* pItem = (HASH_ITEM*)phraseList->getItemData( id );
+	return strcmp( str, pItem->data.wordSeq );
 }
 
-int CHashEdDlg::find(char *tok, BOOL &bExactMatch, int hi, int lo)
+int CHashEdDlg::find(const char *tok, BOOL &bExactMatch, int hi, int lo)
 {
     int p, cmp;
     
@@ -197,42 +225,46 @@ void CHashEdDlg::SelItem(int idx)
 
 void CHashEdDlg::OnAddPhrase() 
 {
-	// TODO: Add your control notification handler code here
     HASH_ITEM *pItem;
 	int	tt;
     BOOL bMatch;
 
-    if ( strlen(m_string)==0 )    return;
-	if ( CHashContext::isChineseString(m_string)==FALSE )
+	wstring wnew_phrase = RichEdit20_GetText( m_edtPhrase );
+	if ( wnew_phrase.empty() )
+		return;
+	string new_phrase( utf16_to_utf8(wnew_phrase.c_str()) );
+
+	if ( CHashContext::isChineseString(new_phrase.c_str())==FALSE )
 	{
 		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
                    NULL, MB_OK );
 		return;
 	}
 
-	if ( (int)strlen(m_string)/2!=m_NumPhoneSeq )
+
+//	FIXME: What's this?
+	m_NumPhoneSeq = m_context._get_phone_seq_from_server(m_PhoneSeq);
+	if ( (int)wnew_phrase.length() != m_NumPhoneSeq )
 	{
 		MessageBox(m_hWnd, GetStringFromTab(IDS_INPUT_RULE),
                    NULL, MB_OK );
 		return;
 	}
 
-    tt = find(m_string, bMatch);
+    tt = find( new_phrase.c_str(), bMatch );
     if ( bMatch==TRUE )
 	{
-        char strtemp[128];
         SelItem(tt);
-        sprintf( strtemp, GetStringFromTab(IDS_PHRASE_EXIST), m_string);
-		MessageBox(m_hWnd, strtemp, NULL, MB_OK);
+		MessageBox(m_hWnd, GetStringFromTab(IDS_PHRASE_EXIST), NULL, MB_OK);
 		return;
 	}
 
-	pItem = m_context.append_phrase(m_string, m_PhoneSeq);
+	pItem = m_context.append_phrase( new_phrase.c_str(), m_PhoneSeq);
 
-	// FIXME: utf-8 conv, sort?
-//	tt = phraseList->insertItem(  );
-//	phraseList->setCurSel( tt );
-//	tt = ListView_EnsureVisible( m_listing, tt, FALSE);
+	++tt;
+	phraseList->insertItem( tt, wnew_phrase, pItem );
+	phraseList->setCurSel( tt );
+	phraseList->ensureItemVisible( tt );
 
     strcpy(m_string, "");
     m_NumPhoneSeq = 0;
@@ -241,43 +273,51 @@ void CHashEdDlg::OnAddPhrase()
     UpdateBanner();
 }
 
-void CHashEdDlg::OnKillfocusNewPhraseEdit() 
+
+wstring RichEdit20_GetText( HWND edit )
 {
-	// TODO: Add your control notification handler code here
-    GetWindowText(m_edtPhrase, m_string, sizeof(m_string));
-    m_string[sizeof(m_string)-1] = '\0';
-	m_NumPhoneSeq = m_context._get_phone_seq_from_server(m_PhoneSeq);
+	WCHAR buf[100];
+	GETTEXTEX gt = {0};
+	gt.codepage = 1200;	// unicode
+	gt.flags = GT_DEFAULT;
+	gt.cb = sizeof(buf);
+	int len = SendMessage( edit, EM_GETTEXTEX, (WPARAM)&gt, (LPARAM)buf );
+	return wstring( len ? buf : L"" );
 }
-
-
 
 void CHashEdDlg::OnFindPhrase() 
 {
 	// TODO: Add your control notification handler code here
-    char    tstring[(MAX_PHONE_SEQ_LEN+1)*2];
     int     idx, beep;
     BOOL    bMatch;
+ 
+    wstring phrase( RichEdit20_GetText( m_edtPhrase ) );
+    if ( phrase.empty() )   return;
 
-    GetWindowText(m_edtPhrase, tstring, sizeof(tstring));
-    tstring[sizeof(tstring)-1] = '\0';
-    if ( strlen(tstring)==0 )   return;
-	if ( CHashContext::isChineseString(tstring)==FALSE )
+	string tstring( utf16_to_utf8( phrase.c_str() ) );
+
+	if ( CHashContext::isChineseString( tstring.c_str() )==FALSE )
 	{
 		MessageBox(m_hWnd, GetStringFromTab(IDS_ALLOW_CHI_STRING),
                    NULL, MB_OK);
 		return;
 	}
-    
-    idx = find(tstring, bMatch);
+
+    idx = find(tstring.c_str(), bMatch);
 
     beep = MB_ICONQUESTION;
     if ( bMatch==TRUE )
     {
+		SelItem(idx);
+		phraseList->ensureItemVisible( idx );
         beep = MB_OK;
     }
+	else
+	{
+		MessageBox( m_hWnd, GetStringFromTab(IDS_NOTFOUND),
+					NULL, MB_OK|MB_ICONSTOP );
+	}
     MessageBeep(beep);
-
-    SelItem(idx);
 }
 
 void CHashEdDlg::OnImport() 
@@ -382,11 +422,9 @@ void CHashEdDlg::OnDelPhrase()
 
 	if ( selItem==-1 )  return;
 
-	// FIXME: user data?
-//	ListView_GetItem( m_listing, &lv_item );
-//	pItem = (HASH_ITEM*) lv_item.lParam;
-
+	pItem = (HASH_ITEM*)phraseList->getItemData( selItem );
 	phraseList->deleteItem(selItem);
+
     m_context.del_phrase_by_id(pItem->item_index);
 
     UpdateBanner();

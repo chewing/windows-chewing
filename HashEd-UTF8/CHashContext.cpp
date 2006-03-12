@@ -417,7 +417,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-BOOL CHashContext::isChineseString(char *str)
+BOOL CHashContext::isChineseString(const char *str)
 {
 	while ( *str != NULL )	{
 		int len = ueBytesFromChar( (unsigned char)*str );
