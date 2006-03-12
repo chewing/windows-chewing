@@ -5,6 +5,8 @@
 #include "HashEd.h"
 #include "HashEdDlg.h"
 
+#include "PhraseList.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -21,6 +23,12 @@ int WINAPI WinMain( HINSTANCE hinst, HINSTANCE hprev, LPSTR lpcmd, int nShow )
 {
 	InitCommonControls();
 
+	// Init RichEdit 2.0
+	HMODULE riched20 = LoadLibraryA("RICHED20.DLL");
+
+	// Init Phrase List Control
+	CPhraseList::init();
+
 	CHashEdDlg dlg;
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -33,5 +41,7 @@ int WINAPI WinMain( HINSTANCE hinst, HINSTANCE hprev, LPSTR lpcmd, int nShow )
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
+
+	FreeLibrary( riched20 );
 	return 0;
 };

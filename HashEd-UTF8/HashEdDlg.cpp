@@ -11,6 +11,8 @@
 
 #include "hash.h"
 
+#include "PhraseList.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -90,12 +92,14 @@ BOOL CHashEdDlg::OnInitDialog()
 	m_banner = GetDlgItem(  m_hWnd, IDC_BANNER );
 	m_btnSaveAs = GetDlgItem(  m_hWnd, IDC_SAVE_AS );
 	m_btnFindPhrase = GetDlgItem(  m_hWnd, IDC_FIND_PHRASE );
-	m_listing = GetDlgItem(  m_hWnd, IDC_PHRASE_LIST );
 	m_btnAddPhrase = GetDlgItem(  m_hWnd, IDC_ADD_PHRASE );
 	m_btnDelPhrase = GetDlgItem(  m_hWnd, IDC_DEL_PHRASE );
 	m_Import = GetDlgItem( m_hWnd, IDC_IMPORT );
 	m_edtPhrase = GetDlgItem( m_hWnd, IDC_NEW_PHRASE_EDIT );
 	m_btnSave = GetDlgItem( m_hWnd, IDC_SAVE );
+
+	// Get CPhraseList control
+	phraseList = CPhraseList::fromHandle( GetDlgItem(m_hWnd, IDC_PHRASE_LIST) );
 
 	// TODO: Add extra initialization here
     _enable_buttons(FALSE);
@@ -106,24 +110,22 @@ BOOL CHashEdDlg::OnInitDialog()
 
 void CHashEdDlg::ReloadListCtrl()
 {
-	ShowWindow( m_listing, SW_HIDE );
     HASH_ITEM *pItem;
     int lop, count = m_context.get_phrase_count();
 
-	ListView_DeleteAllItems( m_listing );
+	phraseList->lockUpdate();
+	phraseList->clear();
     for ( lop=0; lop<count; ++lop )
     {
-        pItem = m_context.get_phrase_by_id(lop);
-		LVITEM item = {0};
-		item.iItem = lop;
-		item.pszText = pItem->data.wordSeq;
-		item.lParam = (LPARAM)pItem;
-		item.mask = LVIF_TEXT|LVIF_PARAM;
-
-		int i = ListView_InsertItem(m_listing, &item);
-		i = i;
+		pItem = m_context.get_phrase_by_id(lop);
+		WCHAR wtext[100];
+		int wlen = MultiByteToWideChar( CP_UTF8, 0, pItem->data.wordSeq, 
+										strlen(pItem->data.wordSeq),
+										wtext, sizeof(wtext) );
+		wtext[wlen] = 0;
+		phraseList->insertItem( -1, wtext );
     }
-	ShowWindow( m_listing, SW_SHOW );
+	phraseList->unlockUpdate();
 }
 
 void CHashEdDlg::OnUpdateNewPhraseEdit() 
@@ -149,20 +151,17 @@ void CHashEdDlg::OnChangeNewPhraseEdit()
 
 int CHashEdDlg::_isMatch(char *string, int id)
 {
-	LVITEM lv_item;
-	lv_item.iItem = id;
-	lv_item.mask = LVIF_PARAM;
-	ListView_GetItem(m_listing, &lv_item);
+	wstring wtext = phraseList->getItem( id );
 
-	HASH_ITEM *pItem = (HASH_ITEM*) lv_item.lParam;
-    return  strcmp(string, pItem->data.wordSeq);
+	//FIXME: convert to UTF-8
+    return -1; //strcmp(string, pItem->data.wordSeq);
 }
 
 int CHashEdDlg::find(char *tok, BOOL &bExactMatch, int hi, int lo)
 {
     int p, cmp;
     
-    p = ListView_GetItemCount(m_listing)-1;
+	p = phraseList->count() - 1;
     if ( hi==-1 )
         hi = p;
     if ( lo==-1 )
@@ -193,10 +192,7 @@ int CHashEdDlg::find(char *tok, BOOL &bExactMatch, int hi, int lo)
 
 void CHashEdDlg::SelItem(int idx) 
 {
-	ListView_SetItemState( m_listing, idx, LVIS_FOCUSED|LVIS_SELECTED, 
-										   LVIS_FOCUSED|LVIS_SELECTED);
-	ListView_EnsureVisible( m_listing, idx, FALSE);
-    ListView_SetSelectionMark( m_listing, idx);
+	phraseList->setCurSel(idx);
 }
 
 void CHashEdDlg::OnAddPhrase() 
@@ -233,24 +229,16 @@ void CHashEdDlg::OnAddPhrase()
 
 	pItem = m_context.append_phrase(m_string, m_PhoneSeq);
 
-	LVITEM lv_item;
-	lv_item.iItem = ListView_GetItemCount(m_listing);
-	lv_item.pszText = m_string;
-	lv_item.lParam = (LPARAM)pItem;
-	lv_item.mask = LVIF_TEXT|LVIF_PARAM;
-
-    tt = ListView_InsertItem( m_listing, &lv_item );
-    ListView_SetItemState( m_listing, tt, LVIS_FOCUSED|LVIS_SELECTED,
-										  LVIS_FOCUSED|LVIS_SELECTED);
-	tt = ListView_EnsureVisible( m_listing, tt, FALSE);
-    ListView_RedrawItems(m_listing, tt, tt);
+	// FIXME: utf-8 conv, sort?
+//	tt = phraseList->insertItem(  );
+//	phraseList->setCurSel( tt );
+//	tt = ListView_EnsureVisible( m_listing, tt, FALSE);
 
     strcpy(m_string, "");
     m_NumPhoneSeq = 0;
     m_PhoneSeq[0] = 0;
     SetWindowText(m_edtPhrase, NULL);
     UpdateBanner();
-    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::OnKillfocusNewPhraseEdit() 
@@ -290,8 +278,6 @@ void CHashEdDlg::OnFindPhrase()
     MessageBeep(beep);
 
     SelItem(idx);
-    ListView_RedrawItems(m_listing, idx, idx);
-    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::OnImport() 
@@ -346,7 +332,6 @@ void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 		           NULL, MB_OK );
 
     UpdateBanner();
-    UpdateWindow( m_listing );
 }
 
 void CHashEdDlg::GetHashLocation()
@@ -393,20 +378,17 @@ void CHashEdDlg::OnDelPhrase()
     HASH_ITEM *pItem;
     int selItem;
 
-	selItem = ListView_GetSelectionMark(m_listing);
+	selItem = phraseList->getCurSel();
 
 	if ( selItem==-1 )  return;
 
-	LVITEM lv_item;
-	lv_item.iItem = selItem;
-	lv_item.mask = LVIF_PARAM;
-	ListView_GetItem( m_listing, &lv_item );
-	pItem = (HASH_ITEM*) lv_item.lParam;
+	// FIXME: user data?
+//	ListView_GetItem( m_listing, &lv_item );
+//	pItem = (HASH_ITEM*) lv_item.lParam;
 
-    ListView_DeleteItem(m_listing, selItem);
+	phraseList->deleteItem(selItem);
     m_context.del_phrase_by_id(pItem->item_index);
 
-    UpdateWindow( m_listing );
     UpdateBanner();
 }
 

@@ -25,7 +25,7 @@
 				Optimization="3"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -91,7 +91,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\Include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderThrough="stdafx.h"
@@ -202,6 +202,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\PhraseList.cpp">
+			</File>
+			<File
 				RelativePath="StdAfx.cpp">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -241,6 +244,9 @@
 			</File>
 			<File
 				RelativePath="HashEdit.h">
+			</File>
+			<File
+				RelativePath=".\PhraseList.h">
 			</File>
 			<File
 				RelativePath="Resource.h">

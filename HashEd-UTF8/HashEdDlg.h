@@ -15,6 +15,8 @@
 
 using namespace std;
 
+class CPhraseList;
+
 class CHashEdDlg
 {
 // Construction
@@ -31,12 +33,12 @@ public:
 	HWND	m_banner;
 	HWND	m_btnSaveAs;
 	HWND	m_btnFindPhrase;
-	HWND	m_listing;	// List control
 	HWND	m_btnAddPhrase;
 	HWND	m_btnDelPhrase;
 	HWND	m_Import;
 	HWND	m_edtPhrase;
 	HWND	m_btnSave;
+	CPhraseList* phraseList;	// Phrase List control
 
     CHashContext    m_context;
     uint16  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];

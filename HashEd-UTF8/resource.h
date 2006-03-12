@@ -28,6 +28,8 @@
 #define IDC_ABOUT                       1009
 #define IDC_BANNER                      1010
 #define IDC_LIST1                       1011
+#define IDC_CUSTOM1                     1014
+#define IDC_PHRASELIST                  1014
 
 // Next default values for new objects
 // 
@@ -35,7 +37,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1012
+#define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
