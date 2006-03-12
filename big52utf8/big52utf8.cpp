@@ -15,16 +15,15 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hprev, LPSTR lpCmd, int nShow )
 		if( ReadFile( hHashFile, buf, size, &size, NULL ) )	{
 			CloseHandle( hHashFile );
 
-			// Backup original file
-//			TCHAR filepath[MAX_PATH];
-//			wsprintf( filepath, "%s.big5", lpCmd );
-//			MoveFile( lpCmd, filepath );
-
 			DWORD usize = MultiByteToWideChar( 950, 0, buf, size + 1, NULL, 0 );
 			wchar_t* ubuf = new wchar_t[usize];
 			if( ubuf )	{
 				usize = MultiByteToWideChar( 950, 0, buf, size + 1, ubuf, usize );
 				size = WideCharToMultiByte( CP_UTF8, 0, ubuf, usize, NULL, 0, NULL, NULL );
+				if ( buf!=NULL ) {
+					delete [] buf;
+					buf = new char[size+1];
+				}
 				size = WideCharToMultiByte( CP_UTF8, 0, ubuf, usize, buf, size, NULL, NULL );
 
 				TCHAR* name = _tcsrchr( lpCmd, '\\' );
