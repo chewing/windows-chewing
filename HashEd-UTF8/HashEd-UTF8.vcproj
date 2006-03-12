@@ -27,7 +27,7 @@
 				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				StringPooling="TRUE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderThrough="stdafx.h"

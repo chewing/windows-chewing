@@ -109,7 +109,8 @@ void CPhraseList::onSize( WPARAM wp, long cx, long cy )
 
 void CPhraseList::onVScroll( int code, int pos )
 {
-	SCROLLINFO si;
+	SCROLLINFO si = {0};
+	si.cbSize = sizeof( si );
 	si.fMask = SIF_ALL;
 	GetScrollInfo( hwnd, SB_VERT, &si );
 	si.fMask = SIF_POS;
@@ -394,6 +395,12 @@ bool CPhraseList::onKeyDown(int key, LPARAM lp)
 	case VK_NEXT:
 		onVScroll( SB_PAGEDOWN, 0 );
 		break;
+	case VK_HOME:
+		new_sel = 0;
+		break;
+	case VK_END:
+		new_sel = count() - 1;
+		break;
 	default:
 		return false;
 	}
@@ -406,7 +413,8 @@ bool CPhraseList::onKeyDown(int key, LPARAM lp)
 
 void CPhraseList::onMouseWheel(int delta)
 {
-	SCROLLINFO si;
+	SCROLLINFO si = {0};
+	si.cbSize = sizeof( si );
 	si.fMask = SIF_ALL;
 	GetScrollInfo( hwnd, SB_VERT, &si );
 	si.fMask = SIF_POS;
