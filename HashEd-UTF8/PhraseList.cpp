@@ -100,7 +100,8 @@ void CPhraseList::onSize( WPARAM wp, long cx, long cy )
 	SCROLLINFO si = {0};
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_RANGE|SIF_PAGE;
-	si.nPage = 4;
+	int visible_lines_per_page = (cy / itemHeight);
+	si.nPage = visible_lines_per_page;
 	si.nMax = lineCount;
 	si.nMin = 0;
 	SetScrollInfo( hwnd, SB_VERT, &si, TRUE );
@@ -267,7 +268,7 @@ void CPhraseList::setCurSel(int idx)
 
 int CPhraseList::getCurSel(void)
 {
-	return -1;
+	return sel;
 }
 
 void CPhraseList::onLButtonDown(WPARAM wp, int x, int y)
@@ -314,6 +315,9 @@ void* CPhraseList::getItemData( int idx )
 
 void CPhraseList::deleteItem( int idx )
 {
+	if( idx < data.size() && idx >=0 ) {
+		data.erase( data.begin() + idx );
+	}
 	if( !lock )
 		recalcLayout();
 }

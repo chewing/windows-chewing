@@ -73,21 +73,21 @@ IDR_MAINFRAME           ICON                    "res\\HashEd.ico"
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 259, 217
+IDD_ABOUTBOX DIALOGEX 0, 0, 259, 202
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "關於 新酷音本地詞庫編輯器"
 FONT 9, "新細明體", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,7,102,245,90
+    GROUPBOX        "",IDC_STATIC,7,88,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
-                    IDC_STATIC,18,112,224,75
-    LTEXT           "新酷音本地詞庫編輯器\n\n版本： 0.0.2\n\n發行日期：2005.11.9\n\n授權方式： GNU General Public License\n\n工具原作者：seamxr\n\nTurbo by：PCMan\n",
-                    IDC_STATIC,87,11,156,90
+                    IDC_STATIC,18,98,224,75
+    LTEXT           "新酷音本地詞庫編輯器\n\n版本： 0.0.2\n\n發行日期：2005.11.9\n\n授權方式： GNU General Public License\n\n工具作者：seamxr, PCMan\n",
+                    IDC_STATIC,87,11,156,79
     CONTROL         122,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,
                     59,63
     LTEXT           "題字：翁政銓",IDC_STATIC,13,74,49,8
-    PUSHBUTTON      "確定 (&O)",IDOK,104,197,50,14
+    PUSHBUTTON      "確定 (&O)",IDOK,104,181,50,14
 END
 
 IDD_HASHED_DIALOG DIALOGEX 0, 0, 443, 304
@@ -164,7 +164,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 252
         TOPMARGIN, 7
-        BOTTOMMARGIN, 210
+        BOTTOMMARGIN, 195
     END
 
     IDD_HASHED_DIALOG, DIALOG
