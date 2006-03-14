@@ -47,6 +47,7 @@ DWORD g_selAreaLen = 50;
 DWORD g_cursorCandList = 1;
 DWORD g_enableCapsLock = 0;
 DWORD g_shiftFullShape = 1;
+DWORD g_phraseMark = 1;
 
 static const char* g_selKeys[]={
 	"1234567890",
@@ -74,6 +75,8 @@ static const char* g_selKeys[]={
 #endif
 
 BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystate );
+
+int ControlListCursor( UINT &key, CandList* candList );
 
 void LoadConfig()
 {
@@ -114,6 +117,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "CursorCandList", 0, &type, (LPBYTE)&g_cursorCandList, &size );
 		RegQueryValueEx( hk, "EnableCapsLock", 0, &type, (LPBYTE)&g_enableCapsLock, &size );
 		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
+		RegQueryValueEx( hk, "PhraseMark", 0, &type, (LPBYTE)&g_phraseMark, &size );
 		RegCloseKey( hk );
 	}
 
@@ -157,6 +161,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("CursorCandList"), 0, REG_DWORD, (LPBYTE)&g_cursorCandList, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EnableCapsLock"), 0, REG_DWORD, (LPBYTE)&g_enableCapsLock, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("PhraseMark"), 0, REG_DWORD, (LPBYTE)&g_phraseMark, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -185,6 +190,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_CURSOR_CANDLIST, g_cursorCandList );
 			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
 			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
+			CheckDlgButton( hwnd, IDC_PHRASE_MARK, g_phraseMark );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -251,6 +257,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_cursorCandList = IsDlgButtonChecked( hwnd, IDC_CURSOR_CANDLIST );
 				g_enableCapsLock = IsDlgButtonChecked( hwnd, IDC_ENABLE_CAPSLOCK );
 				g_shiftFullShape = IsDlgButtonChecked( hwnd, IDC_SHIFT_FULLSHAPE );
+				g_phraseMark = IsDlgButtonChecked( hwnd, IDC_PHRASE_MARK );
                 if ( g_chewing!=NULL )
                     g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 
@@ -602,6 +609,14 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	else
 		cs->setZuin( L"" );
 
+	if( g_phraseMark ) {
+		char* intervalstr = g_chewing->GetIntervalStr();
+		if( intervalstr ) {
+			cs->setInvervalAry( intervalstr );
+			free( intervalstr );
+		}
+	}
+
 	cs->beforeGenerateMsg();
 
 	WORD word = *(WORD*)cs->getCompStr();
@@ -660,7 +675,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			return FALSE;
 		cl = new (cl) CandList;	// placement new
 
-		if( (ic->fdwInit & INIT_CONVERSION) )		// Initialize
+		if( !(ic->fdwInit & INIT_CONVERSION) )		// Initialize
 		{
 			ic->fdwConversion = g_defaultEnglish ? IME_CMODE_CHARCODE : IME_CMODE_CHINESE;
 
@@ -670,7 +685,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 				ic->fdwConversion &=  ~IME_CMODE_FULLSHAPE;
 			ic->fdwInit |= INIT_CONVERSION;
 		}
-		if( ! (ic->fdwInit & INIT_STATUSWNDPOS) )
+		if( !(ic->fdwInit & INIT_STATUSWNDPOS) )
 		{
 			RECT rc;
 			IMEUI::getWorkingArea( &rc, ic->hWnd );
@@ -678,7 +693,7 @@ BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 			ic->ptStatusWndPos.y = rc.bottom - 26;
 			ic->fdwInit |= INIT_STATUSWNDPOS;
 		}
-		if( ! (ic->fdwInit & INIT_LOGFONT) )
+		if( !(ic->fdwInit & INIT_LOGFONT) )
 		{
 			// TODO: initialize font here
 			ic->lfFont;
@@ -996,6 +1011,9 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
 	g_chewing->SetSelAreaLen( (int)g_selAreaLen );
 
+
+	CandList* candList = imc.getCandList();
+
 	if( IsKeyDown( keystate[VK_CONTROL] ) )
 	{
 		if(  key >= '0' && key <= '9' )
@@ -1016,82 +1034,18 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			}
 			else if( ! g_chewing->Candidate() )
 				return FALSE;
-
+			candList->setSelection( 0 );
 			return ! g_chewing->KeystrokeIgnore();
 		}
 		else
 			return FALSE;
 	}
-
-	CandList* candList = imc.getCandList();
 	if( g_chewing->Candidate() > 0 )
 	{	
 		/* control candlsit cursor */
 		if( g_cursorCandList ) {
-			switch( key )
-			{
-			case VK_UP:
-				candList->setSelection( candList->getSelection() - g_candPerRow );
-				if( candList->getSelection() < 0 ) {
-					g_chewing->Up();
-					candList->setSelection( 0 );
-				}
-				if( candList->getSelection() < candList->getPageStart() ) {
-					g_chewing->Left();
-					candList->setSelection( 0 );
-				}
-				return ! g_chewing->KeystrokeIgnore();
-			case VK_DOWN:
-				candList->setSelection( candList->getSelection() + g_candPerRow );
-				if( candList->getSelection() > candList->getTotalCount() - 1 ) {
-					g_chewing->Down();
-					candList->setSelection( 0 );
-				}
-				if( candList->getSelection() - candList->getPageStart() > candList->getPageSize() - 1 ) {
-					g_chewing->Right();
-					candList->setSelection( 0 );
-				}
-				return ! g_chewing->KeystrokeIgnore();
-			case VK_LEFT:
-				if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == 0 ) {
-					g_chewing->Left();
-					if( g_chewing->CurrentPage() == g_chewing->TotalPage() - 1 ) {
-						g_chewing->Up();
-						candList->setSelection( 0 );
-					}
-				} else {
-					candList->setSelection( candList->getSelection() - 1 );
-				}
-				return ! g_chewing->KeystrokeIgnore();
-				break;
-			case VK_RIGHT:
-				if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == g_candPerRow - 1 ||
-					( ( candList->getSelection() % candList->getPageSize() ) == candList->getPageSize() - 1 ) ||
-					candList->getSelection() == candList->getTotalCount() - 1 ) {
-					g_chewing->Right();
-					if( g_chewing->CurrentPage() == 0 ) {
-						g_chewing->Down();
-						candList->setSelection( 0 );
-					}
-				} else {
-					candList->setSelection( candList->getSelection() + 1 );
-				}
-				return ! g_chewing->KeystrokeIgnore();
-				break;
-			case VK_NEXT:
-				key = VK_RIGHT;
-				break;
-			case VK_PRIOR:
-				key = VK_LEFT;
-				break;
-			case VK_RETURN:
-				key = *g_selKeyNames[ g_selKeyType ] + candList->getSelection() % candList->getPageSize();
-				candList->setSelection( 0 );
-				break;
-			case    VK_BACK:
-				key = VK_ESCAPE;
-				break;
-			}
+			if( ControlListCursor( key, candList ) )
+				return TRUE;
 		}
 		else {
 			switch( key )
@@ -1270,4 +1224,75 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		}
 	}
 	return ! g_chewing->KeystrokeIgnore();
+}
+
+int ControlListCursor( UINT &key, CandList* candList ) {
+	switch( key )
+	{
+	case VK_UP:
+		candList->setSelection( candList->getSelection() - g_candPerRow );
+		if( candList->getSelection() < 0 ) {
+			g_chewing->Up();
+			candList->setSelection( 0 );
+		}
+		if( candList->getSelection() < candList->getPageStart() ) {
+			g_chewing->Left();
+			candList->setSelection( 0 );
+		}
+		return ! g_chewing->KeystrokeIgnore();
+	case VK_DOWN:
+		candList->setSelection( candList->getSelection() + g_candPerRow );
+		if( candList->getSelection() > candList->getTotalCount() - 1 ) {
+			g_chewing->Down();
+			candList->setSelection( 0 );
+		}
+		if( candList->getSelection() - candList->getPageStart() > candList->getPageSize() - 1 ) {
+			g_chewing->Right();
+			candList->setSelection( 0 );
+		}
+		return ! g_chewing->KeystrokeIgnore();
+	case VK_LEFT:
+		if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == 0 ) {
+			g_chewing->Left();
+			if( g_chewing->CurrentPage() == g_chewing->TotalPage() - 1 ) {
+				g_chewing->Up();
+				candList->setSelection( 0 );
+			}
+		} else {
+			candList->setSelection( candList->getSelection() - 1 );
+		}
+		return ! g_chewing->KeystrokeIgnore();
+		break;
+	case VK_RIGHT:
+		if( ( candList->getSelection() % candList->getPageSize() ) % g_candPerRow == g_candPerRow - 1 ||
+			( ( candList->getSelection() % candList->getPageSize() ) == candList->getPageSize() - 1 ) ||
+			candList->getSelection() == candList->getTotalCount() - 1 ) {
+			g_chewing->Right();
+			if( g_chewing->CurrentPage() == 0 ) {
+				g_chewing->Down();
+				candList->setSelection( 0 );
+			}
+		} else {
+			candList->setSelection( candList->getSelection() + 1 );
+		}
+		return ! g_chewing->KeystrokeIgnore();
+		break;
+	case VK_NEXT:
+		key = VK_RIGHT;
+		break;
+	case VK_PRIOR:
+		key = VK_LEFT;
+		break;
+	case VK_RETURN:
+		g_chewing->Key( *(g_selKeyNames[ g_selKeyType ] + candList->getSelection() % candList->getPageSize()) );
+		candList->setSelection( 0 );
+		return ! g_chewing->KeystrokeIgnore();
+		break;
+	case    VK_BACK:
+	case	VK_ESCAPE:
+		candList->setSelection( 0 );
+		key = VK_ESCAPE;
+		break;
+	}
+	return FALSE;
 }

@@ -92,15 +92,17 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 
 	HFONT oldFont;
 	RECT rc;
-	HBRUSH hBrush = (HBRUSH)NULL;
-	HBRUSH hOldBrush = (HBRUSH)NULL;
-	HPEN hPen = (HPEN)NULL;
-	HPEN hOldPen = (HPEN)NULL;
+
 
 	GetClientRect( hwnd, &rc );
 	HDC memdc = CreateCompatibleDC( ps.hdc );
 	HBITMAP membmp = CreateCompatibleBitmap( ps.hdc, rc.right, rc.bottom );
 	HGDIOBJ oldbmp = SelectObject( memdc, membmp );
+
+	HBRUSH hBrush = (HBRUSH)NULL;
+	HBRUSH hOldBrush = (HBRUSH)NULL;
+	HPEN hPen = (HPEN)CreatePen(PS_SOLID, (int)(rc.bottom-rc.top)/10, RGB(0, 0, 255));
+	HPEN hOldPen = (HPEN)SelectObject(memdc, hPen);
 
 	InflateRect( &rc, -1, -1 );
 
@@ -121,11 +123,28 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
             // #15235, block cursor
 			int selend = indexToXPos( compStr, cursorPos + 1 );
 		    int curWidth = selend - cursor;
-			/// FIXME: Temporarily changed to 2
 
 			BitBlt( memdc, cursor, 0, curWidth, rc.bottom, memdc, cursor, 0, DSTINVERT );
         }
+
+		if( g_phraseMark ) {
+			short* interval = getIntervalAry( imc );
+
+			int oldto = -1;
+			for( short i = 0; interval[i+1] <= compStr.length(); i += 2 ) {
+				int from = interval[i], to = interval[i+1];
+				if( from == to || from + 1 == to || oldto > from )
+					continue;
+				MoveToEx( memdc, indexToXPos( compStr, from ) + 3, rc.bottom-2, NULL );
+				LineTo( memdc, indexToXPos( compStr, to ) - 3, rc.bottom-2 );
+				oldto = interval[i+1];
+			}
+		}
+
 	}
+
+	SelectObject(memdc, hOldPen);
+	DeleteObject(hPen);
 
 	InflateRect( &rc, 1, 1 );
 	Draw3DBorder( memdc, &rc, GetSysColor(COLOR_3DFACE), 0/*GetSysColor(COLOR_3DDKSHADOW)*/);
@@ -264,4 +283,10 @@ void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
 	ic->cfCandForm->ptCurrentPos.y += pt->y;
 	ic->cfCandForm->ptCurrentPos.x += pt->x;
 	*pt = ic->cfCandForm->ptCurrentPos;
+}
+
+short* CompWnd::getIntervalAry( IMCLock& imc ) {
+	CompStr* compStr = imc.getCompStr();
+	if( compStr )
+		return compStr->getIntervalAry();
 }

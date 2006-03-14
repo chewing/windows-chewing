@@ -68,6 +68,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ZuinStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::CommitStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::Buffer ,
+	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::IntervalStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ShowMsg ,
 
 	  // char* (int)

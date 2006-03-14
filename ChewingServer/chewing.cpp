@@ -285,3 +285,15 @@ void Chewing::SetSelAreaLen(int len)
 {
 	cd->config.selectAreaLen = len;
 }
+
+/* caller must free return value */
+
+char* Chewing::IntervalStr() {
+	char* intervalStr = (char*)calloc( (co->nDispInterval+1) * 2, sizeof( char ) );
+	for( int i = 0; i < co->nDispInterval; i++ ) {
+		intervalStr[i*2] = (char)'0' + co->dispInterval[i].from;
+		intervalStr[i*2+1] = (char)'0' + co->dispInterval[i].to;
+	}
+	intervalStr[i * 2] = '\0';
+	return intervalStr;
+}

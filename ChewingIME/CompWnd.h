@@ -30,4 +30,5 @@ public:
 	bool create(HWND imeUIWnd);
 	void getRelativeCandPos(IMCLock& imc, POINT* pt);
 	void getCandPos(IMCLock& imc, POINT* pt);
+	short* getIntervalAry( IMCLock& imc );
 };

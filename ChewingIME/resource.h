@@ -52,8 +52,9 @@
 #define IDC_FONT_SIZE_SPIN              1028
 #define IDC_CURSOR_CANDLIST             1029
 #define IDC_ENABLE_CAPSLOCK             1030
-#define IDC_CHECK1                      1031
 #define IDC_SHIFT_FULLSHAPE             1031
+#define IDC_CHECK1                      1032
+#define IDC_PHRASE_MARK                 1032
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
@@ -70,7 +71,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40021
-#define _APS_NEXT_CONTROL_VALUE         1032
+#define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

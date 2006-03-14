@@ -79,6 +79,8 @@ public:
     unsigned int  EchoFromServer();
     bool CheckServer();
 
+	char* GetIntervalStr();
+
 protected:
 	char* GetStringFromSharedMem(int len);
 	HANDLE sharedMem;

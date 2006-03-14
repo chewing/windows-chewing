@@ -98,6 +98,9 @@ class Chewing
   void SetAddPhraseForward(bool add_forward);
   bool GetAddPhraseForward(void);
   void SetSelAreaLen(int len);
+
+  char* IntervalStr();
+
 };
 
 #endif /* _CHEWING_H */

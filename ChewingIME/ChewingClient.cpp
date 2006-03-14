@@ -290,3 +290,8 @@ bool ChewingClient::CheckServer()
 
 void ChewingClient::SetSelAreaLen(int len)
 {	SendMessage( serverWnd, ChewingServer::cmdSetSelAreaLen, len, chewingID);	}
+
+char* ChewingClient::GetIntervalStr() {
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalStr, 0, chewingID );
+	return GetStringFromSharedMem( len );
+}

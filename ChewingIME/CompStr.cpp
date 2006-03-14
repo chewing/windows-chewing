@@ -214,3 +214,9 @@ void CompStr::beforeGenerateMsg(void)
 */
 	}
 }
+
+void CompStr::setInvervalAry( char* intervalStr ) {
+	for( int i = 0; i < strlen( intervalStr ); i++ ) {
+		IntervalAry[i] = intervalStr[i] - '0';
+	}
+}
