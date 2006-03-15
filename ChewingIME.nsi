@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.2.5d"
+!define PRODUCT_VERSION "0.2.7b"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭)"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -76,7 +76,7 @@ Section "MainSection" SEC01
   File "UserGuide\chewing.chm"
   File "Installer\Release\Installer.exe"
   File "ChewingServer\Release\ChewingServer.exe"
-;  File "HashEd\Release\PhraseEd.exe"
+  File "HashEd-UTF8\Release\HashEd.exe"
   File /oname=$TEMP\big52utf8.exe "big52utf8\Release\big52utf8.exe"
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
@@ -90,7 +90,7 @@ Section -AdditionalIcons
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\新酷音輸入法"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk" "$INSTDIR\Chewing.chm"
-;  CreateShortCut "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk" "$INSTDIR\PhraseEd.exe"
+  CreateShortCut "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk" "$INSTDIR\HashEd.exe"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
@@ -148,7 +148,7 @@ Section Uninstall
   Delete "$SYSDIR\IME\Chewing\Chewing.chm"
   Delete "$SYSDIR\IME\Chewing\Installer.exe"
   Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
-;  Delete "$SYSDIR\IME\Chewing\PhraseEd.exe"
+  Delete "$SYSDIR\IME\Chewing\HashEd.exe"
 
 ;  IfErrors 0 +2
 ;    Call un.onError
