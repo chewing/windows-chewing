@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32-utf8\include;..\ChewingServer"
+				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32-utf8\include;..\include"
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -86,7 +86,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32-utf8\include;..\ChewingServer"
+				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32-utf8\include;..\include"
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"

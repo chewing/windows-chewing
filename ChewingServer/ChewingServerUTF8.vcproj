@@ -22,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -88,7 +88,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include, ..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;NDEBUG;_WINDOWS"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -205,10 +205,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Chewingpp.h">
+				RelativePath="..\Include\Chewingpp.h">
 			</File>
 			<File
-				RelativePath=".\ChewingServer.h">
+				RelativePath="..\Include\ChewingServer.h">
 			</File>
 			<File
 				RelativePath="..\..\libchewing\branches\win32-utf8\src\private.h">

@@ -6,6 +6,12 @@
 
 #include "chewing.h"
 
+#ifdef	MAX_UTF8_SIZE
+#define	MAX_CHAR_SIZE	(MAX_UTF8_SIZE)
+#else
+#define	MAX_CHAR_SIZE	(2)
+#endif
+
 class Chewing
 {
   ChewingData   *cd;
@@ -56,6 +62,7 @@ class Chewing
 
   char* ZuinStr();
   char* CommitStr();
+  uint16* PhoneSeq();
   char* CommitStr(int from);
   char* CommitStr(int from, int to);
   int   CommitReady();
@@ -85,11 +92,15 @@ class Chewing
   void SetFullShape(bool full);
   bool GetFullShape(void);
   void SetSpaceAsSelection(bool spaceAsSelection);
+  void SetAdvanceAfterSelection(int bDo);
   int ShowMsgLen(void);
   char* ShowMsg(void);
   void SetAddPhraseForward(bool add_forward);
   bool GetAddPhraseForward(void);
   void SetSelAreaLen(int len);
+
+  char* IntervalStr();
+
 };
 
 #endif /* _CHEWING_H */

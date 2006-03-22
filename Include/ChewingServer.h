@@ -87,6 +87,7 @@ public:
 		cmdZuinStr,
 		cmdCommitStr,
 		cmdBuffer,
+		cmdIntervalStr,
 		cmdShowMsg,
 
 		// char* (int)
