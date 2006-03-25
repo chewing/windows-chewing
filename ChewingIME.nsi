@@ -83,7 +83,6 @@ Section "MainSection" SEC01
 
   IfErrors 0 +2
     Call OnInstError
-
 SectionEnd
 
 Section -AdditionalIcons
