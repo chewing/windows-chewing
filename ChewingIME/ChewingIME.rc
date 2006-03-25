@@ -179,6 +179,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,168,90,10
     CONTROL         "使用底線標示詞",IDC_PHRASE_MARK,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,179,64,10
+    CONTROL         "使用 Esc 清空編輯區字串",IDC_ESC_CLEAN_ALL_BUF,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,142,178,93,10
 END
 
 IDD_ABOUT DIALOGEX 0, 0, 275, 222

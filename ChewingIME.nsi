@@ -66,11 +66,11 @@ FunctionEnd
 Section "MainSection" SEC01
   SetOutPath "$SYSDIR\IME\Chewing"
   SetOverwrite on
-  File "..\libchewing\branches\utf8\data\us_freq.dat"
-  File /oname=ph_index.dat "..\libchewing\branches\utf8\data\ph_index.dat"
-  File /oname=fonetree.dat "..\libchewing\branches\utf8\data\fonetree.dat"
-  File "..\libchewing\branches\utf8\data\dict.dat"
-  File /oname=ch_index.dat "..\libchewing\branches\utf8\data\ch_index.dat"
+  File "..\libchewing\trunk\data\us_freq.dat"
+  File /oname=ph_index.dat "..\libchewing\trunk\data\ph_index.dat"
+  File /oname=fonetree.dat "..\libchewing\trunk\data\fonetree.dat"
+  File "..\libchewing\trunk\data\dict.dat"
+  File /oname=ch_index.dat "..\libchewing\trunk\data\ch_index.dat"
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "UserGuide\chewing.chm"
@@ -107,7 +107,7 @@ Section -Post
   SetShellVarContext current
   ExecWait '"$TEMP\big52utf8.exe" $APPDATA\Chewing\hash.dat'
 
-  Delete $TEMP\big52utf8.exe
+  ;Delete $TEMP\big52utf8.exe
 
   IfErrors 0 +2
     Call OnInstError

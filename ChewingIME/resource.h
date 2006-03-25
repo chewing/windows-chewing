@@ -55,6 +55,8 @@
 #define IDC_SHIFT_FULLSHAPE             1031
 #define IDC_CHECK1                      1032
 #define IDC_PHRASE_MARK                 1032
+#define IDC_CHECK2                      1033
+#define IDC_ESC_CLEAN_ALL_BUF           1033
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
@@ -71,7 +73,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40021
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

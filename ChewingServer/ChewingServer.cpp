@@ -62,6 +62,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::SetKeyboardLayout ,
 	(ChewingMemberFuncCI) &Chewing::SetHsuSelectionKeyType ,
 	(ChewingMemberFuncCI) &Chewing::SetSelAreaLen ,
+	(ChewingMemberFuncCI) &Chewing::SetEscCleanAllBuf ,
     (ChewingMemberFuncCI) &Chewing::SetAdvanceAfterSelection,
 
 	  // char* (void)

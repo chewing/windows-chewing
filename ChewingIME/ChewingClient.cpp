@@ -11,15 +11,17 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys, bool AdvAfterSel)
+ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys, bool AdvAfterSel, bool EscCleanAllBuf )
 	: serverWnd(NULL), chewingID(0), sharedMem(INVALID_HANDLE_VALUE)
 	, spaceAsSelection(spaceAsSel)
 	, keyLayout(kbLayout)
     , advAfterSelection(AdvAfterSel)
+	, escCleanAllBuf( EscCleanAllBuf )
 {
 	ConnectServer();
 	SelKey((char*)selKeys);
     SetAdvanceAfterSelection(advAfterSelection);
+	SetEscCleanAllBuf( escCleanAllBuf );
     pSelKeys = (char*)selKeys;
 }
 
@@ -206,6 +208,10 @@ bool ChewingClient::GetFullShape(void)
 
 void ChewingClient::SetSpaceAsSelection(bool spaceAsSelection)
 {	SendMessage( serverWnd, ChewingServer::cmdSetSpaceAsSelection, spaceAsSelection, chewingID);	}
+
+void ChewingClient::SetEscCleanAllBuf( bool escCleanAllBuf ) {
+	SendMessage( serverWnd, ChewingServer::cmdSetEscCleanAllBuf, escCleanAllBuf, chewingID );
+}
 
 char* ChewingClient::GetStringFromSharedMem(int len)
 {

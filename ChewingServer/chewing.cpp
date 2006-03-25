@@ -258,6 +258,11 @@ void Chewing::SetSpaceAsSelection(bool spaceAsSelection)
     SetConfig(cd, &config);
 }
 
+void Chewing::SetEscCleanAllBuf( bool escCleanAllBuf ) {
+	config.bEscCleanAllBuf = escCleanAllBuf;
+	SetConfig( cd, &config );
+}
+
 int Chewing::ShowMsgLen(void)
 {
 	return co->bShowMsg ? co->showMsgLen : 0;

@@ -15,7 +15,7 @@
 class ChewingClient  
 {
 public:
-	ChewingClient( int kbLayout, bool spaceAsSel = true, const char* selKeys="1234567890", bool AdvAfterSel=true);
+	ChewingClient( int kbLayout, bool spaceAsSel = true, const char* selKeys="1234567890", bool AdvAfterSel=true, bool EscCleanAllBuf = false );
 	~ChewingClient();
 
 public:
@@ -91,10 +91,12 @@ protected:
 
 public:
 	void SetSpaceAsSelection(bool spaceAsSelection);
+	void SetEscCleanAllBuf( bool escCleanAllBuf );
 	void ConnectServer(void);
 protected:
 	bool spaceAsSelection;
     bool advAfterSelection;
+	bool escCleanAllBuf;
 	int keyLayout;
 public:
 	int ShowMsgLen(void);

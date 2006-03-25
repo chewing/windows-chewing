@@ -131,7 +131,7 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			short* interval = getIntervalAry( imc );
 
 			int oldto = -1;
-			for( short i = 0; interval[i+1] <= compStr.length(); i += 2 ) {
+			for( short i = 0; interval[i+1] <= g_chewing->BufferLen(); i += 2 ) {
 				int from = interval[i], to = interval[i+1];
 				if( from == to || from + 1 == to || oldto > from )
 					continue;

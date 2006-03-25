@@ -48,6 +48,8 @@ DWORD g_cursorCandList = 1;
 DWORD g_enableCapsLock = 0;
 DWORD g_shiftFullShape = 1;
 DWORD g_phraseMark = 1;
+DWORD g_escCleanAllBuf = 0;
+
 
 static const char* g_selKeys[]={
 	"1234567890",
@@ -118,6 +120,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "EnableCapsLock", 0, &type, (LPBYTE)&g_enableCapsLock, &size );
 		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
 		RegQueryValueEx( hk, "PhraseMark", 0, &type, (LPBYTE)&g_phraseMark, &size );
+		RegQueryValueEx( hk, "EscCleanAllBuf", 0, &type, (LPBYTE)&g_escCleanAllBuf, &size );
 		RegCloseKey( hk );
 	}
 
@@ -162,6 +165,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("EnableCapsLock"), 0, REG_DWORD, (LPBYTE)&g_enableCapsLock, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("PhraseMark"), 0, REG_DWORD, (LPBYTE)&g_phraseMark, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("EscCleanAllBuf"), 0, REG_DWORD, (LPBYTE)&g_escCleanAllBuf, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
 }
@@ -191,6 +195,7 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
 			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
 			CheckDlgButton( hwnd, IDC_PHRASE_MARK, g_phraseMark );
+			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
 
 			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
@@ -258,7 +263,8 @@ static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_enableCapsLock = IsDlgButtonChecked( hwnd, IDC_ENABLE_CAPSLOCK );
 				g_shiftFullShape = IsDlgButtonChecked( hwnd, IDC_SHIFT_FULLSHAPE );
 				g_phraseMark = IsDlgButtonChecked( hwnd, IDC_PHRASE_MARK );
-                if ( g_chewing!=NULL )
+				g_escCleanAllBuf = IsDlgButtonChecked( hwnd, IDC_ESC_CLEAN_ALL_BUF );
+				if ( g_chewing!=NULL )
                     g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 
 				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
@@ -538,8 +544,9 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	// IME Toggle key : Ctrl + Space & Shift + Space
 	if( LOWORD(uVirKey) == VK_SPACE && 
-		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) )
+		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) ) {
 		return TRUE;	// Eat the message
+	}
 
 	BOOL ret = FilterKeyByChewing( IMCLock(hIMC), uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
@@ -649,7 +656,7 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 ChewingClient* LoadChewingEngine()
 {
 	return new ChewingClient( int(g_keyboardLayout), 
-		g_spaceAsSelection, g_selKeys[g_selKeyType], g_AdvanceAfterSelection);
+		g_spaceAsSelection, g_selKeys[g_selKeyType], g_AdvanceAfterSelection, g_escCleanAllBuf );
 }
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
@@ -977,8 +984,10 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 				g_chewing->Capslock();
 			}
 		}
-
-
+		// When type english, zuin str should be clean.
+		if( IsKeyDown( keystate[VK_SHIFT] ) || !g_chewing->ChineseMode() || !isChinese )
+			if( g_chewing->ZuinStr() )
+				g_chewing->Esc();
 
 		CompStr* cs = imc.getCompStr();
 		// In English mode, Bypass chewing if there is no composition string but may be call symbol table!
@@ -1007,6 +1016,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 
 	g_chewing->SetFullShape(isFullShape);
 	g_chewing->SetSpaceAsSelection( !!g_spaceAsSelection );
+	g_chewing->SetEscCleanAllBuf( !!g_escCleanAllBuf );
 	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
 	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
 	g_chewing->SetSelAreaLen( (int)g_selAreaLen );

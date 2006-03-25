@@ -81,6 +81,7 @@ public:
 		cmdSetKeyboardLayout,
 		cmdSetHsuSelectionKeyType,
 		cmdSetSelAreaLen,
+		cmdSetEscCleanAllBuf,
         cmdAdvanceAfterSelection,
 
 		// char* (void)

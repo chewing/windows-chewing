@@ -98,6 +98,7 @@ class Chewing
   void SetAddPhraseForward(bool add_forward);
   bool GetAddPhraseForward(void);
   void SetSelAreaLen(int len);
+  void SetEscCleanAllBuf( bool escCleanAllBuf );
 
   char* IntervalStr();
 
