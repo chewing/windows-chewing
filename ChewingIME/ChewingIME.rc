@@ -243,20 +243,21 @@ IDR_POPUP MENU
 BEGIN
     POPUP "POPUP"
     BEGIN
+        MENUITEM "關於新酷音輸入法(&A)",        ID_ABOUT
         MENUITEM "參觀新酷音官方網站(&W)",      ID_WEBSITE
         MENUITEM "軟體本身的建議及錯誤回報(&B)", ID_BUGREPORT
         MENUITEM "注音及選字選詞錯誤回報 (&P)", ID_DICT_BUGREPORT
-        MENUITEM "關於新酷音輸入法(&A)",        ID_ABOUT
         MENUITEM SEPARATOR
         POPUP "教育部網路辭典 (&D)"
         BEGIN
             MENUITEM "教育部國語辭典",              ID_DICT
             MENUITEM "教育部國語辭典簡編本",        ID_SIMPDICT
             MENUITEM "教育部國語小字典",            ID_LITTLEDICT
-            MENUITEM "教育部成語典",                40018
+            MENUITEM "教育部成語典",                ID_PROVERBDICT
         END
         MENUITEM SEPARATOR
-        MENUITEM "新酷音使用說明 (&H)",         40009
+        MENUITEM "新酷音使用說明 (&H)",         ID_CHEWING_HELP
+        MENUITEM "編輯使用者詞庫 (&E)",         ID_HASHED
         MENUITEM "設定新酷音輸入法(&C)",        ID_CONFIG
     END
 END

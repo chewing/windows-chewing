@@ -292,12 +292,22 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 	case ID_DICT_BUGREPORT:
 		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436"), NULL, NULL, SW_SHOWNORMAL );
 		break;
+	case ID_HASHED:
 	case ID_CHEWING_HELP:
 		{
 			TCHAR path[MAX_PATH];
 			GetSystemDirectory( path, MAX_PATH );
-			_tcscat( path, _T("\\IME\\Chewing\\Chewing.chm"));
-			ShellExecute( NULL, "open", path, NULL, NULL, SW_SHOWMAXIMIZED );
+			_tcscat( path, _T("\\IME\\Chewing\\") );
+			int showcmd;
+			if( id == ID_CHEWING_HELP ) {
+				_tcscat( path, _T("Chewing.chm"));
+				showcmd = SW_SHOWMAXIMIZED;
+			}
+			else {
+				_tcscat( path, _T("HashEd.exe"));
+				showcmd = SW_SHOWNORMAL;
+			}
+			ShellExecute( NULL, "open", path, NULL, NULL, showcmd );
 			break;
 		}
 	case ID_DICT:

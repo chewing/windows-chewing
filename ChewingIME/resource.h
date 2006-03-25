@@ -65,14 +65,15 @@
 #define ID_DICT                         40015
 #define ID_SIMPDICT                     40016
 #define ID_LITTLEDICT                   40017
-#define ID_PROVERBDICT                  40018
+#define ID_HASHED                       40022
+#define ID_PROVERBDICT                  40023
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
-#define _APS_NEXT_COMMAND_VALUE         40021
+#define _APS_NEXT_COMMAND_VALUE         40024
 #define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
