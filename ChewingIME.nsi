@@ -2,8 +2,8 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.2.7b"
-!define PRODUCT_PUBLISHER "PCMan (洪任諭)"
+!define PRODUCT_VERSION "0.2.8"
+!define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -59,7 +59,7 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Function OnInstError
-    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版後重開機再安裝。"
+    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版後登出或重開機後再安裝。"
     Abort
 FunctionEnd
 
@@ -136,7 +136,6 @@ Section Uninstall
 
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
-;  Delete "$SYSDIR\libchewing.dll"
   Delete "$SYSDIR\Chewing.ime"
   Delete "$SYSDIR\IME\Chewing\License.txt"
   Delete "$SYSDIR\IME\Chewing\statuswnd.bmp"
