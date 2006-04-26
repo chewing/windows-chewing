@@ -133,9 +133,6 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			int oldto = -1;
 			for( short i = 0; interval[i+1] <= g_chewing->BufferLen(); i += 2 ) {
 				int from = interval[i], to = interval[i+1];
-				
-				if( towupper( compStr[from] ) >= 'A' && towupper( compStr[from] ) <= 'Z' )
-					continue;
 
 				if( from == to || from + 1 == to || oldto > from )
 					continue;
