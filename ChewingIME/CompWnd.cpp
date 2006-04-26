@@ -133,6 +133,10 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			int oldto = -1;
 			for( short i = 0; interval[i+1] <= g_chewing->BufferLen(); i += 2 ) {
 				int from = interval[i], to = interval[i+1];
+				
+				if( towupper( compStr[from] ) >= 'A' && towupper( compStr[from] ) <= 'Z' )
+					continue;
+
 				if( from == to || from + 1 == to || oldto > from )
 					continue;
 				MoveToEx( memdc, indexToXPos( compStr, from ) + 3, rc.bottom-2, NULL );
@@ -287,6 +291,5 @@ void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
 
 short* CompWnd::getIntervalAry( IMCLock& imc ) {
 	CompStr* compStr = imc.getCompStr();
-	if( compStr )
-		return compStr->getIntervalAry();
+	return compStr->getIntervalAry();
 }
