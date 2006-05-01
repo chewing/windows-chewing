@@ -44,78 +44,44 @@ void CHashContext::clear()
 
 int CHashContext::load_hash(const char *file, bool doClear)
 {
-    FILE *fHashFile;
     HASH_ITEM *hitem;
-    char strBuf[256];
-    int i, lop;
-    bool badItem, badStr;
-
+    char *dump, *seekdump;
+    int fsize, hdrlen, iret;
+    
     if ( doClear )
         clear();
 
-    fHashFile = fopen(file, "r");
-    if ( fHashFile==NULL )
-        return  false;
+	dump = _load_hash_file(file, &fsize);
+	if ( dump==NULL ) {
+		return	0;
+	}
+	hdrlen = strlen(BIN_HASH_SIG)+sizeof(chewing_lifetime);
+	chewing_lifetime = *(int*) (dump+strlen(BIN_HASH_SIG));
+	seekdump = dump+hdrlen;
+	fsize -= hdrlen;
 
-    if ( fscanf(fHashFile, "%d", &chewing_lifetime) != 1 )
+    while ( fsize>=FIELD_SIZE )
     {
-        fclose(fHashFile);
-        return  false;
-    }
-
-    badStr = false;
-    while   ( 1 )
-    {
-        badItem = false;
-        if ( fscanf(fHashFile, "%s", strBuf)!=1 )
-            break;
-
-		if ( CHashContext::isChineseString(strBuf)==FALSE )
-        {
-            badStr = true;
-            fseek(fHashFile, FIELD_SIZE-strlen(strBuf)-1, SEEK_CUR);
-            continue;
-        }
-
         hitem = (HASH_ITEM*) calloc(1, sizeof(HASH_ITEM));
-
-		int word_len = strlen( strBuf );
-		hitem->data.wordSeq = (char*)calloc( word_len + 1, sizeof(char) );
-		strcpy( hitem->data.wordSeq, strBuf );
-
-		/* read phoneSeq */
-		int len = ueStrLen(hitem->data.wordSeq);
-		hitem->data.phoneSeq = (uint16*)calloc( len + 1, sizeof(uint16) );
-		for ( i = 0; i < len; i++ )
-			if ( fscanf( fHashFile, "%hu", &( hitem->data.phoneSeq[ i ] ) ) != 1 )
-			{
-                badItem = true;
-                goto _handle_load_err;			
-			}
-		hitem->data.phoneSeq[ len ] = 0;
-
-		/* read userfreq & recentTime */
-		if ( fscanf( fHashFile, "%d %d %d %d", 
-			&(hitem->data.userfreq), 
-			&(hitem->data.recentTime),
-			&(hitem->data.maxfreq), 
-			&(hitem->data.origfreq) ) != 4 )
-		{
-            badItem = true;
-            goto _handle_load_err;
+		iret = ReadHashItem_bin(seekdump, hitem, 1);
+		if ( iret==-1 ) {
+			seekdump += FIELD_SIZE;
+			fsize -= FIELD_SIZE;
+			continue;
 		}
+		else if ( iret==0 )
+			break;
 
         pool.push_back(hitem);
         hitem->item_index = pool.size();
+		seekdump += FIELD_SIZE;
+		fsize -= FIELD_SIZE;
     }
-
-_handle_load_err:
-    fclose(fHashFile);
-    if ( badItem ) {
-        release__HASH_ITEM(hitem);
-        return  0;
-    }
-    return  (badStr==false)?1 :-1;
+	free(dump);
+	if ( fsize!=0 ) {
+		return	-1;
+	}
+    return  1;
 }
 
 static int _PhoneSeqTheSame(const uint16 p1[], const uint16 p2[])
@@ -195,7 +161,7 @@ void CHashContext::list_phrase()
     HASH_ITEM *pItem;
     uint16 *pui;
     
-    foFile = fopen("lista.txt", "w+");
+    foFile = fopen("lista.txt", "w+b");
     iter = pool.begin();
     while ( iter!=pool.end() )
     {
@@ -248,19 +214,17 @@ bool CHashContext::save_hash(const char *destFile)
     std::vector<HASH_ITEM*>::iterator iter;
 	char str[FIELD_SIZE+1];
 
-	outfile = fopen(destFile, "w+");
+	outfile = fopen(destFile, "w+b");
 
 	/* update "lifetime" */
-	sprintf(formatstring, "%%-%ds", FIELD_SIZE ); 
-	fseek( outfile, 0, SEEK_SET );
-	sprintf( str, "%d", chewing_lifetime );
-	fprintf( outfile, formatstring, str );
+	fwrite(BIN_HASH_SIG, strlen(BIN_HASH_SIG), 1, outfile);
+	fwrite(&chewing_lifetime, 1, sizeof(chewing_lifetime), outfile);
 
     iter = pool.begin();
     while ( iter!=pool.end() )
     {
-    	HashItem2String(str, *iter);
-    	fprintf(outfile, formatstring, str);
+    	HashItem2Binary(str, *iter);
+    	fwrite(str, FIELD_SIZE, 1, outfile);
         ++iter;
     };
 	fclose( outfile );
