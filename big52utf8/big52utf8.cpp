@@ -6,7 +6,8 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hprev, LPSTR lpCmd, int nShow )
 {
 	HANDLE hHashFile = CreateFile( lpCmd, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
 	if( hHashFile == INVALID_HANDLE_VALUE )
-		return -1;
+		return 0; /* absence of hash.dat simply means "nothing", 
+		             and should not rise an error to NSIS. */
 
 	DWORD size = GetFileSize( hHashFile, NULL );
 	DWORD buflen = (size * 3 / 2) + 1;
