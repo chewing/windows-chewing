@@ -136,10 +136,8 @@ bool CHashContext::arrange_phrase()
         pItem = (HASH_ITEM*) *iter;
         if ( pPivot!=NULL )
         {
-            if ( (strcmp(pPivot->data.wordSeq, pItem->data.wordSeq)!=0 ||
-                 _PhoneSeqTheSame(pPivot->data.phoneSeq, pItem->data.phoneSeq)!=0) )
-            { }
-            else
+            if ( strcmp(pPivot->data.wordSeq, pItem->data.wordSeq)==0 &&
+                 _PhoneSeqTheSame(pPivot->data.phoneSeq, pItem->data.phoneSeq)==0 )
             {   /* duplicated item */
                 bDup = false;
                 release__HASH_ITEM(pItem);
