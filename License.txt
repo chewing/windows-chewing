@@ -1,7 +1,8 @@
 新酷音是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru 等人
 改良原本由龔律全與陳康本開發的酷音輸入法而來，支援各種平台。
-本 Windows 版是由洪任諭 (PCMan) 使用前輩們已包裝好的 libchewing 核心
-再參考 OpenVanilla 開放香草輸入法，重新製作了新酷音的 Windows 版。
+本 Windows 版是由洪任諭 (PCMan), seamxr, andyhorng 等人，使用前輩們
+已包裝好的 libchewing 核心，再參考 OpenVanilla 開放香草輸入法
+重新製作了新酷音的 Windows 版。
 本軟體依照 GNU General Public License (GPL )授權合約釋出，以下附上全文。
 
 		    GNU GENERAL PUBLIC LICENSE
