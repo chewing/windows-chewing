@@ -59,7 +59,7 @@ FunctionEnd
 Function .onInit
   ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
   StrCmp $0 "" ContinueInst 0 
-    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到舊版 ${PRODUCT_NAME}已安裝，是否要自動移除舊版後重裝新版？" IDOK +2
+    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到舊版 $0 已安裝，是否要自動移除舊版後重裝新版？" IDOK +2
       Abort
       Call uninstOld
   ContinueInst:
@@ -189,6 +189,7 @@ Section Uninstall
   Delete "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk"
+  Delete "$SMPROGRAMS\新酷音輸入法\線上檢查是否有新版本.lnk"
 
   RMDir "$SYSDIR\IME\Chewing"
   RMDir "$SMPROGRAMS\新酷音輸入法"
