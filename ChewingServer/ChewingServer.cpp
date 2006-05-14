@@ -4,9 +4,11 @@
 #include <windows.h>
 #include <tchar.h>
 #include <shlobj.h>
+#include <time.h>	// For time()
 
 #include "ChewingServer.h"
 #include "Chewingpp.h"
+#include "..\include\chewingserver.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -80,7 +82,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 
 };
 
-ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE)
+ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE), checkTimer(0)
 {
 	g_ChewingServerInstance = this;
 
@@ -140,7 +142,6 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 	{
 	case cmdAddClient:
 		{
-//			SetPriorityClass( GetCurrentProcess(), NORMAL_PRIORITY_CLASS );
 			Chewing* client = new Chewing();
 			chewingClients[(unsigned int)client] = client;
 			return (LRESULT)client;
@@ -152,12 +153,9 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
             {   
                 delete (Chewing*) lp;
             }
-//			if( chewingClients.empty() )
-//				SetPriorityClass( GetCurrentProcess(), IDLE_PRIORITY_CLASS );
-//			PostQuitMessage(0);
 			break;
 		}
-    case    cmdEcho:
+    case cmdEcho:
         {
             map<unsigned int, Chewing*>::iterator iterT;
             
@@ -169,7 +167,7 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
         }
         return  -1; /* return -1 here, so clinet side can identify 
                        its response from server or API failed */
-    case    cmdLastPhoneSeq:
+    case cmdLastPhoneSeq:
         {
             uint16 *sbuf = GetLastPhoneSeq();
 		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
@@ -186,6 +184,9 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 		    UnmapViewOfFile( obuf );
             return  lop;
         }
+	case WM_TIMER:
+		checkNewVersion();
+		break;
     case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -195,6 +196,7 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 			for( ; it != chewingClients.end(); ++it )
 				delete it->second;
 			chewingClients.clear();
+			KillTimer( hwnd, checkTimer );
 			PostQuitMessage(0);
 			break;
 		}
@@ -206,7 +208,6 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 bool ChewingServer::startServer()
 {
 	HANDLE hprocess = GetCurrentProcess();
-//	SetPriorityClass( hprocess, HIGH_PRIORITY_CLASS );
 
 	LPCTSTR name = _T("Local\\ChewingServer");
 	LPCTSTR evtname = _T("Local\\ChewingServerEvent");
@@ -250,7 +251,9 @@ bool ChewingServer::startServer()
 	}
     OutputDebugString("Chewing server up.");
 
-//	SetPriorityClass( hprocess, NORMAL_PRIORITY_CLASS );
+	// Set up a timer to regularly check if there is a new version.
+	checkTimer = SetTimer( hwnd, 1, 3600 * 1000, NULL );
+	checkNewVersion();	// Check now!
 	return true;
 }
 
@@ -302,3 +305,32 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 	return 0;
 }
 
+
+void ChewingServer::checkNewVersion(void)
+{
+	// Check if there is a new version on the website
+	time_t cur_time = 0, last_check = 0;
+	time(&cur_time);
+
+	HKEY hk = NULL;
+	if( ERROR_SUCCESS == RegCreateKeyEx( HKEY_CURRENT_USER, _T("Software\\ChewingIME"), 0, 
+			NULL, 0, KEY_ALL_ACCESS , NULL, &hk, NULL) )
+	{
+		DWORD size = sizeof(DWORD);
+		DWORD type = REG_DWORD;
+		const TCHAR key_name[] = _T("LastVersionCheck");
+
+		RegQueryValueEx( hk, key_name, 0, &type, (LPBYTE)&last_check, &size );
+		if( cur_time - last_check > 86400 ) {
+			// Update time of last check
+			RegSetValueEx( hk, key_name, 0, REG_DWORD, (BYTE*)&cur_time, sizeof(DWORD) );
+
+			// Launch update checker
+			TCHAR path[MAX_PATH];
+			GetSystemDirectory( path, MAX_PATH );
+			_tcscat( path, _T("\\IME\\Chewing\\Update.exe") );
+			ShellExecute( NULL, "open", path, NULL, NULL, SW_HIDE );
+		}
+		RegCloseKey( hk );
+	}
+}
