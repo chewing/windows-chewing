@@ -272,6 +272,9 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\HashEd.exe.manifest">
+		</File>
+		<File
 			RelativePath="ReadMe.txt">
 		</File>
 	</Files>

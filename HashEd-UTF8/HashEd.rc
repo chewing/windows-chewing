@@ -13,6 +13,25 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// 中性 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(950)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "HashEd.exe.manifest"
+#endif    // 中性 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // 中文 (台灣) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
@@ -90,7 +109,7 @@ BEGIN
     PUSHBUTTON      "確定 (&O)",IDOK,104,181,50,14
 END
 
-IDD_HASHED_DIALOG DIALOGEX 0, 0, 443, 304
+IDD_HASHED_DIALOG DIALOGEX 0, 0, 443, 298
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
@@ -102,12 +121,12 @@ BEGIN
     PUSHBUTTON      "新增詞彙",IDC_ADD_PHRASE,162,245,61,16
     PUSHBUTTON      "刪除選取詞彙",IDC_DEL_PHRASE,349,245,80,16
     GROUPBOX        "本地詞庫",IDC_BANNER,7,7,429,223
-    PUSHBUTTON      "匯入詞庫檔",IDC_IMPORT,243,275,61,22
-    PUSHBUTTON      "存入本地詞庫",IDC_SAVE,375,275,61,22
+    PUSHBUTTON      "匯入詞庫檔",IDC_IMPORT,243,275,61,16
+    PUSHBUTTON      "存入本地詞庫",IDC_SAVE,375,275,61,16
     PUSHBUTTON      "尋找詞彙",IDC_FIND_PHRASE,230,245,61,16
     GROUPBOX        "功能",IDC_STATIC,7,234,429,34
-    PUSHBUTTON      "另存成新檔",IDC_SAVE_AS,309,275,61,22
-    PUSHBUTTON      "關於本工具",IDC_ABOUT,7,275,61,22
+    PUSHBUTTON      "另存成新檔",IDC_SAVE_AS,309,275,61,16
+    PUSHBUTTON      "關於本工具",IDC_ABOUT,7,275,61,16
     CONTROL         "",IDC_NEW_PHRASE_EDIT,"RichEdit20A",ES_AUTOHSCROLL | 
                     WS_BORDER | WS_TABSTOP,13,245,141,15
 END
@@ -172,7 +191,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 436
         TOPMARGIN, 7
-        BOTTOMMARGIN, 297
+        BOTTOMMARGIN, 291
     END
 END
 #endif    // APSTUDIO_INVOKED
