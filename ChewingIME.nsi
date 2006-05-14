@@ -18,11 +18,6 @@ SetCompressor lzma
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 
 Function uninstOld
-  FindWindow $0 "ChewingServer"
-  SendMessage $0 ${WM_DESTROY} 0 0
-
-  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
-
   ClearErrors
   IfFileExists "$SYSDIR\Chewing.ime" 0 ContinueUninst
     Delete "$SYSDIR\Chewing.ime"
@@ -30,6 +25,12 @@ Function uninstOld
       MessageBox MB_ICONSTOP|MB_OK "解安裝舊版發生錯誤，請確定你有系統管理員權限，以及舊版不在使用中$\n$\n建議到控制台輸入法設定當中，移除舊版後登出或重開機後再安裝。"
       Abort
   ContinueUninst:
+
+  FindWindow $0 "ChewingServer"
+  SendMessage $0 ${WM_DESTROY} 0 0
+
+  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
+
   Delete "$SYSDIR\IME\Chewing\License.txt"
   Delete "$SYSDIR\IME\Chewing\statuswnd.bmp"
   Delete "$SYSDIR\IME\Chewing\ch_index.dat"

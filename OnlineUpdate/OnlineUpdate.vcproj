@@ -137,6 +137,9 @@
 		<File
 			RelativePath=".\Update.exe.manifest">
 		</File>
+		<File
+			RelativePath=".\Update.ico">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
