@@ -65,8 +65,8 @@
 #define ID_DICT                         40015
 #define ID_SIMPDICT                     40016
 #define ID_LITTLEDICT                   40017
+#define ID_PROVERBDICT                  40018
 #define ID_HASHED                       40022
-#define ID_PROVERBDICT                  40023
 #define ID_CHECK_NEW_VER                40025
 
 // Next default values for new objects

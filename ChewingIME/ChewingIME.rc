@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,9,0
- PRODUCTVERSION 0,2,9,0
+ FILEVERSION 0,3,1,0
+ PRODUCTVERSION 0,3,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 2, 9, 0"
+            VALUE "FileVersion", "0, 3, 1, 0"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 2, 9, 0"
+            VALUE "ProductVersion", "0, 3, 1, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -192,7 +192,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,7,105,261,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 PCMan, seamxr, andyhorng 等人，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,25,115,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.0\n\n發行日期：2006.05.12\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.1\n\n發行日期：2006.05.15\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
                     IDC_STATIC,98,7,170,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP,7,7,80,87
     LTEXT           "題字：翁政銓",IDC_STATIC,21,97,49,8
