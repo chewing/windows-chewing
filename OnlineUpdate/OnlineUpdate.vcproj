@@ -129,6 +129,9 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\icon1.ico">
+		</File>
+		<File
 			RelativePath=".\OnlineUpdate.rc">
 		</File>
 		<File

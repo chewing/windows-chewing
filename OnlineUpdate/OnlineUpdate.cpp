@@ -74,7 +74,9 @@ LRESULT CALLBACK notifier_proc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_INITDIALOG:
 		SetDlgItemText( hwnd, IDC_VERSION, version );
 		SetDlgItemText( hwnd, IDC_CHANGELOG, change_log );
-		break;
+		SendMessage( GetDlgItem(hwnd, IDC_INFOICON), 
+					 STM_SETICON, (WPARAM)LoadIcon(NULL, IDI_INFORMATION), 0 );
+		return TRUE;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
