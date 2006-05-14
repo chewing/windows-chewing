@@ -9,6 +9,8 @@
 #define IDC_VERSION                     1003
 #define IDC_TITLE                       1004
 #define IDC_INFOICON                    1005
+#define IDC_VERSION2                    1006
+#define IDC_RELEASEDTIME                1006
 
 // Next default values for new objects
 // 

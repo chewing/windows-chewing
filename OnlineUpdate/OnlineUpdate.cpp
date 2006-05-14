@@ -16,9 +16,12 @@ TCHAR* url_file_name = url + 39; // dir path is 39 bytes long
 
 TCHAR notifier_class[] = _T("ChewingUpdate");
 const char* version = NULL;
+const char* released_time = NULL;
 const char* change_log = NULL;
 const char* news_url = NULL;
 HINSTANCE hinst = NULL;
+
+bool has_new_version = false;
 
 LRESULT CALLBACK notifier_proc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
@@ -73,9 +76,13 @@ LRESULT CALLBACK notifier_proc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		break;
 	case WM_INITDIALOG:
 		SetDlgItemText( hwnd, IDC_VERSION, version );
+		SetDlgItemText( hwnd, IDC_RELEASEDTIME, released_time );
 		SetDlgItemText( hwnd, IDC_CHANGELOG, change_log );
 		SendMessage( GetDlgItem(hwnd, IDC_INFOICON), 
 					 STM_SETICON, (WPARAM)LoadIcon(NULL, IDI_INFORMATION), 0 );
+		if( ! has_new_version )	{
+			SetDlgItemText( hwnd, IDC_TITLE, "您的新酷音已經是最新版本" );
+		}
 		return TRUE;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -95,7 +102,7 @@ bool get_working_area(RECT* rc, HWND app_wnd)
 	return true;
 }
 
-void show_notify( const char* version, const char* change_log )
+void show_notify()
 {
 	HWND hwnd = CreateDialog( hinst, LPCTSTR(IDD_POPUP), HWND_DESKTOP, 
 							  (DLGPROC)notifier_proc );
@@ -143,8 +150,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 		// version-info should in following simple format:
 		// 1st line: Version string (required)
-		// 2nd line: URL of relating web page (required)
-		// 3rd line to end of file: Change log (optional)
+		// 2nd line: Release date (required)
+		// 3rd line: URL of relating web page (required)
+		// 4th line to end of file: Change log (optional)
 
 		version = strtok(buf, "\r\n ");
 		if( ! version )
@@ -162,14 +170,17 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			RegCloseKey( hk );
 		}
 
-		if( ! strcmp( cur_ver, version ) )	// No new version
-			return 0;
+		has_new_version = strcmp( cur_ver, version ) ? true : false;
 
+		// No new version and in silent mode
+		if( ! has_new_version && strstr(lpCmdLine, "/silent") )
+			return 0;
+		released_time = strtok( NULL, "\r\n" );
 		news_url = strtok( NULL, "\r\n" );
 		change_log = strtok( NULL, "" );
 
 		hinst = hInstance;
-		show_notify( version, change_log );
+		show_notify();
 		return 0;
 	}
 	InternetCloseHandle(inet);
