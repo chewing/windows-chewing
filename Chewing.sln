@@ -39,6 +39,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "big52utf8", "big52utf8\big5
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OnlineUpdate", "OnlineUpdate\OnlineUpdate.vcproj", "{DC981667-BE17-4BFF-BD24-8E5417B8C5D0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -81,6 +85,10 @@ Global
 		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Debug.Build.0 = Debug|Win32
 		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Release.ActiveCfg = Release|Win32
 		{FEA2192A-7A54-46C9-A194-16B2B4268C26}.Release.Build.0 = Release|Win32
+		{DC981667-BE17-4BFF-BD24-8E5417B8C5D0}.Debug.ActiveCfg = Debug|Win32
+		{DC981667-BE17-4BFF-BD24-8E5417B8C5D0}.Debug.Build.0 = Debug|Win32
+		{DC981667-BE17-4BFF-BD24-8E5417B8C5D0}.Release.ActiveCfg = Release|Win32
+		{DC981667-BE17-4BFF-BD24-8E5417B8C5D0}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
