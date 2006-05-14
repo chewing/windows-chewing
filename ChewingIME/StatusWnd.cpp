@@ -294,6 +294,7 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 		break;
 	case ID_HASHED:
 	case ID_CHEWING_HELP:
+	case ID_CHECK_NEW_VER:
 		{
 			TCHAR path[MAX_PATH];
 			GetSystemDirectory( path, MAX_PATH );
@@ -302,6 +303,10 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 			if( id == ID_CHEWING_HELP ) {
 				_tcscat( path, _T("Chewing.chm"));
 				showcmd = SW_SHOWMAXIMIZED;
+			}
+			else if( id == ID_CHECK_NEW_VER ) {
+				_tcscat( path, _T("Update.exe"));
+				showcmd = SW_SHOWNORMAL;
 			}
 			else {
 				_tcscat( path, _T("HashEd.exe"));

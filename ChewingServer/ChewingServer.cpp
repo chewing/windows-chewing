@@ -329,7 +329,7 @@ void ChewingServer::checkNewVersion(void)
 			TCHAR path[MAX_PATH];
 			GetSystemDirectory( path, MAX_PATH );
 			_tcscat( path, _T("\\IME\\Chewing\\Update.exe") );
-			ShellExecute( NULL, "open", path, NULL, NULL, SW_HIDE );
+			ShellExecute( NULL, "open", path, "/silent", NULL, SW_HIDE );
 		}
 		RegCloseKey( hk );
 	}
