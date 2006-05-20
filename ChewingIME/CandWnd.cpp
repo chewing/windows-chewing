@@ -178,7 +178,7 @@ void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
             _DecideCandStringcolor(colorIdx, colorBody, TRUE);
 		}
 
-		int len = wcslen( cand );
+		int len = (int) wcslen( cand );
 		GetTextExtentPoint32W(hDC, cand, len, &candsz);
 		candsz.cx += 4;
 		candsz.cy += 2;
@@ -267,7 +267,7 @@ void CandWnd::getSize(int* w, int* h)
 			swprintf ( cand, L"%d/%d", page, totalPage );
 		}
 
-		int len = wcslen( cand );
+		int len = (int) wcslen( cand );
 		GetTextExtentPoint32W(hDC, cand, len, &candsz);
 		width += candsz.cx + 4;
 		width += selkey_w;

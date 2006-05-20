@@ -207,10 +207,10 @@ bool XPToolbar::onMouseMove(WPARAM wp, LPARAM lp)
 		ClientToScreen( hwnd, &pt );
 
 		int len = MultiByteToWideChar( CP_ACP, 0, buttons[idx].tooltip.c_str(), 
-								buttons[idx].tooltip.length(), NULL, 0 );
+								(int) buttons[idx].tooltip.length(), NULL, 0 );
 		wchar_t* wtip = new wchar_t[len + 1];
 		MultiByteToWideChar( CP_ACP, 0, buttons[idx].tooltip.c_str(), 
-								buttons[idx].tooltip.length()+1, wtip, len + 1 );
+								(int) buttons[idx].tooltip.length()+1, wtip, len + 1 );
 
 		tooltip->showTip( pt.x, pt.y, wtip, 6000 );
 		delete wtip;
@@ -256,7 +256,7 @@ void XPToolbar::drawBtn(HDC dc, int idx)
 int XPToolbar::addBtn(UINT id, int iImage, LPCTSTR tooltip)
 {
 	buttons.push_back( XPToolbarBtn(id, iImage, tooltip, 0) );
-	return buttons.size();
+	return (int) buttons.size();
 }
 
 void XPToolbar::getSize(int *w, int *h)
@@ -311,7 +311,7 @@ void XPToolbar::setTooltip(Tooltip* tip)
 
 bool XPToolbar::getBtnRect(int idx, RECT& rc)
 {
-	if( idx >= buttons.size() )
+	if( idx >= (int) buttons.size() )
 		return false;
 	GetClientRect( hwnd, &rc );
 	int ymargin = (rc.bottom - 21)/2;

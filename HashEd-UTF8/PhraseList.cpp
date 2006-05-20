@@ -146,7 +146,7 @@ void CPhraseList::onVScroll( int code, int pos )
 	}
 	if( si.nPos < 0 )
 		si.nPos = 0;
-	else if( si.nPos > (si.nMax - si.nPage) )
+	else if( si.nPos > (si.nMax - (int) si.nPage) )
 		si.nPos = (si.nMax - si.nPage);
 
 	if( oldPos != si.nPos ) {
@@ -300,7 +300,7 @@ void CPhraseList::insertItem(int pos, std::wstring text, void* user_data)
 
 std::wstring CPhraseList::getItemText( int idx )
 {
-	if( idx < data.size() && idx >=0 ) {
+	if( idx < (int) data.size() && idx >=0 ) {
 		return data[idx].first;
 	}
 	return wstring();
@@ -308,7 +308,7 @@ std::wstring CPhraseList::getItemText( int idx )
 
 void* CPhraseList::getItemData( int idx )
 {
-	if( idx < data.size() && idx >=0 ) {
+	if( idx < (int) data.size() && idx >=0 ) {
 		return data[idx].second;
 	}
 	return NULL;
@@ -316,7 +316,7 @@ void* CPhraseList::getItemData( int idx )
 
 void CPhraseList::deleteItem( int idx )
 {
-	if( idx < data.size() && idx >=0 ) {
+	if( idx < (int) data.size() && idx >=0 ) {
 		data.erase( data.begin() + idx );
 	}
 	if( !lock )
@@ -425,7 +425,7 @@ void CPhraseList::onMouseWheel(int delta)
 
 	if( si.nPos < 0 )
 		si.nPos = 0;
-	else if( si.nPos > (si.nMax - si.nPage) )
+	else if( si.nPos > (si.nMax - (int) si.nPage) )
 		si.nPos = (si.nMax - si.nPage);
 
 	if( oldPos != si.nPos ) {

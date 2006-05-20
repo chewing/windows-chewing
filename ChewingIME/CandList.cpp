@@ -4,7 +4,7 @@ CandList::CandList(void)
 {
 	ci.dwSize = sizeof(CandList);
 	ci.dwCount = 1;
-	ci.dwOffset[0] = (size_t(&cl) - size_t(&ci));
+	ci.dwOffset[0] = (DWORD) (size_t(&cl) - size_t(&ci));
 	ci.dwPrivateSize = 0;
 
 	cl.dwSize = sizeof(cl)+sizeof(offset)+sizeof(candStr);

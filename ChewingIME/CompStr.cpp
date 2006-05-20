@@ -146,7 +146,7 @@ void CompStr::beforeGenerateMsg(void)
 		else	{	// This composition string contains Chinese characters
 			int i;
 			wchar_t* pstr = compStr;
-			for( i = 0; i < cs.dwCompStrLen; ++i )	{
+			for( i = 0; i < (int) cs.dwCompStrLen; ++i )	{
 				compClause[ i ] = (pstr - compStr);
 				++pstr;
 				if( ! *pstr )
@@ -161,7 +161,7 @@ void CompStr::beforeGenerateMsg(void)
 		else	{	// This result string contains Chinese characters
 			int i;
 			wchar_t* pstr = resultStr;
-			for( i = 0; i < cs.dwResultStrLen; ++i )	{
+			for( i = 0; i < (int) cs.dwResultStrLen; ++i )	{
 				resultClause[ i ] = (pstr - resultStr);
 				pstr = ++pstr;
 				if( ! *pstr )
@@ -216,7 +216,7 @@ void CompStr::beforeGenerateMsg(void)
 }
 
 void CompStr::setInvervalAry( char* intervalStr ) {
-	for( int i = 0; i < strlen( intervalStr ); i++ ) {
+	for( int i = 0; i < (int) strlen( intervalStr ); i++ ) {
 		IntervalAry[i] = intervalStr[i] - '0';
 	}
 }

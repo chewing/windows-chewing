@@ -231,7 +231,7 @@ bool CHashContext::save_hash(const char *destFile)
 
 HASH_ITEM* CHashContext::get_phrase_by_id(int index)
 {
-    if ( index>=pool.size() || index<0 )
+    if ( index >= (int) pool.size() || index<0 )
     {
         return  NULL;
     }
@@ -241,7 +241,7 @@ HASH_ITEM* CHashContext::get_phrase_by_id(int index)
 
 void CHashContext::del_phrase_by_id(int index)
 {
-    if ( index>=pool.size() || index<0 )
+    if ( index >= (int) pool.size() || index<0 )
     {
         return;
     }

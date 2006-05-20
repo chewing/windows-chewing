@@ -352,7 +352,7 @@ void CHashEdDlg::OnImport()
 void CHashEdDlg::Reload(char* hashfile, bool bClearContext)
 {
     char strtemp[MAX_PATH + 100];
-    int iret, iWarning = 0;
+    int iWarning = 0;
 
     sprintf( strtemp, GetStringFromTab(IDS_LOADING), hashfile);
     UpdateBanner( strtemp);

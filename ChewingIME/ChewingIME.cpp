@@ -334,7 +334,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 	if( g_useUnicode )	{
 		 lpIMEInfo->fdwProperty |= IME_PROP_UNICODE;
 #ifndef UNICODE
-		int len = strlen(g_chewingIMEClass) + 1;
+		int len = (int) strlen(g_chewingIMEClass) + 1;
 		MultiByteToWideChar( CP_ACP, 0, g_chewingIMEClass, len, (LPWSTR)lpszUIClass, len );
 #endif
 	}

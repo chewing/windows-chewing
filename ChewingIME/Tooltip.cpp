@@ -78,7 +78,7 @@ LRESULT Tooltip::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 
 void Tooltip::onPaint(PAINTSTRUCT& ps)
 {
-	int len = wcslen(text);
+	int len = (int) wcslen(text);
 	RECT rc, textrc = {0};
 	GetClientRect( hwnd, &rc );
 
