@@ -305,11 +305,11 @@ void CHashEdDlg::OnFindPhrase()
 
     idx = find(tstring.c_str(), bMatch);
 
+	SelItem(idx);
+	phraseList->ensureItemVisible( idx );
     beep = MB_ICONQUESTION;
     if ( bMatch==TRUE )
     {
-		SelItem(idx);
-		phraseList->ensureItemVisible( idx );
         beep = MB_OK;
     }
 	else
