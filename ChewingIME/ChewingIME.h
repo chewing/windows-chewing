@@ -9,6 +9,7 @@
 extern HINSTANCE g_dllInst;
 extern bool g_isWindowNT;
 extern bool g_useUnicode;
+extern bool g_isWinLogon;
 
 const LPCTSTR g_chewingIMEClass = _T("ChewingIME");
 const LPCTSTR g_compWndClass = _T("ChewingComp");

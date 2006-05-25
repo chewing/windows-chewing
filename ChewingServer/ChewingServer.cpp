@@ -71,7 +71,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ZuinStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::CommitStr ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::Buffer ,
-	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::IntervalStr ,
+	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::IntervalArray ,
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ShowMsg ,
 
 	  // char* (int)
@@ -273,22 +273,30 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 	if( cmd <= (cmdSelection - cmdFirst) )	//  char* (void) && char* (int)
 	{
 		char* str = NULL;
-		if( cmd < (cmdSelection - cmdFirst) )	// char* (void)
+		int len = 0;
+		if( cmd == (cmdIntervalArray - cmdFirst) ) // unsigned char* (void)
+		{
+			// Special case for interval array
+			str = (char*)chewing->IntervalArray();
+			len = chewing->IntervalLen() * sizeof(unsigned char);
+		}
+		else if( cmd < (cmdSelection - cmdFirst) )	// char* (void)
 		{
 			ChewingMemberFuncCV func = (ChewingMemberFuncCV)chewingCmdTable[cmd];
 			str = (chewing->*func)();
+			len = strlen(str) + 1;
 		}
 		else	// char* (int)
 		{
 			ChewingMemberFuncCI func = (ChewingMemberFuncCI)chewingCmdTable[cmd];
 			str = (chewing->*func)(param);
+			len = strlen(str) + 1;
 		}
 		if( str )
 		{
-			int len = strlen(str);
 			char* pbuf = (char*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
 										0, 0, CHEWINGSERVER_BUF_SIZE );
-			memcpy( pbuf, str, len + 1 );
+			memcpy( pbuf, str, len );
 			UnmapViewOfFile( pbuf );
 			free(str);
 			return len;
@@ -320,16 +328,20 @@ void ChewingServer::checkNewVersion(void)
 		DWORD type = REG_DWORD;
 		const TCHAR key_name[] = _T("LastVersionCheck");
 
-		RegQueryValueEx( hk, key_name, 0, &type, (LPBYTE)&last_check, &size );
-		if( cur_time - last_check > 86400 ) {
-			// Update time of last check
-			RegSetValueEx( hk, key_name, 0, REG_DWORD, (BYTE*)&cur_time, sizeof(DWORD) );
+		DWORD check_new_version = true;
+		RegQueryValueEx( hk, _T("CheckNewVersion"), 0, &type, (LPBYTE)&check_new_version, &size );
+		if( check_new_version ) {
+			RegQueryValueEx( hk, key_name, 0, &type, (LPBYTE)&last_check, &size );
+			if( cur_time - last_check > 86400 ) {
+				// Update time of last check
+				RegSetValueEx( hk, key_name, 0, REG_DWORD, (BYTE*)&cur_time, sizeof(DWORD) );
 
-			// Launch update checker
-			TCHAR path[MAX_PATH];
-			GetSystemDirectory( path, MAX_PATH );
-			_tcscat( path, _T("\\IME\\Chewing\\Update.exe") );
-			ShellExecute( NULL, "open", path, "/silent", NULL, SW_HIDE );
+				// Launch update checker
+				TCHAR path[MAX_PATH];
+				GetSystemDirectory( path, MAX_PATH );
+				_tcscat( path, _T("\\IME\\Chewing\\Update.exe") );
+				ShellExecute( NULL, "open", path, "/silent", NULL, SW_HIDE );
+			}
 		}
 		RegCloseKey( hk );
 	}

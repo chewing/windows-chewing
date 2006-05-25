@@ -94,8 +94,12 @@ bool StatusWnd::create(HWND imeUIWnd)
 	addBtn( ID_CHI_ENG, imc.isChinese() ? iconChi : iconEng, tip );
 	LoadString(g_dllInst, ID_FULL_HALF, tip, sizeof(tip) );
 	addBtn( ID_FULL_HALF, imc.isFullShape() ? iconFull : iconHalf, tip );
-	LoadString(g_dllInst, ID_MENU, tip, sizeof(tip) );
-	addBtn( ID_MENU, iconConfig, tip );
+	// This should be disabled in WinLogon for security reason.
+	if( ! g_isWinLogon )
+	{
+		LoadString(g_dllInst, ID_MENU, tip, sizeof(tip) );
+		addBtn( ID_MENU, iconConfig, tip );
+	}
 
 	IMEUILock ui(GetParent(hwnd));
 	setTooltip( &ui.getIMEUI()->tooltip );

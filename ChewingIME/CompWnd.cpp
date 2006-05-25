@@ -128,20 +128,18 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
         }
 
 		if( g_phraseMark ) {
-			short* interval = getIntervalAry( imc );
-
-			int oldto = -1;
-			for( short i = 0; interval[i+1] <= g_chewing->BufferLen(); i += 2 ) {
-				int from = interval[i], to = interval[i+1];
-
-				if( from == to || from + 1 == to || oldto > from )
-					continue;
-				MoveToEx( memdc, indexToXPos( compStr, from ) + 3, rc.bottom-2, NULL );
-				LineTo( memdc, indexToXPos( compStr, to ) - 3, rc.bottom-2 );
-				oldto = interval[i+1];
+			DWORD len = 0;
+			DWORD* interval = getIntervalAry( imc, len );
+			// TODO: rewrite phrase mark
+			--len;
+			for( DWORD i = 0; i < len ; ++i )
+			{
+				if( interval[i+1] - interval[i] > 1 ) {
+					MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
+					LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
+				}
 			}
 		}
-
 	}
 
 	SelectObject(memdc, hOldPen);
@@ -286,7 +284,8 @@ void CompWnd::getCandPos(IMCLock& imc, POINT* pt)
 	*pt = ic->cfCandForm->ptCurrentPos;
 }
 
-short* CompWnd::getIntervalAry( IMCLock& imc ) {
+DWORD* CompWnd::getIntervalAry( IMCLock& imc, DWORD& count ) {
 	CompStr* compStr = imc.getCompStr();
-	return compStr->getIntervalAry();
+	count = compStr->getInternalLen();
+	return compStr->getIntervalArray();
 }

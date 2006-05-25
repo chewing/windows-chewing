@@ -23,6 +23,9 @@ HINSTANCE g_dllInst = NULL;
 bool g_isWindowNT = false;
 bool g_useUnicode = true;	// Under Windows 95, IME has no unicode support
 
+// Some functions should be disabled under WinLogon for security reason
+bool g_isWinLogon = false;
+
 long g_shiftPressedTime = -1;
 
 ChewingClient* g_chewing = NULL;
@@ -50,6 +53,7 @@ DWORD g_shiftFullShape = 1;
 DWORD g_phraseMark = 1;
 DWORD g_escCleanAllBuf = 0;
 
+DWORD g_checkNewVersion = true;	// Enable update notifier
 
 static const char* g_selKeys[]={
 	"1234567890",
@@ -94,7 +98,6 @@ void LoadConfig()
 	#define KB_DVORAK_HSU 7
 	#define KB_HANYU_PINYING 8
 */
-
 	HKEY hk = NULL;
 	if( ERROR_SUCCESS == RegOpenKey( HKEY_CURRENT_USER, _T("Software\\ChewingIME"), &hk) )
 	{
@@ -121,6 +124,8 @@ void LoadConfig()
 		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
 		RegQueryValueEx( hk, "PhraseMark", 0, &type, (LPBYTE)&g_phraseMark, &size );
 		RegQueryValueEx( hk, "EscCleanAllBuf", 0, &type, (LPBYTE)&g_escCleanAllBuf, &size );
+
+		RegQueryValueEx( hk, "CheckNewVersion", 0, &type, (LPBYTE)&g_checkNewVersion, &size );
 		RegCloseKey( hk );
 	}
 
@@ -166,122 +171,10 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("PhraseMark"), 0, REG_DWORD, (LPBYTE)&g_phraseMark, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EscCleanAllBuf"), 0, REG_DWORD, (LPBYTE)&g_escCleanAllBuf, sizeof(DWORD) );
+
+		RegSetValueEx( hk, _T("CheckNewVersion"), 0, REG_DWORD, (LPBYTE)&g_checkNewVersion, sizeof(DWORD) );
 		RegCloseKey( hk );
 	}
-}
-
-static BOOL ConfigDlgProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch( msg )
-	{
-	case WM_INITDIALOG:
-		{
-			HICON icon = LoadIcon(g_dllInst, LPCTSTR(IDI_ICON));
-			SendMessage( hwnd, WM_SETICON, ICON_BIG, LPARAM(icon) );
-			SendMessage( hwnd, WM_SETICON, ICON_SMALL, LPARAM(icon) );
-			CheckRadioButton( hwnd, IDC_KB1, IDC_KB9, IDC_KB1 + g_keyboardLayout );
-			CheckDlgButton( hwnd, IDC_DEFAULT_ENG, g_defaultEnglish );
-			CheckDlgButton( hwnd, IDC_DEFAULT_FS, g_defaultFullSpace );
-			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
-			CheckDlgButton( hwnd, IDC_ENABLE_SHIFT, g_enableShift );
-			CheckDlgButton( hwnd, IDC_SHIFT_CAPITAL, g_shiftCapital );
-			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
-			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
-			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
-			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
-			CheckDlgButton( hwnd, IDC_BLOCK_CURSOR, g_ColoredCompCursor );
-			CheckDlgButton( hwnd, IDC_ADV_AFTER_SEL, g_AdvanceAfterSelection );
-			CheckDlgButton( hwnd, IDC_CURSOR_CANDLIST, g_cursorCandList );
-			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
-			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
-			CheckDlgButton( hwnd, IDC_PHRASE_MARK, g_phraseMark );
-			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
-
-			HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
-			::SendMessage( spin, UDM_SETPOS, 0, 
-                           (LPARAM) MAKELONG ((short) g_candPerRow , 0));
-
-			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
-			::SendMessage( spin, UDM_SETRANGE32, 7, 10 );
-			int cand_per_page = ( g_selAreaLen - 5 ) / ( 1 * 2 + 3 );
-			::SendMessage( spin, UDM_SETPOS, 0, 
-                           (LPARAM) MAKELONG ((short) cand_per_page , 0));
-
-			spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
-			::SendMessage( spin, UDM_SETRANGE32, 4, 64 );
-			::SendMessage( spin, UDM_SETPOS, 0, 
-                           (LPARAM) MAKELONG ((short) g_FontSize , 0));
-
-			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
-			const TCHAR** pselkeys = g_selKeyNames;
-			while( *pselkeys )
-				ComboBox_AddString( combo, *(pselkeys++) );
-			ComboBox_SetCurSel( combo, g_selKeyType );
-		}
-		return TRUE;
-	case WM_COMMAND:
-		switch( LOWORD(wp) )
-		{
-		case IDOK:
-			{
-				for( UINT id = IDC_KB1; id <= IDC_KB9; ++id )	{
-					if( IsDlgButtonChecked( hwnd, id) )	{
-						g_keyboardLayout = (id - IDC_KB1);
-						break;
-					}
-				}
-				HWND spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
-				g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
-				if( g_candPerRow < 1 )	g_candPerRow = 1;
-				if( g_candPerRow > 10 )	g_candPerRow = 10;
-
-				spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
-				int cand_per_page = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
-				if( cand_per_page < 7 )	g_candPerRow = 7;
-				if( cand_per_page > 10 )	g_candPerRow = 10;
-				g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
-
-				spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
-				int tFontSize = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
-				if( tFontSize < 4 )     tFontSize = 4;
-				if( tFontSize > 64 )	tFontSize = 64;
-				g_FontSize = tFontSize;
-
-				g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
-				g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
-				g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
-				g_enableShift = IsDlgButtonChecked( hwnd, IDC_ENABLE_SHIFT );
-				g_shiftCapital = IsDlgButtonChecked( hwnd, IDC_SHIFT_CAPITAL );
-				g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
-				g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
-				g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
-				g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
-				g_ColoredCompCursor = IsDlgButtonChecked( hwnd, IDC_BLOCK_CURSOR );
-                g_AdvanceAfterSelection = IsDlgButtonChecked( hwnd, IDC_ADV_AFTER_SEL);
-				g_cursorCandList = IsDlgButtonChecked( hwnd, IDC_CURSOR_CANDLIST );
-				g_enableCapsLock = IsDlgButtonChecked( hwnd, IDC_ENABLE_CAPSLOCK );
-				g_shiftFullShape = IsDlgButtonChecked( hwnd, IDC_SHIFT_FULLSHAPE );
-				g_phraseMark = IsDlgButtonChecked( hwnd, IDC_PHRASE_MARK );
-				g_escCleanAllBuf = IsDlgButtonChecked( hwnd, IDC_ESC_CLEAN_ALL_BUF );
-				if ( g_chewing!=NULL )
-                    g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
-
-				g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
-				if( g_selKeyType < 0 )
-					g_selKeyType = 0;
-
-                EndDialog(hwnd, IDOK);
-			}
-			break;
-		case IDCANCEL:
-			EndDialog(hwnd, IDCANCEL);
-			break;
-		}
-		return TRUE;
-		break;
-	}
-	return FALSE;
 }
 
 BOOL GenerateIMEMessage( HIMC hIMC, UINT msg, WPARAM wp, LPARAM lp )
@@ -339,13 +232,160 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 #endif
 	}
 
-/*
-	if(g_isWindowsNT && (DWORD(lpszOptions) & IME_SYSTEMINFO_WINLOGON ))
+	if(g_isWindowNT && (DWORD(lpszOptions) & IME_SYSINFO_WINLOGON ))
 	{
-		// Configuration should be disabled.
+		// Some functions should be disabled under WinLogon for security reason
+		g_isWinLogon = true;
 	}
-*/
 	return TRUE;
+}
+
+static BOOL TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+	case WM_INITDIALOG:
+		{
+			CheckRadioButton( hwnd, IDC_KB1, IDC_KB9, IDC_KB1 + g_keyboardLayout );
+
+			CheckDlgButton( hwnd, IDC_SPACESEL, g_spaceAsSelection );
+			CheckDlgButton( hwnd, IDC_ENABLE_SHIFT, g_enableShift );
+			CheckDlgButton( hwnd, IDC_SHIFT_CAPITAL, g_shiftCapital );
+			CheckDlgButton( hwnd, IDC_ADD_PHRASE_FORWARD, g_addPhraseForward );
+			CheckDlgButton( hwnd, IDC_ADV_AFTER_SEL, g_AdvanceAfterSelection );
+			CheckDlgButton( hwnd, IDC_CURSOR_CANDLIST, g_cursorCandList );
+			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
+			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
+			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
+
+			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
+			const TCHAR** pselkeys = g_selKeyNames;
+			while( *pselkeys )
+				ComboBox_AddString( combo, *(pselkeys++) );
+			ComboBox_SetCurSel( combo, g_selKeyType );
+		}
+		return TRUE;
+	case WM_NOTIFY:
+		if( LPNMHDR(lp)->code == PSN_APPLY )
+		{
+			for( UINT id = IDC_KB1; id <= IDC_KB9; ++id )	{
+				if( IsDlgButtonChecked( hwnd, id) )	{
+					g_keyboardLayout = (id - IDC_KB1);
+					break;
+				}
+			}
+
+			g_selKeyType = ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SELKEYS));
+			if( g_selKeyType < 0 )
+				g_selKeyType = 0;
+
+			g_spaceAsSelection = IsDlgButtonChecked( hwnd, IDC_SPACESEL );
+			g_enableShift = IsDlgButtonChecked( hwnd, IDC_ENABLE_SHIFT );
+			g_shiftCapital = IsDlgButtonChecked( hwnd, IDC_SHIFT_CAPITAL );
+			g_addPhraseForward = IsDlgButtonChecked( hwnd, IDC_ADD_PHRASE_FORWARD );
+			g_AdvanceAfterSelection = IsDlgButtonChecked( hwnd, IDC_ADV_AFTER_SEL);
+			g_cursorCandList = IsDlgButtonChecked( hwnd, IDC_CURSOR_CANDLIST );
+			g_enableCapsLock = IsDlgButtonChecked( hwnd, IDC_ENABLE_CAPSLOCK );
+			g_shiftFullShape = IsDlgButtonChecked( hwnd, IDC_SHIFT_FULLSHAPE );
+			g_escCleanAllBuf = IsDlgButtonChecked( hwnd, IDC_ESC_CLEAN_ALL_BUF );
+			if ( g_chewing!=NULL )
+				g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
+
+			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			return TRUE;
+		}
+			break;
+	}
+	return FALSE;
+}
+
+static BOOL UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+	case WM_INITDIALOG:
+		{
+			HWND spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
+			::SendMessage( spin, UDM_SETRANGE32, 4, 64 );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) g_FontSize , 0));
+
+			CheckDlgButton( hwnd, IDC_DEFAULT_ENG, g_defaultEnglish );
+			CheckDlgButton( hwnd, IDC_DEFAULT_FS, g_defaultFullSpace );
+			CheckDlgButton( hwnd, IDC_HIDE_STATUSWND, g_hideStatusWnd );
+			CheckDlgButton( hwnd, IDC_FIX_COMPWND, g_fixCompWnd );
+			CheckDlgButton( hwnd, IDC_PHRASE_MARK, g_phraseMark );
+			CheckDlgButton( hwnd, IDC_BLOCK_CURSOR, g_ColoredCompCursor );
+			CheckDlgButton( hwnd, IDC_COLOR_CANDIDATE, g_ColorCandWnd );
+
+			spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
+			::SendMessage( spin, UDM_SETRANGE32, 1, 10 );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) g_candPerRow , 0));
+
+			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
+			::SendMessage( spin, UDM_SETRANGE32, 7, 10 );
+			int cand_per_page = ( g_selAreaLen - 5 ) / ( 1 * 2 + 3 );
+			::SendMessage( spin, UDM_SETPOS, 0, 
+                           (LPARAM) MAKELONG ((short) cand_per_page , 0));
+		}
+		return TRUE;
+	case WM_NOTIFY:
+		if( LPNMHDR(lp)->code == PSN_APPLY )
+		{
+			HWND spin = GetDlgItem( hwnd, IDC_FONT_SIZE_SPIN );
+			int tFontSize = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+			if( tFontSize < 4 )     tFontSize = 4;
+			if( tFontSize > 64 )	tFontSize = 64;
+			g_FontSize = tFontSize;
+
+			g_phraseMark = IsDlgButtonChecked( hwnd, IDC_PHRASE_MARK );
+			g_defaultEnglish = IsDlgButtonChecked( hwnd, IDC_DEFAULT_ENG );
+			g_defaultFullSpace = IsDlgButtonChecked( hwnd, IDC_DEFAULT_FS );
+			g_hideStatusWnd = IsDlgButtonChecked( hwnd, IDC_HIDE_STATUSWND );
+			g_fixCompWnd = IsDlgButtonChecked( hwnd, IDC_FIX_COMPWND );
+			g_ColoredCompCursor = IsDlgButtonChecked( hwnd, IDC_BLOCK_CURSOR );
+			g_ColorCandWnd = IsDlgButtonChecked( hwnd, IDC_COLOR_CANDIDATE );
+
+			spin = GetDlgItem( hwnd, IDC_CAND_PER_ROW_SPIN );
+			g_candPerRow = (DWORD)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+			if( g_candPerRow < 1 )	g_candPerRow = 1;
+			if( g_candPerRow > 10 )	g_candPerRow = 10;
+
+			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
+			int cand_per_page = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+			if( cand_per_page < 7 )	g_candPerRow = 7;
+			if( cand_per_page > 10 )	g_candPerRow = 10;
+			g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
+
+
+			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
+}
+
+static BOOL UpdatePageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+	case WM_INITDIALOG:
+		{
+			CheckDlgButton( hwnd, IDC_CHECK_NEW_VERSION, g_checkNewVersion );
+		}
+		return TRUE;
+	case WM_NOTIFY:
+		if(  LPNMHDR(lp)->code == PSN_APPLY)
+		{
+			g_checkNewVersion = IsDlgButtonChecked( hwnd, IDC_CHECK_NEW_VERSION );
+			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
 }
 
 
@@ -360,19 +400,45 @@ static BOOL CALLBACK ReloadAllChewingInst(HWND hwnd, LPARAM lp)
 
 void ConfigureChewingIME(HWND parent)
 {
-//	TCHAR title[32];
-//	LoadString( g_dllInst, IDS_CONFIGTIELE, title, sizeof(title) );
-//	HWND dlg;
-//	if( dlg = FindWindow( NULL, title) )
-//		SetForegroundWindow( dlg );
-//	else
+	// This should be disabled in WinLogon for security reason.
+	if( g_isWinLogon )
+		return;
+
+	PROPSHEETPAGE pages[3] = {0};
+
+	pages[0].dwSize = pages[1].dwSize = 
+	pages[2].dwSize = sizeof(PROPSHEETPAGE);
+
+	pages[0].dwFlags = pages[1].dwFlags = 
+	pages[2].dwFlags = PSP_DEFAULT;
+
+	pages[0].hInstance = pages[1].hInstance = 
+	pages[2].hInstance = g_dllInst;
+
+	pages[0].pszTemplate = (LPCTSTR)IDD_TYPING;
+	pages[0].pfnDlgProc  = (DLGPROC)TypingPageProc;
+
+	pages[1].pszTemplate = (LPCTSTR)IDD_UI;
+	pages[1].pfnDlgProc  = (DLGPROC)UIPageProc;
+
+	pages[2].pszTemplate = (LPCTSTR)IDD_UPDATE;
+	pages[2].pfnDlgProc  = (DLGPROC)UpdatePageProc;
+
+	PROPSHEETHEADER psh = {0};
+	psh.dwFlags = PSH_NOAPPLYNOW | PSH_USEICONID | PSH_PROPSHEETPAGE ;
+	psh.dwSize = sizeof(PROPSHEETHEADER);
+	psh.hInstance = g_dllInst;
+	psh.hwndParent = parent;
+	psh.pszIcon = (LPCTSTR)IDI_ICON;
+	psh.nPages = sizeof(pages)/sizeof(PROPSHEETPAGE);
+	psh.ppsp = pages;
+	psh.pszCaption = (LPCTSTR)IDS_CONFIGTIELE;
+
+	if( PropertySheet( &psh ) )
 	{
-		if( IDOK == DialogBox( g_dllInst, LPCTSTR(IDD_CONFIG), parent, (DLGPROC)ConfigDlgProc ) )
-		{
-			SaveConfig();
-			// Force all Chewing instances to reload
-			EnumChildWindows( GetDesktopWindow(), ReloadAllChewingInst, NULL);
-		}
+		SaveConfig();
+		// Force all Chewing instances to reload
+		EnumChildWindows( GetDesktopWindow(), ReloadAllChewingInst, NULL);
 	}
 }
 
@@ -611,17 +677,20 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		cs->setZuin(wzuin);
 		
 		free(zuin);
-
 	}
 	else
 		cs->setZuin( L"" );
 
 	if( g_phraseMark ) {
-		char* intervalstr = g_chewing->GetIntervalStr();
-		if( intervalstr ) {
-			cs->setInvervalAry( intervalstr );
-			free( intervalstr );
+		int interval_len = 0;
+		unsigned char* interval = g_chewing->GetIntervalArray(interval_len);
+		cs->setInvervalArray( interval, interval_len );
+		if( interval ) {
+			free( interval );
 		}
+	}
+	else {
+		cs->setInvervalArray( NULL, 0 );
 	}
 
 	cs->beforeGenerateMsg();

@@ -100,8 +100,8 @@ class Chewing
   void SetSelAreaLen(int len);
   void SetEscCleanAllBuf( bool escCleanAllBuf );
 
-  char* IntervalStr();
-
+  int IntervalLen();
+  unsigned char* IntervalArray();
 };
 
 #endif /* _CHEWING_H */

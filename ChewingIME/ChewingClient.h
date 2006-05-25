@@ -79,10 +79,10 @@ public:
     unsigned int  EchoFromServer();
     bool CheckServer();
 
-	char* GetIntervalStr();
+	unsigned char* GetIntervalArray(int& len);
 
 protected:
-	char* GetStringFromSharedMem(int len);
+	unsigned char* GetDataFromSharedMem(int len);
 	HANDLE sharedMem;
 	LPARAM chewingID;
 	HWND serverWnd;

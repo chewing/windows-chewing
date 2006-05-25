@@ -25,8 +25,6 @@ protected:
 	wchar_t resultStr[256];	// unicode string
 	DWORD resultClause[257];
 
-	short IntervalAry[512];
-
 // private data;
 	wchar_t showMsg[50];
 
@@ -41,6 +39,7 @@ public:
 	void setCursorPos(int pos);
 	void setZuin(LPCWSTR zuin);
 	void beforeGenerateMsg(void);
-	void setInvervalAry( char* intervalStr );
-	short* getIntervalAry() {	return IntervalAry; }
+	void setInvervalArray( unsigned char* interval, int count );
+	DWORD* getIntervalArray() {	return compClause; }
+	DWORD getInternalLen() {	return cs.dwCompClauseLen / sizeof(DWORD);	}
 };

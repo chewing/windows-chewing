@@ -6,7 +6,6 @@
 #define IDC_STATUS_TB                   20
 #define IDI_ICON1                       101
 #define ID_CHI_ENG                      101
-#define IDD_CONFIG                      102
 #define ID_FULL_HALF                    102
 #define IDI_ICON2                       102
 #define ID_CONFIG                       103
@@ -20,6 +19,9 @@
 #define IDI_FULL                        122
 #define IDB_COOL                        122
 #define IDI_HALF                        123
+#define IDD_UI                          124
+#define IDD_TYPING                      125
+#define IDD_UPDATE                      126
 #define IDC_KB1                         1001
 #define IDC_KB2                         1002
 #define IDC_KB3                         1003
@@ -30,6 +32,7 @@
 #define IDC_KB8                         1008
 #define IDC_BUTTON1                     1009
 #define IDC_KB9                         1009
+#define IDC_SELKEY_COLOR                1009
 #define IDC_CAND_PER_ROW                1010
 #define IDC_CAND_PER_ROW_SPIN           1011
 #define IDC_CAND_PER_PAGE               1012
@@ -38,6 +41,7 @@
 #define IDC_SELKEYS                     1014
 #define IDC_SHIFT_CAPITAL               1015
 #define IDC_SPACESEL                    1016
+#define IDC_CAND_COLOR2                 1016
 #define IDC_FIX_COMPWND                 1017
 #define IDC_ADD_PHRASE_FORWARD          1018
 #define IDC_HIDE_STATUSWND              1019
@@ -55,6 +59,8 @@
 #define IDC_SHIFT_FULLSHAPE             1031
 #define IDC_CHECK1                      1032
 #define IDC_PHRASE_MARK                 1032
+#define IDC_UPDATE_NOTIFIER             1032
+#define IDC_CHECK_NEW_VERSION           1032
 #define IDC_CHECK2                      1033
 #define IDC_ESC_CLEAN_ALL_BUF           1033
 #define ID_ABOUT                        40001
@@ -73,9 +79,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
+#define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         40026
-#define _APS_NEXT_CONTROL_VALUE         1034
+#define _APS_NEXT_CONTROL_VALUE         1036
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

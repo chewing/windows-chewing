@@ -5,7 +5,6 @@
 #include "ChewingClient.h"
 #include <string.h>
 #include <tchar.h>
-#include ".\chewingclient.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -138,13 +137,13 @@ void ChewingClient::SelKey(char* selkey)
 char* ChewingClient::ZuinStr()
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdZuinStr, 0, chewingID);
-	return GetStringFromSharedMem(len);
+	return (char*)GetDataFromSharedMem(len);
 }
 
 char* ChewingClient::CommitStr()
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdCommitStr, 0, chewingID);
-	return GetStringFromSharedMem(len);
+	return (char*)GetDataFromSharedMem(len);
 }
 
 int   ChewingClient::CommitReady()
@@ -153,7 +152,7 @@ int   ChewingClient::CommitReady()
 char* ChewingClient::Buffer()
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdBuffer, 0, chewingID);
-	return GetStringFromSharedMem(len);
+	return (char*)GetDataFromSharedMem(len);
 }
 
 int   ChewingClient::BufferLen()
@@ -197,7 +196,7 @@ int ChewingClient::CurrentPage()
 char* ChewingClient::Selection(int i)
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdSelection, i, chewingID);
-	return GetStringFromSharedMem(len);
+	return (char*)GetDataFromSharedMem(len);
 }
 
 void ChewingClient::SetFullShape(bool full)
@@ -213,28 +212,29 @@ void ChewingClient::SetEscCleanAllBuf( bool escCleanAllBuf ) {
 	SendMessage( serverWnd, ChewingServer::cmdSetEscCleanAllBuf, escCleanAllBuf, chewingID );
 }
 
-char* ChewingClient::GetStringFromSharedMem(int len)
+unsigned char* ChewingClient::GetDataFromSharedMem(int len)
 {
-	char* str = NULL;
+	unsigned char* data = NULL;
 	if( len > 0 )
 	{
 	    sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
         if ( sharedMem==NULL )
         {
             sharedMem = INVALID_HANDLE_VALUE; 
-            return  "";
+            return  (unsigned char*)"";
         }
 
 		char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
 		if( buf )
 		{
-			str = strdup(buf);
+			data = new unsigned char [ len ];
+			memcpy( data, buf, len );
 			UnmapViewOfFile(buf);
 		}
     	CloseHandle(sharedMem);
         sharedMem = INVALID_HANDLE_VALUE;
 	}
-	return str;
+	return data;
 }
 
 void ChewingClient::ConnectServer(void)
@@ -271,7 +271,7 @@ int ChewingClient::ShowMsgLen(void)
 char* ChewingClient::ShowMsg(void)
 {
 	int len = (int)SendMessage( serverWnd, ChewingServer::cmdShowMsg, 0, chewingID);
-	return GetStringFromSharedMem(len);
+	return (char*)GetDataFromSharedMem(len);
 }
 
 void ChewingClient::SetAddPhraseForward(bool add_forward)
@@ -297,7 +297,7 @@ bool ChewingClient::CheckServer()
 void ChewingClient::SetSelAreaLen(int len)
 {	SendMessage( serverWnd, ChewingServer::cmdSetSelAreaLen, len, chewingID);	}
 
-char* ChewingClient::GetIntervalStr() {
-	int len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalStr, 0, chewingID );
-	return GetStringFromSharedMem( len );
+unsigned char* ChewingClient::GetIntervalArray(int& len) {
+	len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalArray, 0, chewingID );
+	return GetDataFromSharedMem( len );
 }

@@ -84,11 +84,11 @@ public:
 		cmdSetEscCleanAllBuf,
         cmdAdvanceAfterSelection,
 
-		// char* (void)
+		// char* (void) or unsigned char* (void)
 		cmdZuinStr,
 		cmdCommitStr,
 		cmdBuffer,
-		cmdIntervalStr,
+		cmdIntervalArray,
 		cmdShowMsg,
 
 		// char* (int)

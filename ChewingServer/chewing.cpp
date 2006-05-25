@@ -291,14 +291,21 @@ void Chewing::SetSelAreaLen(int len)
 	cd->config.selectAreaLen = len;
 }
 
-/* caller must free return value */
-
-char* Chewing::IntervalStr() {
-	char* intervalStr = (char*)calloc( (co->nDispInterval+1) * 2, sizeof( char ) );
-	for( int i = 0; i < co->nDispInterval; i++ ) {
-		intervalStr[i*2] = (char)'0' + co->dispInterval[i].from;
-		intervalStr[i*2+1] = (char)'0' + co->dispInterval[i].to;
-	}
-	intervalStr[i * 2] = '\0';
-	return intervalStr;
+// Return the length of interval array
+int Chewing::IntervalLen()
+{
+	return co->nDispInterval * 2;
 }
+
+//	Return interval array
+//	caller must free return value
+unsigned char* Chewing::IntervalArray()
+{
+	unsigned char* interval = (unsigned char*)calloc( IntervalLen(), sizeof( unsigned char ) );
+	for( int i = 0; i < co->nDispInterval; ++i ) {
+		interval[i * 2] = (unsigned char)co->dispInterval[i].from;
+		interval[i * 2 + 1] = (unsigned char)co->dispInterval[i].to;
+	}
+	return interval;
+}
+
