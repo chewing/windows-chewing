@@ -43,6 +43,7 @@
 #define IDC_SPACESEL                    1016
 #define IDC_CAND_COLOR2                 1016
 #define IDC_FIX_COMPWND                 1017
+#define IDC_SPACESEL2                   1017
 #define IDC_ADD_PHRASE_FORWARD          1018
 #define IDC_HIDE_STATUSWND              1019
 #define IDC_DEFAULT_FS                  1020
@@ -59,7 +60,6 @@
 #define IDC_SHIFT_FULLSHAPE             1031
 #define IDC_CHECK1                      1032
 #define IDC_PHRASE_MARK                 1032
-#define IDC_UPDATE_NOTIFIER             1032
 #define IDC_CHECK_NEW_VERSION           1032
 #define IDC_CHECK2                      1033
 #define IDC_ESC_CLEAN_ALL_BUF           1033

@@ -25,7 +25,7 @@ class Chewing
   int           kbLayout;
 
  public:
-  static bool LoadDataFiles( const char* dataDir, const char* hashDir );
+  static bool LoadDataFiles( const char* dataDir, const char* userDir );
   Chewing( bool spaceAsSelection = true, int keyLayout=KB_DEFAULT);
 
   void SetKeyboardLayout(int kb);

@@ -1,6 +1,9 @@
 #include "ChewingIME.h"
 #include ".\compstr.h"
 
+// Disable warning on converting pointer to DWORD in VC++
+#pragma warning( disable: 4244 )
+
 CompStr::CompStr(void)
 {
 	cs.dwSize = sizeof(CompStr);

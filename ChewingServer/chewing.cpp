@@ -243,12 +243,14 @@ void Chewing::SetAdvanceAfterSelection(int bDo)
     cd->bAutoShiftCur = bDo;
 }
 
-bool Chewing::LoadDataFiles(const char *dataDir, const char *hashDir)
+bool Chewing::LoadDataFiles(const char *dataDir, const char *userDir)
 {
     ReadTree( (char*)dataDir );
     InitChar( (char*)dataDir );
     InitDict( (char*)dataDir );
-    ReadHash( (char*)hashDir );
+    ReadHash( (char*)userDir );
+	if( ! InitSymbolTable((char*)userDir) )
+		InitSymbolTable((char*)dataDir);
 	return true; 
 }
 
