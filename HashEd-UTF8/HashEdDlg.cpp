@@ -382,6 +382,12 @@ void CHashEdDlg::GetHashLocation()
 	{
 		SHGetPathFromIDList(pidl, m_strHashFolder);
 		_tcscat(m_strHashFolder, _T("\\Chewing") );
+
+		IMalloc* pmalloc;
+		if( S_OK == SHGetMalloc(&pmalloc) ) {
+			pmalloc->Free( pidl );
+			pmalloc->Release();
+		}
     }
 }
 

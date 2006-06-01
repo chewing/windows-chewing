@@ -133,6 +133,23 @@ LRESULT CALLBACK ChewingServer::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM l
 	return g_ChewingServerInstance->wndProc( msg, wp, lp );
 }
 
+void GetUserDataPath( LPTSTR filename )
+{
+    LPITEMIDLIST pidl;
+	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
+	{
+		SHGetPathFromIDList(pidl, filename);
+		_tcscat( filename, _T("\\Chewing") );
+		CreateDirectory( filename, NULL );
+
+		IMalloc* pmalloc;
+		if( NOERROR == SHGetMalloc(&pmalloc) ) {
+			pmalloc->Free( pidl );
+			pmalloc->Release();
+		}
+    }
+}
+
 LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 {
 	if( msg >= cmdFirst && msg <= cmdLast )
@@ -184,6 +201,11 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 		    UnmapViewOfFile( obuf );
             return  lop;
         }
+	case cmdReloadSymbolTable:
+		char userdir[MAX_PATH];
+		GetUserDataPath( userdir );
+		Chewing::ReloadSymbolTable(userdir);
+		break;
 	case WM_TIMER:
 		checkNewVersion();
 		break;
@@ -231,17 +253,7 @@ bool ChewingServer::startServer()
 	GetSystemDirectory( datadir, MAX_PATH );
 	_tcscat( datadir, _T("\\IME\\Chewing") );
 
-	LPITEMIDLIST pidl;
-	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
-	{
-		SHGetPathFromIDList(pidl, hashdir);
-		_tcscat( hashdir, _T("\\Chewing") );
-		CreateDirectory( hashdir, NULL );
-		phashdir = hashdir;
-		IMalloc* palloc = NULL;
-		if( NOERROR == SHGetMalloc(&palloc) )
-			palloc->Free(pidl);
-	}
+	GetUserDataPath( hashdir );
 	Chewing::LoadDataFiles( datadir, hashdir );
 
 	if( evt != INVALID_HANDLE_VALUE )

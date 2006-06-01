@@ -22,6 +22,7 @@
 #define IDD_UI                          124
 #define IDD_TYPING                      125
 #define IDD_UPDATE                      126
+#define IDD_SYMBOLS                     127
 #define IDC_KB1                         1001
 #define IDC_KB2                         1002
 #define IDC_KB3                         1003
@@ -43,7 +44,6 @@
 #define IDC_SPACESEL                    1016
 #define IDC_CAND_COLOR2                 1016
 #define IDC_FIX_COMPWND                 1017
-#define IDC_SPACESEL2                   1017
 #define IDC_ADD_PHRASE_FORWARD          1018
 #define IDC_HIDE_STATUSWND              1019
 #define IDC_DEFAULT_FS                  1020
@@ -63,6 +63,7 @@
 #define IDC_CHECK_NEW_VERSION           1032
 #define IDC_CHECK2                      1033
 #define IDC_ESC_CLEAN_ALL_BUF           1033
+#define IDC_EDIT                        1037
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
 #define ID_DICT_BUGREPORT               40005
@@ -74,14 +75,20 @@
 #define ID_PROVERBDICT                  40018
 #define ID_HASHED                       40022
 #define ID_CHECK_NEW_VER                40025
+#define ID_EDIT_UNDO                    40032
+#define ID_EDIT_CUT                     40033
+#define ID_EDIT_COPY                    40034
+#define ID_EDIT_PASTE                   40035
+#define ID_EDIT_DELETE                  40036
+#define ID_EDIT_SELALL                  40037
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        135
-#define _APS_NEXT_COMMAND_VALUE         40026
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_COMMAND_VALUE         40038
+#define _APS_NEXT_CONTROL_VALUE         1038
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

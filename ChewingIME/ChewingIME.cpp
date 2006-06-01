@@ -13,6 +13,8 @@
 #include <shlobj.h>
 #include <windowsx.h>
 
+#include <Richedit.h>
+
 #include "CompWnd.h"
 #include "CandWnd.h"
 #include "StatusWnd.h"
@@ -240,7 +242,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 	return TRUE;
 }
 
-static BOOL TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch( msg )
 	{
@@ -299,7 +301,7 @@ static BOOL TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
-static BOOL UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+static BOOL CALLBACK UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch( msg )
 	{
@@ -367,7 +369,211 @@ static BOOL UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
-static BOOL UpdatePageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+// convinent functions for Rich Edit control
+wstring RichEdit20_GetText( HWND edit )
+{
+	WCHAR *buf;
+	GETTEXTLENGTHEX gtl = { GTL_USECRLF|GTL_CLOSE, 1200 };
+	DWORD len = SendMessage( edit, EM_GETTEXTLENGTHEX, (WPARAM)&gtl, (LPARAM)0 );
+	if( len <= 0 )
+		return wstring( L"" );
+	GETTEXTEX gt = {0};
+	gt.codepage = 1200;	// unicode
+	gt.flags = GT_USECRLF;
+	gt.cb = len * sizeof(WCHAR);
+	buf = new WCHAR[len + 1];
+	len = SendMessage( edit, EM_GETTEXTEX, (WPARAM)&gt, (LPARAM)buf );
+	wstring ret( buf );
+	delete []buf;
+	return ret;
+}
+
+void RichEdit20_SetText( HWND edit, wstring text )
+{
+	SETTEXTEX st = { ST_DEFAULT, 1200 };
+	SendMessage( edit, EM_SETTEXTEX, (WPARAM)&st, (LPARAM)text.c_str() );
+}
+
+// Encoding conversion tools
+
+string utf16_to_utf8( const WCHAR* wtext )
+{
+	char *text = NULL;
+	int len = WideCharToMultiByte( CP_UTF8, 0, wtext,
+									-1,
+									NULL, 0, NULL, NULL );
+	text = new char[len + 1];
+	len = WideCharToMultiByte( CP_UTF8, 0, wtext,
+								-1,
+								text, len, NULL, NULL );
+	text[len] = 0;
+	string ret(text);
+	delete []text;
+	return ret;
+}
+
+wstring utf8_to_utf16( const char* text )
+{
+	WCHAR *wtext = NULL;
+	int wlen = MultiByteToWideChar( CP_UTF8, 0, text, 
+									-1,
+									NULL, 0 );
+	wtext = new WCHAR[wlen + 1];
+	wlen = MultiByteToWideChar( CP_UTF8, 0, text, 
+								-1,
+								wtext, wlen );
+	wtext[wlen] = 0;
+	wstring ret(wtext);
+	delete []wtext;
+	return ret;
+}
+
+void GetUserDataPath( LPTSTR filename, LPCTSTR name )
+{
+    LPITEMIDLIST pidl;
+	if( NOERROR == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
+	{
+		SHGetPathFromIDList(pidl, filename);
+		_tcscat( filename, _T("\\Chewing\\") );
+		CreateDirectory( filename, NULL );
+		_tcscat( filename, name );
+
+		IMalloc* pmalloc;
+		if( S_OK == SHGetMalloc(&pmalloc) ) {
+			pmalloc->Free( pidl );
+			pmalloc->Release();
+		}
+    }
+}
+
+void GetDataPath( LPTSTR filename, LPCTSTR name )
+{
+	GetSystemDirectory( filename, MAX_PATH );
+	_tcscat( filename, _T("\\IME\\Chewing\\") );
+	_tcscat( filename, name );	
+}
+
+// Subclass RichEdit control to provide a popup menu
+static WNDPROC oldEditProc = NULL;
+static LRESULT CALLBACK RichEditProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if( msg == WM_CONTEXTMENU ) {
+		HMENU menu = LoadMenu( g_dllInst, LPCTSTR(IDR_POPUP) );
+		HMENU popup = GetSubMenu( menu, 1 );
+		TrackPopupMenu( popup, TPM_LEFTALIGN, GET_X_LPARAM(lp), GET_Y_LPARAM(lp), 0, hwnd, NULL );
+		DestroyMenu( menu );
+		return 0;
+	}
+	else if( msg == WM_COMMAND ) {
+		LRESULT r;
+		switch( LOWORD(wp) )
+		{
+		case ID_EDIT_UNDO:
+			SendMessage( hwnd, WM_UNDO, 0, 0 );
+			return 0;
+		case ID_EDIT_CUT:
+			SendMessage( hwnd, WM_CUT, 0, 0 );
+			GetLastError();
+			return 0;
+		case ID_EDIT_COPY:
+			SendMessage( hwnd, WM_COPY, 0, 0 );
+			return 0;
+		case ID_EDIT_PASTE:
+			SendMessage( hwnd, WM_PASTE, 0, NULL );
+			return 0;
+		case ID_EDIT_DELETE:
+			SendMessage( hwnd, WM_CLEAR, 0, 0 );
+			return 0;
+		case ID_EDIT_SELALL: {
+			CHARRANGE cr = {0, -1};
+			SendMessage( hwnd, EM_EXSETSEL, 0, (LPARAM)&cr );
+			return 0;
+			}
+		}
+	}
+	else if( msg == WM_SETFOCUS ) {
+		// This is a dirty hack to prevent the auto scrolling of richedit.
+		static CHARRANGE cr = {0, 0};
+		SendMessage( hwnd, EM_EXSETSEL, 0, (LPARAM)&cr );
+	}
+	else if( msg == WM_DESTROY ) {
+		SetWindowLongPtr( hwnd, GWL_WNDPROC, LONG_PTR(oldEditProc) );
+	}
+	return CallWindowProc( oldEditProc, hwnd, msg, wp, lp );
+}
+
+// Symbol table editing
+static BOOL CALLBACK SymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+	case WM_INITDIALOG:
+		{
+			HWND edit = GetDlgItem(hwnd, IDC_EDIT);
+			// Init RichEdit 2.0
+			SendMessage( edit, EM_SETTEXTMODE, TM_PLAINTEXT|TM_MULTICODEPAGE, 0 );
+
+			//Subclass
+			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWL_WNDPROC, LONG_PTR(RichEditProc) );
+
+			CHARFORMAT2 cf;
+			cf.cbSize = sizeof(cf);
+			cf.dwMask = CFM_SIZE;
+			SendMessage( edit, EM_GETCHARFORMAT, SCF_DEFAULT, LPARAM(&cf) );
+			cf.yHeight = 12 * 20;	// 1 point = 20 twips
+			cf.bPitchAndFamily = FIXED_PITCH;
+			SendMessage( edit, EM_SETCHARFORMAT, SCF_ALL, LPARAM(&cf) );
+
+			// Load symbol table file
+			HANDLE file;
+			TCHAR filename[MAX_PATH];
+			GetUserDataPath( filename, "symbols.dat" );
+			file = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
+			if( file == INVALID_HANDLE_VALUE ) {
+				GetDataPath( filename, "symbols.dat" );
+				file = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
+			}
+			if( file != INVALID_HANDLE_VALUE ) {
+				DWORD size = GetFileSize( file, NULL );
+				char* buf = new char[size+1];
+				DWORD rsize;
+				ReadFile( file, buf, size, &rsize, NULL );
+				CloseHandle(file);
+				buf[size] = 0;
+				RichEdit20_SetText( edit, utf8_to_utf16(buf) );
+				delete []buf;
+			}
+		}
+		return TRUE;
+	case WM_NOTIFY:
+		if(  LPNMHDR(lp)->code == PSN_APPLY)
+		{
+			HWND edit = GetDlgItem(hwnd, IDC_EDIT);
+
+			TCHAR filename[MAX_PATH];
+			GetUserDataPath( filename, "symbols.dat" );
+			HANDLE file = CreateFile( filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL );
+			if( file != INVALID_HANDLE_VALUE ) {
+				wstring wtext = RichEdit20_GetText( edit );
+				string text = utf16_to_utf8( wtext.c_str() );
+				DWORD wsize;
+				WriteFile( file, text.c_str(), text.length(), &wsize, NULL );
+				CloseHandle(file);
+			}
+			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+
+			// Reload symbol table
+			if( g_chewing ) {
+				g_chewing->ReloadSymbolTable();
+			}
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
+}
+
+static BOOL CALLBACK UpdatePageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch( msg )
 	{
@@ -404,16 +610,16 @@ void ConfigureChewingIME(HWND parent)
 	if( g_isWinLogon )
 		return;
 
-	PROPSHEETPAGE pages[3] = {0};
+	PROPSHEETPAGE pages[4] = {0};
 
 	pages[0].dwSize = pages[1].dwSize = 
-	pages[2].dwSize = sizeof(PROPSHEETPAGE);
+	pages[2].dwSize = pages[3].dwSize = sizeof(PROPSHEETPAGE);
 
 	pages[0].dwFlags = pages[1].dwFlags = 
-	pages[2].dwFlags = PSP_DEFAULT;
+	pages[2].dwFlags = pages[3].dwFlags = PSP_DEFAULT;
 
 	pages[0].hInstance = pages[1].hInstance = 
-	pages[2].hInstance = g_dllInst;
+	pages[2].hInstance = pages[3].hInstance = g_dllInst;
 
 	pages[0].pszTemplate = (LPCTSTR)IDD_TYPING;
 	pages[0].pfnDlgProc  = (DLGPROC)TypingPageProc;
@@ -421,8 +627,11 @@ void ConfigureChewingIME(HWND parent)
 	pages[1].pszTemplate = (LPCTSTR)IDD_UI;
 	pages[1].pfnDlgProc  = (DLGPROC)UIPageProc;
 
-	pages[2].pszTemplate = (LPCTSTR)IDD_UPDATE;
-	pages[2].pfnDlgProc  = (DLGPROC)UpdatePageProc;
+	pages[2].pszTemplate = (LPCTSTR)IDD_SYMBOLS;
+	pages[2].pfnDlgProc  = (DLGPROC)SymbolsPageProc;
+
+	pages[3].pszTemplate = (LPCTSTR)IDD_UPDATE;
+	pages[3].pfnDlgProc  = (DLGPROC)UpdatePageProc;
 
 	PROPSHEETHEADER psh = {0};
 	psh.dwFlags = PSH_NOAPPLYNOW | PSH_USEICONID | PSH_PROPSHEETPAGE ;
@@ -434,12 +643,19 @@ void ConfigureChewingIME(HWND parent)
 	psh.ppsp = pages;
 	psh.pszCaption = (LPCTSTR)IDS_CONFIGTIELE;
 
+	HMODULE riched20;
+	InitCommonControls();
+	// Init RichEdit 2.0
+	riched20 = LoadLibraryA("RICHED20.DLL");
+
 	if( PropertySheet( &psh ) )
 	{
 		SaveConfig();
 		// Force all Chewing instances to reload
 		EnumChildWindows( GetDesktopWindow(), ReloadAllChewingInst, NULL);
 	}
+
+	FreeLibrary( riched20 );
 }
 
 
@@ -549,7 +765,7 @@ BOOL ProcessCandidateList( HIMC hIMC, HIMCC hCandInfo )
 			{
 				char* cand = g_chewing->Selection( i );
 				if( cand )	{
-					wchar_t wcand[10];
+					wchar_t wcand[16];
 					MultiByteToWideChar( CP_UTF8, 0, cand, -1, wcand, sizeof(wcand)/sizeof(wchar_t) );
 					candList->setCand( i , wcand );
 					free(cand);

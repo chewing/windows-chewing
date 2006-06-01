@@ -5,6 +5,7 @@
 #include "ChewingClient.h"
 #include <string.h>
 #include <tchar.h>
+#include ".\chewingclient.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -227,7 +228,7 @@ unsigned char* ChewingClient::GetDataFromSharedMem(int len)
 		char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
 		if( buf )
 		{
-			data = new unsigned char [ len ];
+			data = (unsigned char*)calloc( len, sizeof(unsigned char) );
 			memcpy( data, buf, len );
 			UnmapViewOfFile(buf);
 		}
@@ -301,3 +302,9 @@ unsigned char* ChewingClient::GetIntervalArray(int& len) {
 	len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalArray, 0, chewingID );
 	return GetDataFromSharedMem( len );
 }
+
+void ChewingClient::ReloadSymbolTable(void)
+{
+	SendMessage( serverWnd, ChewingServer::cmdReloadSymbolTable, 0, 0);
+}
+

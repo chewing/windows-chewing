@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,1,0
- PRODUCTVERSION 0,3,1,0
+ FILEVERSION 0,3,2,0
+ PRODUCTVERSION 0,3,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 3, 1, 0"
+            VALUE "FileVersion", "0, 3, 2, 0"
             VALUE "InternalName", "ChewingIME"
             VALUE "LegalCopyright", "Copyright (C) 2005"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 3, 1, 0"
+            VALUE "ProductVersion", "0, 3, 2, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -216,6 +216,18 @@ BEGIN
                     IDC_STATIC,7,7,224,54
 END
 
+IDD_SYMBOLS DIALOGEX 0, 0, 237, 159
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "標點符號輸入"
+FONT 9, "新細明體", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_EDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER | WS_BORDER | 
+                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,4,3,229,118
+    LTEXT           "新酷音輸入法提供符號表，裡面的符號可以自訂。\n以上是符號表的設定檔，語法相當簡單：\n每一行的內容都是： 「分類名稱」=「此分類下的所有符號」\n您也可以一行只放一個符號，則該符號會被放在最上層選單。",
+                    IDC_STATIC,8,125,222,33
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -242,6 +254,12 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 226
         BOTTOMMARGIN, 156
+    END
+
+    IDD_SYMBOLS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 236
+        BOTTOMMARGIN, 158
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -281,6 +299,17 @@ BEGIN
         MENUITEM "新酷音使用說明 (&H)",         ID_CHEWING_HELP
         MENUITEM "編輯使用者詞庫 (&E)",         ID_HASHED
         MENUITEM "設定新酷音輸入法(&C)",        ID_CONFIG
+    END
+    POPUP "EDIT"
+    BEGIN
+        MENUITEM "復原 (&U)",                   ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "剪下 (&T)",                   ID_EDIT_CUT
+        MENUITEM "複製 (&C)",                   ID_EDIT_COPY
+        MENUITEM "貼上 (&P)",                   ID_EDIT_PASTE
+        MENUITEM "刪除 (&D)",                   ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "全選 (&A)",                   ID_EDIT_SELALL
     END
 END
 

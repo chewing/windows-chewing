@@ -102,7 +102,8 @@ public:
 		cmdAddClient,
 		cmdRemoveClient,
         cmdEcho,
-        cmdLastPhoneSeq
+        cmdLastPhoneSeq,
+		cmdReloadSymbolTable
 	};
 
 public:

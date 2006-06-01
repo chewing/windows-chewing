@@ -1,7 +1,6 @@
 #include <string.h>
-#include <winsock.h>
 #include "Chewingpp.h"
-#include ".\chewingpp.h"
+#include "..\include\chewingpp.h"
 
 Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
     cf = (ChewingConf *) calloc( 1, sizeof( ChewingConf ) );
@@ -311,3 +310,9 @@ unsigned char* Chewing::IntervalArray()
 	return interval;
 }
 
+
+void Chewing::ReloadSymbolTable( const char* userDir )
+{
+	TerminateSymbolTable();
+	InitSymbolTable(userDir);
+}
