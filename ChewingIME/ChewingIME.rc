@@ -160,7 +160,7 @@ BEGIN
     PUSHBUTTON      "候選字色彩",IDC_CAND_COLOR2,100,62,61,14,NOT WS_VISIBLE
 END
 
-IDD_TYPING DIALOGEX 0, 0, 232, 141
+IDD_TYPING DIALOGEX 0, 0, 232, 157
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "打字行為"
 FONT 9, "新細明體", 0, 0, 0x0
@@ -177,28 +177,30 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,62,103,10
     CONTROL         "使用 Shift 輸入全形符號",IDC_SHIFT_FULLSHAPE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,76,99,10
-    CONTROL         "方向鍵選字",IDC_CURSOR_CANDLIST,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,90,59,12
+    CONTROL         "使用方向鍵移動游標選字",IDC_CURSOR_CANDLIST,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,90,104,10
     CONTROL         "打字時按空白鍵叫出選字視窗",IDC_SPACESEL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,106,120,10
-    LTEXT           "選字鍵",IDC_STATIC,9,125,26,9
-    COMBOBOX        IDC_SELKEYS,42,122,102,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    CONTROL         "選字完畢自動跳到下一個字",IDC_ADV_AFTER_SEL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,120,112,10
+    LTEXT           "選字鍵",IDC_STATIC,9,136,26,9
+    COMBOBOX        IDC_SELKEYS,42,133,102,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    GROUPBOX        "鍵盤對應",IDC_STATIC,147,2,79,135
+    GROUPBOX        "鍵盤對應",IDC_STATIC,147,3,79,142
     CONTROL         "預設",IDC_KB1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
-                    155,12,35,12
-    CONTROL         "許氏鍵盤",IDC_KB2,"Button",BS_AUTORADIOBUTTON,155,26,54,
+                    155,16,35,12
+    CONTROL         "許氏鍵盤",IDC_KB2,"Button",BS_AUTORADIOBUTTON,155,30,54,
                     12
-    CONTROL         "IBM",IDC_KB3,"Button",BS_AUTORADIOBUTTON,155,40,35,12
-    CONTROL         "精業",IDC_KB4,"Button",BS_AUTORADIOBUTTON,155,54,35,12
-    CONTROL         "倚天",IDC_KB5,"Button",BS_AUTORADIOBUTTON,155,68,35,12
-    CONTROL         "倚天 26 鍵",IDC_KB6,"Button",BS_AUTORADIOBUTTON,155,82,
+    CONTROL         "IBM",IDC_KB3,"Button",BS_AUTORADIOBUTTON,155,44,35,12
+    CONTROL         "精業",IDC_KB4,"Button",BS_AUTORADIOBUTTON,155,58,35,12
+    CONTROL         "倚天",IDC_KB5,"Button",BS_AUTORADIOBUTTON,155,72,35,12
+    CONTROL         "倚天 26 鍵",IDC_KB6,"Button",BS_AUTORADIOBUTTON,155,86,
                     67,12
-    CONTROL         "DVORAK",IDC_KB7,"Button",BS_AUTORADIOBUTTON,155,96,65,
+    CONTROL         "DVORAK",IDC_KB7,"Button",BS_AUTORADIOBUTTON,155,100,65,
                     12
     CONTROL         "DVORAK 許氏",IDC_KB8,"Button",BS_AUTORADIOBUTTON,155,
-                    110,66,10
-    CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,155,122,
+                    114,66,10
+    CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,155,126,
                     65,12
 END
 
@@ -238,8 +240,8 @@ BEGIN
 
     IDD_TYPING, DIALOG
     BEGIN
-        RIGHTMARGIN, 230
-        BOTTOMMARGIN, 140
+        RIGHTMARGIN, 226
+        BOTTOMMARGIN, 156
     END
 END
 #endif    // APSTUDIO_INVOKED
