@@ -88,6 +88,7 @@ LRESULT CompWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 {
 	wstring compStr = getDisplayedCompStr(imc);
+	wstring zuin = getDisplayedZuin( imc );
 	int cursorPos = getDisplayedCursorPos(imc);
 
 	HFONT oldFont;
@@ -134,9 +135,11 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			--len;
 			for( DWORD i = 0; i < len ; ++i )
 			{
-				if( interval[i+1] - interval[i] > 1 ) {
-					MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
-					LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
+				if( interval[i+1] <= compStr.length() - zuin.length() ) {
+					if( interval[i+1] - interval[i] > 1 ) {
+						MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
+						LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
+					}
 				}
 			}
 		}
@@ -226,6 +229,14 @@ wstring CompWnd::getDisplayedCompStr(IMCLock& imc)
 	CompStr* compStr = imc.getCompStr();
 	if( compStr )
 		return wstring( compStr->getCompStr() );
+	return wstring( L"" );
+}
+
+wstring CompWnd::getDisplayedZuin( IMCLock& imc )
+{
+	CompStr* compStr = imc.getCompStr();
+	if( compStr )
+		return wstring( compStr->getZuin() );
 	return wstring( L"" );
 }
 

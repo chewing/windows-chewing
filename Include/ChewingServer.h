@@ -80,7 +80,7 @@ public:
 		cmdSetAddPhraseForward,
 		cmdSetKeyboardLayout,
 		cmdSetHsuSelectionKeyType,
-		cmdSetSelAreaLen,
+		cmdSetCandPerPage,
 		cmdSetEscCleanAllBuf,
         cmdAdvanceAfterSelection,
 

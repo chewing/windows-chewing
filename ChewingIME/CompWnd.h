@@ -23,6 +23,7 @@ public:
 	HFONT getFont(){	return font;	}
 	void getSize(int* w, int* h);
 	wstring getDisplayedCompStr(IMCLock& imc);
+	wstring getDisplayedZuin( IMCLock& imc );
 	int getDisplayedCursorPos(IMCLock& imc);
 	wstring getDisplayedCompStr(){	return getDisplayedCompStr(IMCLock(getIMC()));	}
 	int getDisplayedCursorPos(){	return getDisplayedCursorPos(IMCLock(getIMC()));	}

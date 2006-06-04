@@ -2,7 +2,7 @@
 //
 
 #include "ChewingIME.h"
-
+#include <assert.h>
 #include "CompStr.h"
 #include "CandList.h"
 #include "IMCLock.h"
@@ -48,7 +48,8 @@ DWORD g_ColoredCompCursor = false;
 DWORD g_AdvanceAfterSelection = true;
 DWORD g_FontSize = DEF_FONT_SIZE;
 DWORD g_selKeyType = 0;
-DWORD g_selAreaLen = 50;
+//DWORD g_selAreaLen = 50;
+DWORD g_candPerPage = 9;
 DWORD g_cursorCandList = 1;
 DWORD g_enableCapsLock = 0;
 DWORD g_shiftFullShape = 1;
@@ -120,7 +121,8 @@ void LoadConfig()
 		RegQueryValueEx( hk, "AdvanceAfterSelection", 0, &type, (LPBYTE)&g_AdvanceAfterSelection, &size );
         RegQueryValueEx( hk, "DefFontSize", 0, &type, (LPBYTE)&g_FontSize, &size );
 		RegQueryValueEx( hk, "SelKeyType", 0, &type, (LPBYTE)&g_selKeyType, &size );
-		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
+		//RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_selAreaLen, &size );
+		RegQueryValueEx( hk, "SelAreaLen", 0, &type, (LPBYTE)&g_candPerPage, &size );
 		RegQueryValueEx( hk, "CursorCandList", 0, &type, (LPBYTE)&g_cursorCandList, &size );
 		RegQueryValueEx( hk, "EnableCapsLock", 0, &type, (LPBYTE)&g_enableCapsLock, &size );
 		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
@@ -134,8 +136,8 @@ void LoadConfig()
 	if( g_selKeyType > ((sizeof(g_selKeys)/sizeof(char*))-1) )
 		g_selKeyType = 0;
 
-	if( g_selAreaLen > 55 || g_selAreaLen < 40 )
-		g_selAreaLen = 40;
+	//if( g_selAreaLen > 55 || g_selAreaLen < 40 )
+	//	g_selAreaLen = 40;
 
 	if( g_chewing )
 		g_chewing->SelKey( (char*)g_selKeys[g_selKeyType] );
@@ -167,7 +169,8 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("AdvanceAfterSelection"), 0, REG_DWORD, (LPBYTE)&g_AdvanceAfterSelection, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("DefFontSize"), 0, REG_DWORD, (LPBYTE)&g_FontSize, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("SelKeyType"), 0, REG_DWORD, (LPBYTE)&g_selKeyType, sizeof(DWORD) );
-		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
+		//RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_selAreaLen, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("SelAreaLen"), 0, REG_DWORD, (LPBYTE)&g_candPerPage, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("CursorCandList"), 0, REG_DWORD, (LPBYTE)&g_cursorCandList, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EnableCapsLock"), 0, REG_DWORD, (LPBYTE)&g_enableCapsLock, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
@@ -327,9 +330,8 @@ static BOOL CALLBACK UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
 			::SendMessage( spin, UDM_SETRANGE32, 7, 10 );
-			int cand_per_page = ( g_selAreaLen - 5 ) / ( 1 * 2 + 3 );
 			::SendMessage( spin, UDM_SETPOS, 0, 
-                           (LPARAM) MAKELONG ((short) cand_per_page , 0));
+                           (LPARAM) MAKELONG ((short) g_candPerPage , 0));
 		}
 		return TRUE;
 	case WM_NOTIFY:
@@ -355,10 +357,10 @@ static BOOL CALLBACK UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			if( g_candPerRow > 10 )	g_candPerRow = 10;
 
 			spin = GetDlgItem( hwnd, IDC_CAND_PER_PAGE_SPIN );
-			int cand_per_page = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
-			if( cand_per_page < 7 )	g_candPerRow = 7;
-			if( cand_per_page > 10 )	g_candPerRow = 10;
-			g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
+			g_candPerPage = (int)::SendMessage( spin, UDM_GETPOS, 0, 0 );
+			//if( cand_per_page < 7 )	g_candPerRow = 7;
+			//if( cand_per_page > 10 )	g_candPerRow = 10;
+			//g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
 
 
 			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
@@ -835,10 +837,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		return FALSE;
 
 	INPUTCONTEXT* ic = (INPUTCONTEXT*)ImmLockIMC(hIMC);
-	if( ProcessCandidateList( hIMC, ic->hCandInfo ) )	{
-		ImmUnlockIMC( hIMC );
-		return TRUE;
-	}
+	ProcessCandidateList( hIMC, ic->hCandInfo );
+	ImmUnlockIMC( hIMC );
 
 	CompStr* cs = (CompStr*)ImmLockIMCC(ic->hCompStr);
 	bool composition_started = !!*cs->getCompStr();
@@ -1231,7 +1231,7 @@ static int _InvertCase(int key)
 }
 
 bool _FilterKey( int key ) {
-	string table = "`~=+[{]}|\\'\"";
+	string table = "~=+[{]}|\\'\"";
 	return table.find( key ) != -1;
 }
 
@@ -1271,7 +1271,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		}
 		// When type english, zuin str should be clean.
 		if( IsKeyDown( keystate[VK_SHIFT] ) || !g_chewing->ChineseMode() || !isChinese )
-			if( g_chewing->ZuinStr() )
+			if( strlen( g_chewing->ZuinStr() ) )
 				g_chewing->Esc();
 
 		CompStr* cs = imc.getCompStr();
@@ -1304,7 +1304,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 	g_chewing->SetEscCleanAllBuf( !!g_escCleanAllBuf );
 	g_chewing->SetKeyboardLayout( (int)g_keyboardLayout );
 	g_chewing->SetAddPhraseForward( !!g_addPhraseForward );
-	g_chewing->SetSelAreaLen( (int)g_selAreaLen );
+	g_chewing->SetCandPerPage( (int)g_candPerPage );
 
 
 	CandList* candList = imc.getCandList();

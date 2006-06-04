@@ -103,7 +103,7 @@ public:
 	char* ShowMsg(void);
 	void SetAddPhraseForward(bool add_forward);
 	int GetAddPhraseForward(void);
-	void SetSelAreaLen(int len);
+	void SetCandPerPage(int len);
 	void ReloadSymbolTable(void);
 };
 

@@ -99,7 +99,7 @@ class Chewing
   char* ShowMsg(void);
   void SetAddPhraseForward(bool add_forward);
   bool GetAddPhraseForward(void);
-  void SetSelAreaLen(int len);
+  void SetCandPerPage(int len);
   void SetEscCleanAllBuf( bool escCleanAllBuf );
 
   int IntervalLen();

@@ -32,6 +32,7 @@ public:
 	wchar_t* getCompStr()	{	return &compStr[0];	}
 	wchar_t* getResultStr()	{	return &resultStr[0];	}
 	wchar_t* getShowMsg()	{	return &showMsg[0];	}
+	wchar_t* getZuin()		{	return &readStr[0];	}
 	DWORD getCursorPos()	{	return cs.dwCursorPos;	}
 	void setCompStr(LPCWSTR comp_str);
 	void setResultStr(LPCWSTR result_str);

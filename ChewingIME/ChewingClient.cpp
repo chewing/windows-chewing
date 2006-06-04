@@ -295,8 +295,8 @@ bool ChewingClient::CheckServer()
     return  false;
 }
 
-void ChewingClient::SetSelAreaLen(int len)
-{	SendMessage( serverWnd, ChewingServer::cmdSetSelAreaLen, len, chewingID);	}
+void ChewingClient::SetCandPerPage(int len)
+{	SendMessage( serverWnd, ChewingServer::cmdSetCandPerPage, len, chewingID);	}
 
 unsigned char* ChewingClient::GetIntervalArray(int& len) {
 	len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalArray, 0, chewingID );

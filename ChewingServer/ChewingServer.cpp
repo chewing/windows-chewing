@@ -63,7 +63,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::SetAddPhraseForward ,
 	(ChewingMemberFuncCI) &Chewing::SetKeyboardLayout ,
 	(ChewingMemberFuncCI) &Chewing::SetHsuSelectionKeyType ,
-	(ChewingMemberFuncCI) &Chewing::SetSelAreaLen ,
+	(ChewingMemberFuncCI) &Chewing::SetCandPerPage ,
 	(ChewingMemberFuncCI) &Chewing::SetEscCleanAllBuf ,
     (ChewingMemberFuncCI) &Chewing::SetAdvanceAfterSelection,
 

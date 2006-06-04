@@ -14,7 +14,7 @@ Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
 
     InitChewing(cd,cf);
 
-    config.selectAreaLen = 40;
+    config.candPerPage = 9;
     config.maxChiSymbolLen = 20;
 	config.bSpaceAsSelection = spaceAsSelection;
 
@@ -280,6 +280,8 @@ char* Chewing::ShowMsg(void)
 void Chewing::SetAddPhraseForward(bool add_forward)
 {
 	cd->config.bAddPhraseForward = add_forward;
+	config.bAddPhraseForward = add_forward;
+	SetConfig( cd, &config );
 }
 
 bool Chewing::GetAddPhraseForward(void)
@@ -287,9 +289,10 @@ bool Chewing::GetAddPhraseForward(void)
 	return !!cd->config.bAddPhraseForward;
 }
 
-void Chewing::SetSelAreaLen(int len)
+void Chewing::SetCandPerPage(int len)
 {
-	cd->config.selectAreaLen = len;
+	config.candPerPage = len;
+	SetConfig( cd, &config );
 }
 
 // Return the length of interval array
