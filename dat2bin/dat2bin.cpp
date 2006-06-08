@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #ifdef WIN32
+	#include <windows.h>
 	#include <direct.h>
 #endif
 
@@ -19,9 +20,17 @@ extern "C"
 	int sort_word();
 }
 
+#ifdef WIN32
+int WINAPI WinMain( HINSTANCE hinst, HINSTANCE hprev, LPSTR cmdline, int show )
+#else
 int main(int argc, char* argv[])
+#endif
 {
+#ifdef WIN32
+	char* prefix = cmdline && *cmdline ? cmdline : "";
+#else
 	char* prefix = argc < 2 ? "" : argv[1];
+#endif
 	char filename[ 100 ];
 	char workdir[ 100 ];
 	int i;
