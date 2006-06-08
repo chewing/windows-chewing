@@ -82,6 +82,7 @@ LRESULT CALLBACK notifier_proc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 					 STM_SETICON, (WPARAM)LoadIcon(NULL, IDI_INFORMATION), 0 );
 		if( ! has_new_version )	{
 			SetDlgItemText( hwnd, IDC_TITLE, "您的新酷音已經是最新版本" );
+			EnableWindow( GetDlgItem( hwnd, IDOK), FALSE );
 		}
 		return TRUE;
 	case WM_DESTROY:
