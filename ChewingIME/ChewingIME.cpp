@@ -837,8 +837,11 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		return FALSE;
 
 	INPUTCONTEXT* ic = (INPUTCONTEXT*)ImmLockIMC(hIMC);
-	ProcessCandidateList( hIMC, ic->hCandInfo );
-	ImmUnlockIMC( hIMC );
+	//ProcessCandidateList( hIMC, ic->hCandInfo );
+	if( ProcessCandidateList( hIMC, ic->hCandInfo ) ) {
+		ImmUnlockIMC(hIMC);
+		return TRUE;
+	}
 
 	CompStr* cs = (CompStr*)ImmLockIMCC(ic->hCompStr);
 	bool composition_started = !!*cs->getCompStr();
