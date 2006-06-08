@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.1"
+!define PRODUCT_VERSION "0.3.2"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -29,37 +29,13 @@ Function uninstOld
   FindWindow $0 "ChewingServer"
   SendMessage $0 ${WM_DESTROY} 0 0
 
-  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
-
-  Delete "$SYSDIR\IME\Chewing\License.txt"
-  Delete "$SYSDIR\IME\Chewing\statuswnd.bmp"
-  Delete "$SYSDIR\IME\Chewing\ch_index.dat"
-  Delete "$SYSDIR\IME\Chewing\dict.dat"
-  Delete "$SYSDIR\IME\Chewing\fonetree.dat"
-  Delete "$SYSDIR\IME\Chewing\ph_index.dat"
-  Delete "$SYSDIR\IME\Chewing\us_freq.dat"
-  Delete "$SYSDIR\IME\Chewing\Chewing.chm"
-  Delete "$SYSDIR\IME\Chewing\Installer.exe"
-  Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
-  Delete "$SYSDIR\IME\Chewing\HashEd.exe"
-  Delete "$SYSDIR\IME\Chewing\Update.exe"
-
-  Delete "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk"
-  Delete "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk"
-  Delete "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk"
-
-  RMDir "$SYSDIR\IME\Chewing"
-  RMDir "$SMPROGRAMS\新酷音輸入法"
-
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-
-  Delete "$INSTDIR\uninst.exe"
+  ExecWait '"$INSTDIR\uninst.exe" /S'
 FunctionEnd
 
 Function .onInit
   ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
   StrCmp $0 "" ContinueInst 0 
-    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到舊版 $0 已安裝，是否要自動移除舊版後重裝新版？" IDOK +2
+    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到舊版 $0 已安裝，是否要移除舊版後重裝新版？" IDOK +2
       Abort
       Call uninstOld
   ContinueInst:
@@ -157,11 +133,11 @@ SectionEnd
 
 Function un.onUninstSuccess
 ;  HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) 已成功地從你的電腦移除。"
+  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) 已成功地從你的電腦移除。" /SD IDOK
 FunctionEnd
 
 Function un.onInit
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "你確定要完全移除 $(^Name) ，其及所有的元件？" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "你確定要完全移除 $(^Name) ，其及所有的元件？" /SD IDYES IDYES +2
   Abort
 FunctionEnd
 
