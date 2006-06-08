@@ -6,6 +6,7 @@
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define TMPDIR "$TEMP\ChewingInst"
 
 SetCompressor lzma
 
@@ -29,7 +30,7 @@ Function uninstOld
   FindWindow $0 "ChewingServer"
   SendMessage $0 ${WM_DESTROY} 0 0
 
-  ExecWait '"$INSTDIR\uninst.exe" /S'
+  ExecWait '"$SYSDIR\IME\Chewing\uninst.exe" /S'
 FunctionEnd
 
 Function .onInit
@@ -80,13 +81,34 @@ Function OnInstError
 FunctionEnd
 
 Section "MainSection" SEC01
-  SetOutPath "$SYSDIR\IME\Chewing"
   SetOverwrite on
-  File "..\libchewing-data\utf-8\us_freq.dat"
-  File /oname=ph_index.dat "..\libchewing-data\utf-8\ph_index.dat"
-  File /oname=fonetree.dat "..\libchewing-data\utf-8\fonetree.dat"
-  File "..\libchewing-data\utf-8\dict.dat"
-  File /oname=ch_index.dat "..\libchewing-data\utf-8\ch_index.dat"
+
+;  File "..\libchewing-data\utf-8\us_freq.dat"
+;  File /oname=ph_index.dat "..\libchewing-data\utf-8\ph_index.dat"
+;  File /oname=fonetree.dat "..\libchewing-data\utf-8\fonetree.dat"
+;  File "..\libchewing-data\utf-8\dict.dat"
+;  File /oname=ch_index.dat "..\libchewing-data\utf-8\ch_index.dat"
+
+; Generate data files on installation to reduce the size of installer.
+  CreateDirectory "${TMPDIR}"
+  SetOutPath "${TMPDIR}"
+  File "big52utf8\Release\big52utf8.exe"
+
+  File "..\libchewing-data\utf-8\tsi.src"
+  File "..\libchewing-data\utf-8\phone.cin"
+  File "dat2bin\Release\dat2bin.exe"
+  ExecWait '"${TMPDIR}\dat2bin.exe"'
+
+  CreateDirectory "$SYSDIR\IME\Chewing"
+  SetOutPath "$SYSDIR\IME\Chewing"
+
+  Rename "${TMPDIR}\dat2bin.exe" 'dat2bin.exe'
+  Rename "${TMPDIR}\ch_index.dat_bin" 'ch_index.dat'
+  Rename "${TMPDIR}\dict.dat" 'dict.dat'
+  Rename "${TMPDIR}\us_freq.dat" 'us_freq.dat'
+  Rename "${TMPDIR}\ph_index.dat_bin" 'ph_index.dat'
+  Rename "${TMPDIR}\fonetree.dat_bin" 'fonetree.dat'
+
   File "Data\statuswnd.bmp"
   File "License.txt"
   File "UserGuide\chewing.chm"
@@ -94,7 +116,8 @@ Section "MainSection" SEC01
   File "ChewingServer\Release\ChewingServer.exe"
   File "HashEd-UTF8\Release\HashEd.exe"
   File "OnlineUpdate\Release\Update.exe"
-  File /oname=$TEMP\big52utf8.exe "big52utf8\Release\big52utf8.exe"
+  File "..\libchewing\branches\win32-utf8\data\symbols.dat"
+
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
 
@@ -112,19 +135,20 @@ Section -AdditionalIcons
 SectionEnd
 
 Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe"
+  WriteUninstaller "$SYSDIR\IME\Chewing\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
-  Exec '"$SYSDIR\IME\Chewing\Installer.exe"'
+  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe"'
 
-  IfFileExists $APPDATA\Chewing\uhash.dat +3 0
   SetShellVarContext current
-  ExecWait '"$TEMP\big52utf8.exe" $APPDATA\Chewing\hash.dat'
+  IfFileExists $APPDATA\Chewing\uhash.dat +2 0
+  ExecWait '"${TMPDIR}\big52utf8.exe" $APPDATA\Chewing\hash.dat'
 
-  ;Delete $TEMP\big52utf8.exe
+  Delete "${TMPDIR}\*"
+  RMDir "${TMPDIR}"
 
   IfErrors 0 +2
     Call OnInstError
@@ -149,30 +173,33 @@ Section Uninstall
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
   Delete "$SYSDIR\Chewing.ime"
-  Delete "$SYSDIR\IME\Chewing\License.txt"
-  Delete "$SYSDIR\IME\Chewing\statuswnd.bmp"
-  Delete "$SYSDIR\IME\Chewing\ch_index.dat"
-  Delete "$SYSDIR\IME\Chewing\dict.dat"
-  Delete "$SYSDIR\IME\Chewing\fonetree.dat"
-  Delete "$SYSDIR\IME\Chewing\ph_index.dat"
-  Delete "$SYSDIR\IME\Chewing\us_freq.dat"
-  Delete "$SYSDIR\IME\Chewing\Chewing.chm"
-  Delete "$SYSDIR\IME\Chewing\Installer.exe"
-  Delete "$SYSDIR\IME\Chewing\ChewingServer.exe"
-  Delete "$SYSDIR\IME\Chewing\HashEd.exe"
-  Delete "$SYSDIR\IME\Chewing\Update.exe"
+  Delete "$INSTDIR\License.txt"
+  Delete "$INSTDIR\statuswnd.bmp"
+  Delete "$INSTDIR\ch_index.dat"
+  Delete "$INSTDIR\dict.dat"
+  Delete "$INSTDIR\fonetree.dat"
+  Delete "$INSTDIR\ph_index.dat"
+  Delete "$INSTDIR\us_freq.dat"
+  Delete "$INSTDIR\Chewing.chm"
+  Delete "$INSTDIR\Installer.exe"
+  Delete "$INSTDIR\ChewingServer.exe"
+  Delete "$INSTDIR\HashEd.exe"
+  Delete "$INSTDIR\Update.exe"
+
+  Delete "$INSTDIR\symbols.dat"
+  Delete "$INSTDIR\dat2bin.exe"
 
   Delete "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\線上檢查是否有新版本.lnk"
 
-  RMDir "$SYSDIR\IME\Chewing"
   RMDir "$SMPROGRAMS\新酷音輸入法"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
 
   Delete "$INSTDIR\uninst.exe"
+  RMDir "$SYSDIR\IME\Chewing"
 
   SetAutoClose true
 SectionEnd
