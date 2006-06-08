@@ -1274,7 +1274,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 		}
 		// When type english, zuin str should be clean.
 		if( IsKeyDown( keystate[VK_SHIFT] ) || !g_chewing->ChineseMode() || !isChinese )
-			if( strlen( g_chewing->ZuinStr() ) )
+			if( g_chewing->ZuinStr() && g_chewing->ZuinStr()[0] != '\0' )
 				g_chewing->Esc();
 
 		CompStr* cs = imc.getCompStr();
