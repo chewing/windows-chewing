@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.2.1"
+!define PRODUCT_VERSION "0.3.2.2"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -47,6 +47,10 @@ Function uninstOld
   RMDir "$TEMP\~nsu.tmp"
   ClearErrors
 
+  ; Ensure the old IME is deleted.
+  Delete "$SYSDIR\Chewing.ime"
+  IfErrors 0 +2
+    Call OnInstError
 FunctionEnd
 
 Function .onInit
@@ -113,6 +117,10 @@ Section "MainSection" SEC01
   File "..\libchewing-data\utf-8\phone.cin"
   File "dat2bin\Release\dat2bin.exe"
   ExecWait '"${TMPDIR}\dat2bin.exe"'
+
+  ; Rename will fail if destination file exists. So, delete them all.
+  Delete "$SYSDIR\IME\Chewing\*"
+  ; If the files to delete don't exist, error flag if *NOT* set.
 
   SetOutPath "$SYSDIR\IME\Chewing"
   Rename "${TMPDIR}\dat2bin.exe" 'dat2bin.exe'
@@ -184,7 +192,6 @@ Section Uninstall
 
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
-  Delete "$SYSDIR\Chewing.ime"
   Delete "$INSTDIR\License.txt"
   Delete "$INSTDIR\statuswnd.bmp"
   Delete "$INSTDIR\ch_index.dat"
@@ -212,6 +219,10 @@ Section Uninstall
 
   Delete "$INSTDIR\uninst.exe"
   RMDir "$SYSDIR\IME\Chewing"
+
+  ; Put Delete Chewing.ime in last line, or other files will not be deleted
+  ; because the uninstaller aborts when there is any error.
+  Delete /REBOOTOK "$SYSDIR\Chewing.ime"
 
   SetAutoClose true
 SectionEnd
