@@ -40,9 +40,9 @@ public:
     void list_phrase();
 
     /**
-     *  Find phrase by HASH_ITEM.item_index
+     *  Find phrase by array index of CHashContext.pool
      */
-    HASH_ITEM* get_phrase_by_id(int index);
+    HASH_ITEM* get_phrase_by_id(int array_index);
 
     /**
      *  Remove phrase by HASH_ITEM.item_index

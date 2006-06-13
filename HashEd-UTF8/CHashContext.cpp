@@ -229,19 +229,19 @@ bool CHashContext::save_hash(const char *destFile)
     return  true;
 }
 
-HASH_ITEM* CHashContext::get_phrase_by_id(int index)
+HASH_ITEM* CHashContext::get_phrase_by_id(int array_index)
 {
-    if ( index >= (int) pool.size() || index<0 )
+    if ( array_index >= (int) pool.size() || array_index<0 )
     {
         return  NULL;
     }
 
-    return  pool[index];
+    return  pool[array_index];
 }
 
 void CHashContext::del_phrase_by_id(int index)
 {
-    if ( index >= (int) pool.size() || index<0 )
+    if ( index<0 )
     {
         return;
     }

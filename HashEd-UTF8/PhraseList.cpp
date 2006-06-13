@@ -319,6 +319,9 @@ void CPhraseList::deleteItem( int idx )
 	if( idx < (int) data.size() && idx >=0 ) {
 		data.erase( data.begin() + idx );
 	}
+	if ( data.size()>0 && sel>=(int)data.size() ) {
+		sel = data.size()-1;
+	}
 	if( !lock )
 		recalcLayout();
 }

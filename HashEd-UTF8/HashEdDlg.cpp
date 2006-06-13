@@ -429,6 +429,9 @@ void CHashEdDlg::OnDelPhrase()
 	if ( selItem==-1 )  return;
 
 	pItem = (HASH_ITEM*)phraseList->getItemData( selItem );
+	if (pItem == NULL) {
+		return;
+	}
 	phraseList->deleteItem(selItem);
 
     m_context.del_phrase_by_id(pItem->item_index);
