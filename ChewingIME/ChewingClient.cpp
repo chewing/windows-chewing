@@ -113,6 +113,12 @@ void ChewingClient::SetAdvanceAfterSelection(bool bDo)
                 (bDo==true)?1 :0, chewingID);
 }
 
+void ChewingClient::SetEasySymbolInput(bool bSet)
+{
+    SendMessage( serverWnd, ChewingServer::cmdEasySymbolInput, 
+                (bSet==true)?1 :0, chewingID);
+}
+
 void ChewingClient::SelKey(char* selkey)
 {
     sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);

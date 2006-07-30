@@ -242,6 +242,11 @@ void Chewing::SetAdvanceAfterSelection(int bDo)
     cd->bAutoShiftCur = bDo;
 }
 
+void Chewing::SetEasySymbolInput(int bSet)
+{
+    cd->bEasySymbolInput = bSet;
+}
+
 bool Chewing::LoadDataFiles(const char *dataDir, const char *userDir)
 {
     ReadTree( (char*)dataDir );
@@ -250,6 +255,8 @@ bool Chewing::LoadDataFiles(const char *dataDir, const char *userDir)
     ReadHash( (char*)userDir );
 	if( ! InitSymbolTable((char*)userDir) )
 		InitSymbolTable((char*)dataDir);
+	if( ! InitEasySymbolInput((char*)userDir) )
+		InitEasySymbolInput((char*)dataDir);
 	return true; 
 }
 
@@ -318,4 +325,7 @@ void Chewing::ReloadSymbolTable( const char* userDir )
 {
 	TerminateSymbolTable();
 	InitSymbolTable(userDir);
+
+	TerminateEasySymbolTable();
+	InitEasySymbolInput(userDir);
 }

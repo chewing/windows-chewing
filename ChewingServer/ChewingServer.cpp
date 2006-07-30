@@ -66,6 +66,7 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::SetCandPerPage ,
 	(ChewingMemberFuncCI) &Chewing::SetEscCleanAllBuf ,
     (ChewingMemberFuncCI) &Chewing::SetAdvanceAfterSelection,
+    (ChewingMemberFuncCI) &Chewing::SetEasySymbolInput,
 
 	  // char* (void)
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ZuinStr ,

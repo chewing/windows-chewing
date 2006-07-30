@@ -48,6 +48,7 @@ public:
 	char SelKey(int i);
 	void SelKey(char* selkey);
     void SetAdvanceAfterSelection(bool bDo);
+    void SetEasySymbolInput(bool bSet);
 
 	char* ZuinStr();
 	char* CommitStr();

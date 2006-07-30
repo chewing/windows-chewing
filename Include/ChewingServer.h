@@ -83,6 +83,7 @@ public:
 		cmdSetCandPerPage,
 		cmdSetEscCleanAllBuf,
         cmdAdvanceAfterSelection,
+        cmdEasySymbolInput,
 
 		// char* (void) or unsigned char* (void)
 		cmdZuinStr,

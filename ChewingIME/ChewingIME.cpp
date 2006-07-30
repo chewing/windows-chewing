@@ -1335,8 +1335,14 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			candList->setSelection( 0 );
 			return ! g_chewing->KeystrokeIgnore();
 		}
-		else
-			return FALSE;
+		else /*if( IsKeyDown(keystate[VK_SHIFT]) )*/
+		{
+			g_chewing->SetEasySymbolInput(1);
+			g_chewing->Key(key);
+			g_chewing->SetEasySymbolInput(0);
+			return TRUE;
+		}
+		return FALSE;
 	}
 	if( g_chewing->Candidate() > 0 )
 	{	
