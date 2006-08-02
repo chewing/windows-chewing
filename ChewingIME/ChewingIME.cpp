@@ -55,6 +55,7 @@ DWORD g_enableCapsLock = 0;
 DWORD g_shiftFullShape = 1;
 DWORD g_phraseMark = 1;
 DWORD g_escCleanAllBuf = 0;
+DWORD g_shiftSymbol = 0;
 
 DWORD g_checkNewVersion = true;	// Enable update notifier
 
@@ -128,6 +129,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "ShiftFullShape", 0, &type, (LPBYTE)&g_shiftFullShape, &size );
 		RegQueryValueEx( hk, "PhraseMark", 0, &type, (LPBYTE)&g_phraseMark, &size );
 		RegQueryValueEx( hk, "EscCleanAllBuf", 0, &type, (LPBYTE)&g_escCleanAllBuf, &size );
+		RegQueryValueEx( hk, "ShiftSymbol", 0, &type, (LPBYTE)&g_shiftSymbol, &size );
 
 		RegQueryValueEx( hk, "CheckNewVersion", 0, &type, (LPBYTE)&g_checkNewVersion, &size );
 		RegCloseKey( hk );
@@ -176,6 +178,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("ShiftFullShape"), 0, REG_DWORD, (LPBYTE)&g_shiftFullShape, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("PhraseMark"), 0, REG_DWORD, (LPBYTE)&g_phraseMark, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EscCleanAllBuf"), 0, REG_DWORD, (LPBYTE)&g_escCleanAllBuf, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("ShiftSymbol"), 0, REG_DWORD, (LPBYTE)&g_shiftSymbol, sizeof(DWORD) );
 
 		RegSetValueEx( hk, _T("CheckNewVersion"), 0, REG_DWORD, (LPBYTE)&g_checkNewVersion, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -262,6 +265,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_ENABLE_CAPSLOCK, g_enableCapsLock );
 			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
 			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
+			CheckDlgButton( hwnd, IDC_SHIFT_SYMBOL, g_shiftSymbol );
 
 			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
 			const TCHAR** pselkeys = g_selKeyNames;
@@ -295,6 +299,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			g_escCleanAllBuf = IsDlgButtonChecked( hwnd, IDC_ESC_CLEAN_ALL_BUF );
 			if ( g_chewing!=NULL )
 				g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
+			g_shiftSymbol = IsDlgButtonChecked( hwnd, IDC_SHIFT_SYMBOL );
 
 			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
@@ -1335,7 +1340,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			candList->setSelection( 0 );
 			return ! g_chewing->KeystrokeIgnore();
 		}
-		else /*if( IsKeyDown(keystate[VK_SHIFT]) )*/
+		else 
 		{
 			g_chewing->SetEasySymbolInput(1);
 			g_chewing->Key(key);
@@ -1468,6 +1473,13 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 					}
 				
 				if( !g_enableCapsLock ) {
+					if( g_shiftSymbol && IsKeyDown(keystate[VK_SHIFT]) ) {
+						g_chewing->SetEasySymbolInput(1);
+						g_chewing->Key(key);
+						g_chewing->SetEasySymbolInput(0);
+						return TRUE;
+					}
+
 					if( IsKeyToggled( keystate[VK_CAPITAL] ) ) {
 						if( IsKeyDown(keystate[VK_SHIFT]) ) {
 							if( key >= 'a' && key <= 'z' ) {
