@@ -56,6 +56,7 @@ DWORD g_shiftFullShape = 1;
 DWORD g_phraseMark = 1;
 DWORD g_escCleanAllBuf = 0;
 DWORD g_shiftSymbol = 0;
+DWORD g_ctrlSymbol = 0;
 
 DWORD g_checkNewVersion = true;	// Enable update notifier
 
@@ -130,6 +131,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "PhraseMark", 0, &type, (LPBYTE)&g_phraseMark, &size );
 		RegQueryValueEx( hk, "EscCleanAllBuf", 0, &type, (LPBYTE)&g_escCleanAllBuf, &size );
 		RegQueryValueEx( hk, "ShiftSymbol", 0, &type, (LPBYTE)&g_shiftSymbol, &size );
+		RegQueryValueEx( hk, "CtrlSymbol", 0, &type, (LPBYTE)&g_ctrlSymbol, &size );
 
 		RegQueryValueEx( hk, "CheckNewVersion", 0, &type, (LPBYTE)&g_checkNewVersion, &size );
 		RegCloseKey( hk );
@@ -179,6 +181,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("PhraseMark"), 0, REG_DWORD, (LPBYTE)&g_phraseMark, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EscCleanAllBuf"), 0, REG_DWORD, (LPBYTE)&g_escCleanAllBuf, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ShiftSymbol"), 0, REG_DWORD, (LPBYTE)&g_shiftSymbol, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("CtrlSymbol"), 0, REG_DWORD, (LPBYTE)&g_ctrlSymbol, sizeof(DWORD) );
 
 		RegSetValueEx( hk, _T("CheckNewVersion"), 0, REG_DWORD, (LPBYTE)&g_checkNewVersion, sizeof(DWORD) );
 		RegCloseKey( hk );
@@ -266,6 +269,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_SHIFT_FULLSHAPE, g_shiftFullShape );
 			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
 			CheckDlgButton( hwnd, IDC_SHIFT_SYMBOL, g_shiftSymbol );
+			CheckDlgButton( hwnd, IDC_CTRL_SYMBOL, g_ctrlSymbol );
 
 			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
 			const TCHAR** pselkeys = g_selKeyNames;
@@ -300,6 +304,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			if ( g_chewing!=NULL )
 				g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 			g_shiftSymbol = IsDlgButtonChecked( hwnd, IDC_SHIFT_SYMBOL );
+			g_ctrlSymbol = IsDlgButtonChecked( hwnd, IDC_CTRL_SYMBOL );
 
 			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
@@ -1340,7 +1345,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			candList->setSelection( 0 );
 			return ! g_chewing->KeystrokeIgnore();
 		}
-		else 
+		else if ( g_ctrlSymbol )
 		{
 			g_chewing->SetEasySymbolInput(1);
 			g_chewing->Key(key);

@@ -113,7 +113,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,7,105,261,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 PCMan, seamxr, andyhorng 等人，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,25,115,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.3\n\n發行日期：2006.08.04\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.3.1\n\n發行日期：2006.08.04\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
                     IDC_STATIC,98,7,170,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP,7,7,80,87
     LTEXT           "題字：翁政銓",IDC_STATIC,21,97,49,8
@@ -160,7 +160,7 @@ BEGIN
     PUSHBUTTON      "候選字色彩",IDC_CAND_COLOR2,100,62,61,14,NOT WS_VISIBLE
 END
 
-IDD_TYPING DIALOGEX 0, 0, 232, 167
+IDD_TYPING DIALOGEX 0, 0, 232, 173
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "打字行為"
 FONT 9, "新細明體", 0, 0, 0x0
@@ -183,8 +183,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,106,120,10
     CONTROL         "選字完畢自動跳到下一個字",IDC_ADV_AFTER_SEL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,120,112,10
-    LTEXT           "選字鍵",IDC_STATIC,9,152,26,9
-    COMBOBOX        IDC_SELKEYS,42,149,102,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "選字鍵",IDC_STATIC,9,155,26,9
+    COMBOBOX        IDC_SELKEYS,42,152,102,76,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     GROUPBOX        "鍵盤對應",IDC_STATIC,147,3,79,142
     CONTROL         "預設",IDC_KB1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
@@ -202,8 +202,11 @@ BEGIN
                     114,66,10
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,155,126,
                     65,12
-    CONTROL         "使用 Shift 鍵輸入標點符號",IDC_SHIFT_SYMBOL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,134,107,10
+    CONTROL         "Shift ",IDC_SHIFT_SYMBOL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,9,134,33,10
+    CONTROL         "Ctrl",IDC_CTRL_SYMBOL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,47,134,28,10
+    LTEXT           "輸入標點符號",IDC_STATIC,81,135,56,10
 END
 
 IDD_UPDATE DIALOGEX 0, 0, 237, 113
@@ -304,7 +307,7 @@ BEGIN
     IDD_TYPING, DIALOG
     BEGIN
         RIGHTMARGIN, 226
-        BOTTOMMARGIN, 166
+        BOTTOMMARGIN, 172
     END
 
     IDD_SYMBOLS, DIALOG

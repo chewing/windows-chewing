@@ -75,6 +75,8 @@
 #define IDC_SHIFT_SYMBOL                1026
 #define IDC_COMP_FONT                   1027
 #define IDC_BUTTON19                    1027
+#define IDC_SHIFT_SYMBOL2               1027
+#define IDC_CTRL_SYMBOL                 1027
 #define IDC_FONT_SIZE_SPIN              1028
 #define IDC_BUTTON20                    1028
 #define IDC_CURSOR_CANDLIST             1029
