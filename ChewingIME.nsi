@@ -139,6 +139,8 @@ Section "MainSection" SEC01
   File "OnlineUpdate\Release\Update.exe"
   File "..\libchewing\branches\win32-utf8\data\symbols.dat"
   File "..\libchewing\branches\win32-utf8\data\swkb.dat"
+  
+  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /privilege'
 
   SetOutPath "$SYSDIR"
   File "ChewingIME\Release\Chewing.ime"
