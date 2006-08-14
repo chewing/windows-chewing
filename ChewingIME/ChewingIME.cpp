@@ -58,6 +58,7 @@ DWORD g_escCleanAllBuf = 0;
 DWORD g_shiftSymbol = 0;
 DWORD g_ctrlSymbol = 0;
 
+
 DWORD g_checkNewVersion = true;	// Enable update notifier
 
 static const char* g_selKeys[]={
@@ -1345,7 +1346,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 			candList->setSelection( 0 );
 			return ! g_chewing->KeystrokeIgnore();
 		}
-		else if ( g_ctrlSymbol )
+		else if ( g_ctrlSymbol /*&& toupper(key)>='A' && toupper(key)<='Z'*/ )
 		{
 			g_chewing->SetEasySymbolInput(1);
 			g_chewing->Key(key);
@@ -1478,7 +1479,8 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 					}
 				
 				if( !g_enableCapsLock ) {
-					if( g_shiftSymbol && IsKeyDown(keystate[VK_SHIFT]) ) {
+					if( g_shiftSymbol && IsKeyDown(keystate[VK_SHIFT]) /*&&
+						toupper(key)>='A' && toupper(key)<='Z'*/ ) {
 						g_chewing->SetEasySymbolInput(1);
 						g_chewing->Key(key);
 						g_chewing->SetEasySymbolInput(0);

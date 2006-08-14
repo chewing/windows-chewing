@@ -86,7 +86,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="0"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include, ..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;NDEBUG;_WINDOWS"
