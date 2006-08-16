@@ -586,6 +586,77 @@ static BOOL CALLBACK SymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
+// Symbol table editing
+static BOOL CALLBACK EzSymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch( msg )
+	{
+	case WM_INITDIALOG:
+		{
+			HWND edit = GetDlgItem(hwnd, IDC_EZEDIT);
+			// Init RichEdit 2.0
+			SendMessage( edit, EM_SETTEXTMODE, TM_PLAINTEXT|TM_MULTICODEPAGE, 0 );
+
+			//Subclass
+			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWL_WNDPROC, LONG_PTR(RichEditProc) );
+
+			CHARFORMAT2 cf;
+			cf.cbSize = sizeof(cf);
+			cf.dwMask = CFM_SIZE;
+			SendMessage( edit, EM_GETCHARFORMAT, SCF_DEFAULT, LPARAM(&cf) );
+			cf.yHeight = 12 * 20;	// 1 point = 20 twips
+			cf.bPitchAndFamily = FIXED_PITCH;
+			SendMessage( edit, EM_SETCHARFORMAT, SCF_ALL, LPARAM(&cf) );
+
+			// Load symbol table file
+			HANDLE file;
+			TCHAR filename[MAX_PATH];
+			GetUserDataPath( filename, "swkb.dat" );
+			file = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
+			if( file == INVALID_HANDLE_VALUE ) {
+				GetDataPath( filename, "swkb.dat" );
+				file = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
+			}
+			if( file != INVALID_HANDLE_VALUE ) {
+				DWORD size = GetFileSize( file, NULL );
+				char* buf = new char[size+1];
+				DWORD rsize;
+				ReadFile( file, buf, size, &rsize, NULL );
+				CloseHandle(file);
+				buf[size] = 0;
+				RichEdit20_SetText( edit, utf8_to_utf16(buf) );
+				delete []buf;
+			}
+		}
+		return TRUE;
+	case WM_NOTIFY:
+		if(  LPNMHDR(lp)->code == PSN_APPLY)
+		{
+			HWND edit = GetDlgItem(hwnd, IDC_EZEDIT);
+
+			TCHAR filename[MAX_PATH];
+			GetUserDataPath( filename, "swkb.dat" );
+			HANDLE file = CreateFile( filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL );
+			if( file != INVALID_HANDLE_VALUE ) {
+				wstring wtext = RichEdit20_GetText( edit );
+				string text = utf16_to_utf8( wtext.c_str() );
+				DWORD wsize;
+				WriteFile( file, text.c_str(), text.length(), &wsize, NULL );
+				CloseHandle(file);
+			}
+			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+
+			// Reload symbol table
+			if( g_chewing ) {
+				g_chewing->ReloadSymbolTable();
+			}
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
+}
+
 static BOOL CALLBACK UpdatePageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch( msg )
@@ -623,16 +694,13 @@ void ConfigureChewingIME(HWND parent)
 	if( g_isWinLogon )
 		return;
 
-	PROPSHEETPAGE pages[4] = {0};
+	PROPSHEETPAGE pages[5] = {0};
 
-	pages[0].dwSize = pages[1].dwSize = 
-	pages[2].dwSize = pages[3].dwSize = sizeof(PROPSHEETPAGE);
-
-	pages[0].dwFlags = pages[1].dwFlags = 
-	pages[2].dwFlags = pages[3].dwFlags = PSP_DEFAULT;
-
-	pages[0].hInstance = pages[1].hInstance = 
-	pages[2].hInstance = pages[3].hInstance = g_dllInst;
+	for ( int lop=0; lop<sizeof(pages)/sizeof(PROPSHEETPAGE); ++lop ) {
+		pages[lop].dwSize = sizeof(PROPSHEETPAGE);
+		pages[lop].dwFlags = PSP_DEFAULT;
+		pages[lop].hInstance = g_dllInst;
+	}
 
 	pages[0].pszTemplate = (LPCTSTR)IDD_TYPING;
 	pages[0].pfnDlgProc  = (DLGPROC)TypingPageProc;
@@ -643,8 +711,11 @@ void ConfigureChewingIME(HWND parent)
 	pages[2].pszTemplate = (LPCTSTR)IDD_SYMBOLS;
 	pages[2].pfnDlgProc  = (DLGPROC)SymbolsPageProc;
 
-	pages[3].pszTemplate = (LPCTSTR)IDD_UPDATE;
-	pages[3].pfnDlgProc  = (DLGPROC)UpdatePageProc;
+	pages[3].pszTemplate = (LPCTSTR)IDD_EZ_SYMBOLS;
+	pages[3].pfnDlgProc  = (DLGPROC)EzSymbolsPageProc;
+
+	pages[4].pszTemplate = (LPCTSTR)IDD_UPDATE;
+	pages[4].pfnDlgProc  = (DLGPROC)UpdatePageProc;
 
 	PROPSHEETHEADER psh = {0};
 	psh.dwFlags = PSH_NOAPPLYNOW | PSH_USEICONID | PSH_PROPSHEETPAGE ;

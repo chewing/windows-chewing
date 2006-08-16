@@ -24,6 +24,8 @@
 #define IDD_UPDATE                      126
 #define IDD_SYMBOLS                     127
 #define IDD_DIALOG1                     135
+#define IDD_KEYBOARD                    135
+#define IDD_EZ_SYMBOLS                  136
 #define IDC_KB1                         1001
 #define IDC_KB2                         1002
 #define IDC_KB3                         1003
@@ -92,6 +94,7 @@
 #define IDC_CHECK2                      1033
 #define IDC_ESC_CLEAN_ALL_BUF           1033
 #define IDC_EDIT                        1037
+#define IDC_EZEDIT                      1038
 #define IDC_BUTTON25                    1053
 #define IDC_BUTTON26                    1054
 #define IDC_BUTTON27                    1055
@@ -134,7 +137,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         40038
-#define _APS_NEXT_CONTROL_VALUE         1038
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

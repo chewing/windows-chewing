@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.3.1"
+!define PRODUCT_VERSION "0.3.3.2"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -137,8 +137,10 @@ Section "MainSection" SEC01
   File "ChewingServer\Release\ChewingServer.exe"
   File "HashEd-UTF8\Release\HashEd.exe"
   File "OnlineUpdate\Release\Update.exe"
+  SetOverwrite off
   File "..\libchewing\branches\win32-utf8\data\symbols.dat"
   File "..\libchewing\branches\win32-utf8\data\swkb.dat"
+  SetOverwrite on
   
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /privilege'
 

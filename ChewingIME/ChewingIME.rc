@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Taiwan) resources
+// 中文 (台灣) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
 #ifdef _WIN32
@@ -113,7 +113,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,7,105,261,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 PCMan, seamxr, andyhorng 等人，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,25,115,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.3.1\n\n發行日期：2006.08.04\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.3.2\n\n發行日期：2006.08.04\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
                     IDC_STATIC,98,7,170,92
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP,7,7,80,87
     LTEXT           "題字：翁政銓",IDC_STATIC,21,97,49,8
@@ -233,7 +233,7 @@ BEGIN
                     IDC_STATIC,8,125,222,33
 END
 
-IDD_DIALOG1 DIALOGEX 0, 0, 266, 90
+IDD_KEYBOARD DIALOGEX 0, 0, 266, 90
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_BORDER
 EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -282,6 +282,19 @@ BEGIN
     PUSHBUTTON      "9",IDC_BUTTON43,210,7,18,16
 END
 
+IDD_EZ_SYMBOLS DIALOGEX 0, 0, 237, 177
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "簡易符號輸入"
+FONT 9, "新細明體", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_EZEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
+                    ES_NUMBER | WS_BORDER | WS_VSCROLL | WS_HSCROLL | 
+                    WS_TABSTOP,4,3,229,118
+    LTEXT           "這是簡易符號輸入的設定介面。這個介面裡的一行表示一個鍵所對應的字串，例如「m 新酷音」或是「L orz」等。\n每一行的格式必須符合：「Ta Tb」。其中 Ta 與 Tb 間必須有一個半形空白字元；Ta 可以是 a-z 等字母；Tb 可以是長度 1 到 10 的任意中英文字串。",
+                    IDC_STATIC,8,127,222,49,SS_NOPREFIX
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -316,12 +329,18 @@ BEGIN
         BOTTOMMARGIN, 158
     END
 
-    IDD_DIALOG1, DIALOG
+    IDD_KEYBOARD, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 259
         TOPMARGIN, 7
         BOTTOMMARGIN, 83
+    END
+
+    IDD_EZ_SYMBOLS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 236
+        BOTTOMMARGIN, 176
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -389,7 +408,7 @@ BEGIN
     ID_MENU                 "新酷音輸入法設定"
 END
 
-#endif    // Chinese (Taiwan) resources
+#endif    // 中文 (台灣) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
