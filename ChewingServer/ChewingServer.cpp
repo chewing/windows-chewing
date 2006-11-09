@@ -209,6 +209,8 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	case WM_TIMER:
 		checkNewVersion();
+		KillTimer( hwnd, checkTimer );
+		checkTimer = SetTimer( hwnd, 1, 6*60*60*1000, NULL );
 		break;
     case WM_CLOSE:
 		DestroyWindow(hwnd);
@@ -265,8 +267,7 @@ bool ChewingServer::startServer()
     OutputDebugString("Chewing server up.");
 
 	// Set up a timer to regularly check if there is a new version.
-	checkTimer = SetTimer( hwnd, 1, 3600 * 1000, NULL );
-	checkNewVersion();	// Check now!
+	checkTimer = SetTimer( hwnd, 1, 5*60*1000, NULL );
 	return true;
 }
 
