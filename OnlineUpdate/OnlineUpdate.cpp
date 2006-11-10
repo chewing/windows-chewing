@@ -13,6 +13,7 @@
 
 TCHAR url[100] = _T("http://chewing.csie.net/download/win32/");
 TCHAR* url_file_name = url + 39; // dir path is 39 bytes long
+char CSig[] = "ISTA";
 
 TCHAR notifier_class[] = _T("ChewingUpdate");
 const char* version = NULL;
@@ -155,9 +156,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		// 3rd line: URL of relating web page (required)
 		// 4th line to end of file: Change log (optional)
 
+		if ( strncmp(buf, CSig, strlen(CSig))!=0 ) {
+			return	-1;
+		}
 		version = strtok(buf, "\r\n ");
 		if( ! version )
 			return -1;
+
+		version += strlen(CSig);
 
 		// Check if we are using the latest version
 		HKEY hk = NULL;
