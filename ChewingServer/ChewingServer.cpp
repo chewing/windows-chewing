@@ -153,8 +153,12 @@ void GetUserDataPath( LPTSTR filename )
 
 LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 {
-	if( msg >= cmdFirst && msg <= cmdLast )
+	if( msg >= cmdFirst && msg <= cmdLast ) {
+		if ( chewingClients.end()==chewingClients.find((unsigned int)lp) ) {
+			return	0;
+		}
 		return parseChewingCmd(msg, (int)wp, (Chewing*)lp);
+	}
 
 	switch( msg )
 	{
