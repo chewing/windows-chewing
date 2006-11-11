@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.3.2"
+!define PRODUCT_VERSION "0.3.4"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -155,7 +155,7 @@ Section -AdditionalIcons
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\新酷音輸入法"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk" "$INSTDIR\Chewing.chm"
-  CreateShortCut "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk" "$INSTDIR\HashEd.exe"
+  CreateShortCut "$SMPROGRAMS\新酷音輸入法\使用者詞庫編輯工具.lnk" "$INSTDIR\HashEd.exe"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\線上檢查是否有新版本.lnk" "$INSTDIR\Update.exe"
   CreateShortCut "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
@@ -214,7 +214,7 @@ Section Uninstall
   Delete "$INSTDIR\dat2bin.exe"
 
   Delete "$SMPROGRAMS\新酷音輸入法\新酷音輸入法使用說明.lnk"
-  Delete "$SMPROGRAMS\新酷音輸入法\本地詞庫編輯工具.lnk"
+  Delete "$SMPROGRAMS\新酷音輸入法\使用者詞庫編輯工具.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\解除安裝.lnk"
   Delete "$SMPROGRAMS\新酷音輸入法\線上檢查是否有新版本.lnk"
 
