@@ -985,9 +985,11 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( g_phraseMark ) {
 		int interval_len = 0;
 		unsigned char* interval = g_chewing->GetIntervalArray(interval_len);
-		cs->setInvervalArray( interval, interval_len );
-		if( interval ) {
-			free( interval );
+		if ( interval_len>0 ) {
+			cs->setInvervalArray( interval, interval_len );
+			if( interval ) {
+				free( interval );
+			}
 		}
 	}
 	else {

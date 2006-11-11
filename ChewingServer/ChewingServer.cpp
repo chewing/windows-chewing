@@ -83,8 +83,24 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 
 };
 
+char* _gen_event_name(char *buf, int szbuf, const char *prefix)
+{
+	char temp[512]={'0'};
+	DWORD sztemp = sizeof(temp);
+	GetUserName(temp, &sztemp);
+
+	strncpy(buf, prefix, szbuf);
+	strncat(buf, "_", szbuf);
+	strncat(buf, temp, szbuf);
+	buf[szbuf-1] = '\0';
+	return	buf;
+}
+
+
 ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE), checkTimer(0)
 {
+	char classname[512];
+	_gen_event_name(classname, sizeof(classname), chewingServerClassName);
 	g_ChewingServerInstance = this;
 
 	WNDCLASSEX wc;
@@ -97,12 +113,12 @@ ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE), ch
 	wc.hCursor			= NULL;
 	wc.hIcon			= NULL;
 	wc.lpszMenuName		= (LPTSTR)NULL;
-	wc.lpszClassName	= chewingServerClassName;
+	wc.lpszClassName	= classname;
 	wc.hbrBackground	= NULL;
 	wc.hIconSm			= NULL;
 	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
 		return;
-	hwnd = CreateWindowEx(0, chewingServerClassName, NULL, 0, 
+	hwnd = CreateWindowEx(0, classname, NULL, 0, 
 					0, 0, 0, 0, HWND_DESKTOP, NULL, wc.hInstance, NULL);
 }
 
@@ -238,8 +254,13 @@ bool ChewingServer::startServer()
 {
 	HANDLE hprocess = GetCurrentProcess();
 
-	LPCTSTR name = _T("Local\\ChewingServer");
-	LPCTSTR evtname = _T("Local\\ChewingServerEvent");
+	char evt_name[512];
+	_gen_event_name(evt_name, sizeof(evt_name), "Local\\ChewingServerEvent");
+	LPCTSTR evtname = evt_name;
+
+	char prc_name[512];
+	_gen_event_name(prc_name, sizeof(prc_name), "Local\\ChewingServer");
+	LPCTSTR name = prc_name;
 	DWORD osVersion = GetVersion();
  	DWORD major = (DWORD)(LOBYTE(LOWORD(osVersion)));
 	DWORD minor =  (DWORD)(HIBYTE(LOWORD(osVersion)));
@@ -268,7 +289,6 @@ bool ChewingServer::startServer()
 		SetEvent(evt);
 		CloseHandle(evt);
 	}
-    OutputDebugString("Chewing server up.");
 
 	// Set up a timer to regularly check if there is a new version.
 	checkTimer = SetTimer( hwnd, 1, 5*60*1000, NULL );

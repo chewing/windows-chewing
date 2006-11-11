@@ -125,4 +125,8 @@ protected:
 	void checkNewVersion(void);
 };
 
+
+//  Generate class, event name according to the user account.
+char* _gen_event_name(char *buf, int szbuf, const char *prefix);
+
 #endif // !defined(AFX_CHEWINGSERVER_H__BA0A82BD_DE77_4E22_9B6C_443D7E3D22EB__INCLUDED_)

@@ -300,12 +300,29 @@ int CHashContext::get_phrase_count()
     return  pool.size();
 }
 
+char* _gen_event_name(char *buf, int szbuf, const char *prefix)
+{
+	char temp[512]={'0'};
+	DWORD sztemp = sizeof(temp);
+	GetUserName(temp, &sztemp);
+
+	strncpy(buf, prefix, szbuf);
+	strncat(buf, "_", szbuf);
+	strncat(buf, temp, szbuf);
+	buf[szbuf-1] = '\0';
+	return	buf;
+}
+
 void CHashContext::_connect_server(void)
 {
-	serverWnd = FindWindow( chewingServerClassName, NULL );
+	char classname[512];
+	_gen_event_name(classname, sizeof(classname), chewingServerClassName);
+	serverWnd = FindWindow( classname, NULL );
 	if( ! serverWnd )
 	{
-		LPCTSTR evtname = _T("Local\\ChewingServerEvent");
+		char evt_name[512];
+		_gen_event_name(evt_name, sizeof(evt_name), "Local\\ChewingServerEvent");
+		LPCTSTR evtname = evt_name;
 		DWORD osVersion = GetVersion();
  		DWORD major = (DWORD)(LOBYTE(LOWORD(osVersion)));
 		DWORD minor =  (DWORD)(HIBYTE(LOWORD(osVersion)));
@@ -319,7 +336,7 @@ void CHashContext::_connect_server(void)
 		ShellExecute( NULL, "open", server_path, NULL, NULL, SW_HIDE );
 		WaitForSingleObject( evt, 10000 );
 		CloseHandle(evt);
-		serverWnd = FindWindow( chewingServerClassName, NULL );
+		serverWnd = FindWindow( classname, NULL );
 	}
 	GetWindowText( serverWnd, filemapName, sizeof(filemapName) );
 }
