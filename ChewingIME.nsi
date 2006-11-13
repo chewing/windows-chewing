@@ -192,9 +192,6 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
-  FindWindow $0 "ChewingServer"
-  SendMessage $0 ${WM_DESTROY} 0 0
-
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
   Delete "$INSTDIR\License.txt"

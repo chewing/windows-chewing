@@ -79,6 +79,18 @@ int enable_access(char *filename)
 	return retval;
 }
 
+char* _gen_event_name(char *buf, int szbuf, const char *prefix)
+{
+	char temp[512]={'0'};
+	DWORD sztemp = sizeof(temp);
+	GetUserName(temp, &sztemp);
+
+	strncpy(buf, prefix, szbuf);
+	strncat(buf, "_", szbuf);
+	strncat(buf, temp, szbuf);
+	buf[szbuf-1] = '\0';
+	return	buf;
+}
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -94,6 +106,14 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if( strstr( lpCmdLine, "/uninstall" ) )
 	{
+		char temp[1024];
+		_gen_event_name(temp, sizeof(temp), "ChewingServer");
+		HWND hwnd = FindWindow(temp, NULL);
+		if ( hwnd ) {
+			SendMessage(hwnd, WM_DESTROY, 0, 0);
+		}
+
+
 		if( hk )
 		{
 			DWORD type = REG_DWORD, size = sizeof(DWORD);

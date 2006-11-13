@@ -338,7 +338,8 @@ void CHashContext::_connect_server(void)
 		CloseHandle(evt);
 		serverWnd = FindWindow( classname, NULL );
 	}
-	GetWindowText( serverWnd, filemapName, sizeof(filemapName) );
+	GetWindowText( serverWnd, classname, sizeof(classname) );
+	_gen_event_name(filemapName, sizeof(filemapName), classname);
 }
 
 int CHashContext::_get_phone_seq_from_server(uint16 *pPhoneSeq)

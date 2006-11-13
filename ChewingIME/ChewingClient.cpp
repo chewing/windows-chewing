@@ -259,9 +259,9 @@ char* _gen_event_name(char *buf, int szbuf, const char *prefix)
 
 void ChewingClient::ConnectServer(void)
 {
-	char classname[512];
-	_gen_event_name(classname, sizeof(classname), chewingServerClassName);
-	serverWnd = FindWindow( classname, NULL );
+	char tempname[512];
+	_gen_event_name(tempname, sizeof(tempname), chewingServerClassName);
+	serverWnd = FindWindow( tempname, NULL );
 	if( ! serverWnd )
 	{
 		char evt_name[512];
@@ -281,10 +281,12 @@ void ChewingClient::ConnectServer(void)
 		ShellExecute( NULL, "open", server_path, NULL, NULL, SW_HIDE );
 		WaitForSingleObject( evt, 10000 );
 		CloseHandle(evt);
-		serverWnd = FindWindow( classname, NULL );
+		serverWnd = FindWindow( tempname, NULL );
 	}
+
 	chewingID = SendMessage( serverWnd, ChewingServer::cmdAddClient, 0, 0 );
-	GetWindowText( serverWnd, filemapName, sizeof(filemapName) );
+	GetWindowText( serverWnd, tempname, sizeof(tempname) );
+	_gen_event_name(filemapName, sizeof(filemapName), tempname);
 
 	SetSpaceAsSelection(spaceAsSelection);
 	SetKeyboardLayout(keyLayout);

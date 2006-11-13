@@ -261,6 +261,7 @@ bool ChewingServer::startServer()
 	char prc_name[512];
 	_gen_event_name(prc_name, sizeof(prc_name), "Local\\ChewingServer");
 	LPCTSTR name = prc_name;
+	LPCTSTR winname = "Local\\ChewingServer";
 	DWORD osVersion = GetVersion();
  	DWORD major = (DWORD)(LOBYTE(LOWORD(osVersion)));
 	DWORD minor =  (DWORD)(HIBYTE(LOWORD(osVersion)));
@@ -268,9 +269,10 @@ bool ChewingServer::startServer()
 	{
 		name += 6;	// remove prfix "Local\\"
 		evtname += 6;	// remove prfix "Local\\"
+		winname += 6;
 	}
 	HANDLE evt = OpenEvent( EVENT_ALL_ACCESS, FALSE, evtname );
-	SetWindowText( hwnd, name );
+	SetWindowText( hwnd, winname );
 
 	sharedMem = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
 						0, CHEWINGSERVER_BUF_SIZE, name );
