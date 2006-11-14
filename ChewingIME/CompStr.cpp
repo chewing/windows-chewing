@@ -174,49 +174,6 @@ void CompStr::beforeGenerateMsg(void)
 			cs.dwResultClauseLen = (i+1) * sizeof(DWORD);
 		}
 	}
-	else	// ANSI version
-	{
-		// We have to convert all unicode data to ANSI here.
-		// Since under Win 95/NT4, there is no unicode IME support.
-
-/*		wchar_t* wsinsert = compStr + cs.dwCursorPos;
-		int winsert_len = wcslen( sinsert );
-		TCHAR sinsert[ sizeof(compStr) ];
-		WideCharToMultiByte( CP_ACP, 0, sinsert, winsert_len, sinsert, sizeof(), ' ', NULL );
-		cs.dwCompReadStrLen = _tcslen( sinsert );
-
-		if( compStr[0] == 0 )	// If quick commit
-			cs.dwCompClauseLen = 0;	// No clause info
-		else	{	// This composition string contains Chinese characters
-			int i;
-			TCHAR* pstr = compStr;
-			for( i = 0; i < cs.dwCompStrLen; ++i )	{
-				compClause[ i ] = (pstr - compStr);
-				pstr = _tcsinc( pstr );
-				if( ! *pstr )
-					break;
-			}
-			compClause[++i] = cs.dwCompStrLen;
-			cs.dwCompClauseLen = (i+1) * sizeof(DWORD);
-		}
-
-		if( resultStr[0] == 0 )	// If no result string
-			cs.dwResultClauseLen = 0;	// No clause info
-		else	{	// This result string contains Chinese characters
-			int i;
-			TCHAR* pstr = resultStr;
-			for( i = 0; i < cs.dwResultStrLen; ++i )	{
-				resultClause[ i ] = (pstr - resultStr);
-				pstr = _tcsinc( pstr );
-				if( ! *pstr )
-					break;
-			}
-			resultClause[++i] = cs.dwResultStrLen;
-			cs.dwResultClauseLen = (i+1) * sizeof(DWORD);
-		}
-*/
-	}
-
 
 	cs.dwCompReadStrLen = cs.dwCompReadAttrLen = 0;
 
@@ -238,6 +195,9 @@ void CompStr::beforeGenerateMsg(void)
 void CompStr::setInvervalArray( unsigned char* interval, int count )
 {
 	cs.dwCompClauseLen = 0;
+	if ( count<=0 ) {
+		return;
+	}
 	if( ! interval ) {
 		if( compStr[0] ) {
 			wchar_t* pstr = compStr;

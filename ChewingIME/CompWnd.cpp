@@ -132,7 +132,7 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			DWORD len = 0;
 			DWORD* interval = getIntervalAry( imc, len );
 			// TODO: rewrite phrase mark
-			if ( len>0 ){
+			if ( len>0 && interval!=NULL ){
 				--len;
 				for( DWORD i = 0; i < len ; ++i )
 				{

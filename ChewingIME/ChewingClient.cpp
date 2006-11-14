@@ -222,25 +222,27 @@ void ChewingClient::SetEscCleanAllBuf( bool escCleanAllBuf ) {
 unsigned char* ChewingClient::GetDataFromSharedMem(int len)
 {
 	unsigned char* data = NULL;
-	if( len > 0 )
-	{
-	    sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
-        if ( sharedMem==NULL )
-        {
-            sharedMem = INVALID_HANDLE_VALUE; 
-            return  (unsigned char*)"";
-        }
 
-		char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
-		if( buf )
-		{
-			data = (unsigned char*)calloc( len, sizeof(unsigned char) );
-			memcpy( data, buf, len );
-			UnmapViewOfFile(buf);
-		}
-    	CloseHandle(sharedMem);
-        sharedMem = INVALID_HANDLE_VALUE;
+	if ( len<=0 ){
+		return	NULL;
 	}
+
+	sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
+    if ( sharedMem==NULL )
+    {
+        sharedMem = INVALID_HANDLE_VALUE; 
+        return  NULL;
+    }
+
+	char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
+	if( buf )
+	{
+		data = (unsigned char*)calloc( len, sizeof(unsigned char) );
+		memcpy( data, buf, len );
+		UnmapViewOfFile(buf);
+	}
+    CloseHandle(sharedMem);
+    sharedMem = INVALID_HANDLE_VALUE;
 	return data;
 }
 
