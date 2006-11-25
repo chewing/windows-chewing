@@ -272,7 +272,7 @@ HASH_ITEM* CHashContext::get_phrase_by_id(int index)
 
 void CHashContext::del_phrase_by_id(int index)
 {
-    if ( index>=pool.size() || index<0 )
+    if ( index<0 )
     {
         return;
     }
