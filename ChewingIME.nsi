@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.4.1"
+!define PRODUCT_VERSION "0.3.4.2"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -23,12 +23,12 @@ Function uninstOld
   IfFileExists "$SYSDIR\Chewing.ime" 0 ContinueUninst
     Delete "$SYSDIR\Chewing.ime"
     IfErrors 0 ContinueUninst
-      MessageBox MB_ICONSTOP|MB_OK "解安裝舊版發生錯誤，請確定你有系統管理員權限，以及舊版不在使用中$\n$\n建議到控制台輸入法設定當中，移除舊版後登出或重開機後再安裝。"
+      MessageBox MB_ICONSTOP|MB_OK "無法移除已存在的新酷音client端。$\n通常是因為舊版的新酷音client端已經被某些程式載入而無法移除。$\n請關閉所有程式或重新開機後，在安裝一次即可。"
       Abort
   ContinueUninst:
 
-  FindWindow $0 "ChewingServer"
-  SendMessage $0 ${WM_DESTROY} 0 0
+  ;  shutdown chewing server.
+  ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
   ; uninst.exe will copy itself to $TEMP\~nsu.tmp\Au_.exe and execute that copy.
   ; Therefore, ExecWait "$INSTDIR\uninst.exe" is useless since it terminates after
@@ -56,7 +56,7 @@ FunctionEnd
 Function .onInit
   ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
   StrCmp $0 "" ContinueInst 0 
-    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到舊版 $0 已安裝，是否要移除舊版後重裝新版？" IDOK +2
+    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到已安裝舊版 $0 ，是否要移除舊版後繼續安裝新版？" IDOK +2
       Abort
       Call uninstOld
   ContinueInst:
@@ -96,7 +96,7 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Function OnInstError
-    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版後登出或重開機後再安裝。"
+    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版並重開機後再安裝一次。"
     Abort
 FunctionEnd
 
@@ -183,7 +183,7 @@ SectionEnd
 
 Function un.onUninstSuccess
 ;  HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) 已成功地從你的電腦移除。" /SD IDOK
+  MessageBox MB_ICONINFORMATION|MB_OK "已成功地從你的電腦移除 $(^Name) 。" /SD IDOK
 FunctionEnd
 
 Function un.onInit
@@ -192,6 +192,7 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
+  ;  shutdown chewing server.
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
 
   Delete "$INSTDIR\License.txt"

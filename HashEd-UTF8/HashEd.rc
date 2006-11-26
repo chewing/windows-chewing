@@ -101,7 +101,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,7,88,245,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
                     IDC_STATIC,18,98,224,75
-    LTEXT           "新酷音使用者詞庫編輯器\n\n版本： 0.0.3\n\n發行日期：2006.03.12\n\n授權方式： GNU General Public License\n\n工具作者：seamxr, PCMan\n",
+    LTEXT           "新酷音使用者詞庫編輯器\n\n版本： 0.1\n\n發行日期：2006.11.26\n\n授權方式： GNU General Public License\n\n工具作者：seamxr, PCMan\n",
                     IDC_STATIC,87,11,156,79
     CONTROL         122,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,
                     59,63
