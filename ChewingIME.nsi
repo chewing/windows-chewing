@@ -23,7 +23,7 @@ Function uninstOld
   IfFileExists "$SYSDIR\Chewing.ime" 0 ContinueUninst
     Delete "$SYSDIR\Chewing.ime"
     IfErrors 0 ContinueUninst
-      MessageBox MB_ICONSTOP|MB_OK "無法移除已存在的新酷音client端。$\n通常是因為舊版的新酷音client端已經被某些程式載入而無法移除。$\n請關閉所有程式或重新開機後，在安裝一次即可。"
+      MessageBox MB_ICONSTOP|MB_OK "無法移除已存在的新酷音client端。$\n通常是因為舊版的新酷音client端已經被某些程式載入而無法移除。$\n請關閉所有程式或重新開機後，再安裝一次即可。"
       Abort
   ContinueUninst:
 
