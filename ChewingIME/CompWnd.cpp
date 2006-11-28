@@ -131,17 +131,13 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 		if( g_phraseMark ) {
 			DWORD len = 0;
 			DWORD* interval = getIntervalAry( imc, len );
-			// TODO: rewrite phrase mark
 			if ( len>0 && interval!=NULL ){
-				--len;
-				for( DWORD i = 0; i < len ; ++i )
+				for( DWORD i = 0; i < len - 1; ++i )
 				{
-					if( interval[i+1] <= compStr.length() - zuin.length() ) {
-						if( interval[i+1] - interval[i] > 1 ) {
-							MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
-							LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
-						}
-					}
+					if( interval[i+1] - interval[i] > 1 )
+						continue;
+					MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
+					LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
 				}
 			}
 		}

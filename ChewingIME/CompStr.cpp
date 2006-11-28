@@ -40,9 +40,9 @@ CompStr::CompStr(void)
 	cs.dwResultReadStrLen = 0;
 	memset( resultReadStr, 0, sizeof(resultReadStr) );
 
-	cs.dwResultClauseOffset = DWORD( (BYTE*)&resultClause[0] - (BYTE*)this);
-	cs.dwResultClauseLen = 0;
-	memset( resultClause, 0, sizeof(resultClause) );
+	cs.dwResultReadClauseOffset = DWORD( (BYTE*)&resultReadClause[0] - (BYTE*)this);
+	cs.dwResultReadClauseLen = 0;
+	memset( resultReadClause, 0, sizeof(resultReadClause) );
 
 	cs.dwResultStrOffset = (BYTE*)&resultStr[0] - (BYTE*)this;
 	cs.dwResultStrLen = 0;
@@ -132,29 +132,24 @@ void CompStr::beforeGenerateMsg(void)
 			compClause[1] = cs.dwCompStrLen;
 		}
 		else	{	// This composition string contains Chinese characters
-			// TODO: This part should be totally re-written.
-			// Current implementation is too dirty and has no readability!
+
 			if( cs.dwCompReadStrLen ) {
 				if( 0 == cs.dwCompClauseLen )
-					cs.dwCompClauseLen = 1;
-				cs.dwCompClauseLen += cs.dwCompReadStrLen;
-				compClause[cs.dwCompClauseLen] = cs.dwCompStrLen;
-				for( int i = cs.dwCompClauseLen - 1; i >= (int)cs.dwCursorPos; --i )
-				{
-					if( i > cs.dwCursorPos + cs.dwCompReadStrLen ) {
-						compClause[i] = compClause[i - cs.dwCompReadStrLen] + cs.dwCompReadStrLen;
-					}
-					else {
-						if( compClause[i+1] >= 1 )
-							compClause[i] = compClause[i+1] - 1;
-						else
-							compClause[i] = 0;
-					}
-				}
-				if( cs.dwCompClauseLen < 2 ) {
-					cs.dwCompClauseLen = 2;
-					compClause[ 1 ] = cs.dwCompStrLen;
-				}
+					compClause[cs.dwCompClauseLen++] = 0;
+				int newCompClauseLen = 0;
+				DWORD newCompClause[257];
+				int i;
+				for (i = 0; i < cs.dwCompClauseLen && compClause[i] < cs.dwCursorPos; i++)
+					newCompClause[newCompClauseLen++] = compClause[i];
+				if (compClause[i] == cs.dwCursorPos)
+					i++;
+				for (int j = 0; j <= cs.dwCompReadStrLen; j++)
+					newCompClause[newCompClauseLen++] = cs.dwCursorPos + j;
+				for (; i < cs.dwCompClauseLen; i++)
+					newCompClause[newCompClauseLen++] = compClause[i] + cs.dwCompReadStrLen;
+
+				memcpy(compClause, newCompClause, sizeof(compClause));
+				cs.dwCompClauseLen = newCompClauseLen;
 			}
 			cs.dwCompClauseLen *= sizeof(DWORD);
 		}
@@ -162,16 +157,10 @@ void CompStr::beforeGenerateMsg(void)
 		if( resultStr[0] == 0 )	// If no result string
 			cs.dwResultClauseLen = 0;	// No clause info
 		else	{	// This result string contains Chinese characters
-			int i;
-			wchar_t* pstr = resultStr;
-			for( i = 0; i < (int) cs.dwResultStrLen; ++i )	{
-				resultClause[ i ] = (pstr - resultStr);
-				pstr = ++pstr;
-				if( ! *pstr )
-					break;
+			for(int i = 0; i <= (int) cs.dwResultStrLen; ++i ) {
+				resultClause[ i ] = i;
 			}
-			resultClause[++i] = cs.dwResultStrLen;
-			cs.dwResultClauseLen = (i+1) * sizeof(DWORD);
+			cs.dwResultClauseLen = (cs.dwResultStrLen+1) * sizeof(DWORD);
 		}
 	}
 
@@ -186,7 +175,7 @@ void CompStr::beforeGenerateMsg(void)
 	cs.dwCompReadClauseLen = 0;//sizeof(readClause);
 
 	resultReadClause[0] = 0;
-	resultReadClause[1] = cs.dwResultReadClauseLen = 0;
+	resultReadClause[1] = cs.dwResultReadClauseLen;
 	cs.dwResultReadClauseLen = 0;//sizeof(resultReadClause);
 
 
@@ -198,41 +187,16 @@ void CompStr::setInvervalArray( unsigned char* interval, int count )
 	if ( count<=0 ) {
 		return;
 	}
-	if( ! interval ) {
-		if( compStr[0] ) {
-			wchar_t* pstr = compStr;
-			for( int i = 0; i < (int) cs.dwCompStrLen; ++i )	{
-				compClause[ i ] = (pstr - compStr);
-				++pstr;
-				if( ! *pstr )
-					break;
-			}
-			compClause[++i] = cs.dwCompStrLen;
-			cs.dwCompClauseLen = (i+1);
-		}
-		return;
-	}
 
-	int prev_interval = -1;
-	if( cs.dwCompStrLen >= 2 )
-	{
-		int i = 0;
-	}
 	for( DWORD i = 0; i < cs.dwCompStrLen; ) {
-		if( i < interval[0] || count <= 0 ) {
-			compClause[ cs.dwCompClauseLen ] = i;
-			++cs.dwCompClauseLen;
-			++i;
+		if( interval == NULL || i < interval[0] || count <= 0 ) {
+			compClause[ cs.dwCompClauseLen++ ] = i++;
 			continue;
 		}
-		if( interval[0] > prev_interval ) {
-			compClause[ cs.dwCompClauseLen ] = interval[0];
-			++cs.dwCompClauseLen;
-		}
-		compClause[ cs.dwCompClauseLen ] = prev_interval = interval[1];
+		compClause[ cs.dwCompClauseLen++ ] = interval[0];
 		i = interval[ 1 ];
 		interval += 2;
 		count -= 2;
-		++cs.dwCompClauseLen;
 	}
+	compClause[ cs.dwCompClauseLen++ ] = cs.dwCompStrLen;
 }
