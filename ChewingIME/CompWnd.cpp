@@ -134,7 +134,7 @@ void CompWnd::onPaint(IMCLock& imc, PAINTSTRUCT& ps)
 			if ( len>0 && interval!=NULL ){
 				for( DWORD i = 0; i < len - 1; ++i )
 				{
-					if( interval[i+1] - interval[i] > 1 )
+					if( interval[i+1] - interval[i] < 2 )
 						continue;
 					MoveToEx( memdc, indexToXPos( compStr, interval[i] ) + 3, rc.bottom-2, NULL );
 					LineTo( memdc, indexToXPos( compStr, interval[i+1] ) - 3, rc.bottom-2 );
