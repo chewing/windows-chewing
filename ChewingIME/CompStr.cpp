@@ -200,3 +200,37 @@ void CompStr::setInvervalArray( unsigned char* interval, int count )
 	}
 	compClause[ cs.dwCompClauseLen++ ] = cs.dwCompStrLen;
 }
+
+// for IE workaround
+void CompStr::backupCompLen(void)
+{
+	bakCompStrLen = cs.dwCompStrLen;
+	bakCompClauseLen = cs.dwCompClauseLen;
+	bakCompAttrLen = cs.dwCompAttrLen;
+	bakCompReadStrLen = cs.dwCompReadStrLen;
+	bakCompReadClauseLen = cs.dwCompReadClauseLen;
+	bakCompReadAttrLen = cs.dwCompReadAttrLen;
+	bakCursorPos = cs.dwCursorPos;
+}
+
+void CompStr::resetCompLen(void)
+{
+	cs.dwCompStrLen = 0;
+	cs.dwCompClauseLen = 0;
+	cs.dwCompAttrLen = 0;
+	cs.dwCompReadStrLen = 0;
+	cs.dwCompReadClauseLen = 0;
+	cs.dwCompReadAttrLen = 0;
+	cs.dwCursorPos = 0;
+}
+
+void CompStr::restoreCompLen(void)
+{
+	cs.dwCompStrLen = bakCompStrLen;
+	cs.dwCompClauseLen = bakCompClauseLen;
+	cs.dwCompAttrLen = bakCompAttrLen;
+	cs.dwCompReadStrLen = bakCompReadStrLen;
+	cs.dwCompReadClauseLen = bakCompReadClauseLen;
+	cs.dwCompReadAttrLen = bakCompReadAttrLen;
+	cs.dwCursorPos = bakCursorPos;
+}

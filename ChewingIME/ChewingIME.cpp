@@ -1008,6 +1008,33 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 
 	ImmUnlockIMCC(ic->hCompStr);
 
+	// ticket #14430, workaround for IE, which behave strange when
+	// composition string is not empty and commit single space character
+	if (has_result && wcscmp(L" ",cs->getResultStr())==0 && !is_empty) {
+		// backup the composition string status
+		cs->backupCompLen();
+
+		// tell App the composition string is empty first
+		cs->resetCompLen();
+		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION,
+				word,
+				(GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|GCS_COMPREADATTR|
+				 GCS_COMPCLAUSE|GCS_COMPREADCLAUSE|
+				 GCS_COMPREADATTR|GCS_CURSORPOS|
+				 GCS_DELTASTART ) );
+
+		// commit the result only
+		GenerateIMEMessage( hIMC, WM_IME_COMPOSITION,
+				word,
+				GCS_CURSORPOS|
+				GCS_RESULTCLAUSE|GCS_RESULTSTR|GCS_RESULTREADSTR|GCS_RESULTREADCLAUSE );
+
+		// restore the composition string
+		cs->restoreCompLen();
+
+		has_result = false;
+	}
+
 	GenerateIMEMessage( hIMC, WM_IME_COMPOSITION, 
 				(composition_started ? word : 0),
 				(GCS_COMPSTR|GCS_COMPATTR|GCS_COMPREADSTR|GCS_COMPREADATTR|

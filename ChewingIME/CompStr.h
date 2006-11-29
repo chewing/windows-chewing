@@ -28,6 +28,15 @@ protected:
 // private data;
 	wchar_t showMsg[50];
 
+	// for IE workaround
+	DWORD bakCompStrLen;
+	DWORD bakCompClauseLen;
+	DWORD bakCompAttrLen;
+	DWORD bakCompReadStrLen;
+	DWORD bakCompReadClauseLen;
+	DWORD bakCompReadAttrLen;
+	DWORD bakCursorPos;
+
 public:
 	wchar_t* getCompStr()	{	return &compStr[0];	}
 	wchar_t* getResultStr()	{	return &resultStr[0];	}
@@ -43,4 +52,9 @@ public:
 	void setInvervalArray( unsigned char* interval, int count );
 	DWORD* getIntervalArray() {	return compClause; }
 	DWORD getInternalLen() {	return cs.dwCompClauseLen / sizeof(DWORD);	}
+
+	// for IE workaround
+	void backupCompLen(void);
+	void resetCompLen(void);
+	void restoreCompLen(void);
 };
