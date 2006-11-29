@@ -180,7 +180,7 @@
 				RelativePath="..\..\libchewing\branches\win32-utf8\src\dict.c">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hanyupinying.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\hanyupinyin.c">
 			</File>
 			<File
 				RelativePath="..\..\libchewing\branches\win32-utf8\src\hash.c">
@@ -232,7 +232,7 @@
 				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h">
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\hanyupinying.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\hanyupinyin.h">
 			</File>
 			<File
 				RelativePath="..\..\libchewing\branches\win32-utf8\include\hash.h">
