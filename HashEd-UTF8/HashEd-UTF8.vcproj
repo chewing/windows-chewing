@@ -90,7 +90,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\Include"
+				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\Include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
