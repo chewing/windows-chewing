@@ -92,11 +92,7 @@ void CompStr::setCursorPos(int pos)
 	// ATTR_CONVERTED 	Character given from the conversion.
 	// ATTR_TARGET_NOTCONVERTED 	Character currently being converted (yet to be converted).
 
-	memset( &compAttr[cs.dwCursorPos], ATTR_CONVERTED, 1 );
-
 	cs.dwCursorPos = pos;
-
-	memset( &compAttr[pos], ATTR_TARGET_CONVERTED, 1 );
 }
 
 void CompStr::setZuin(LPCWSTR zuin)
@@ -119,11 +115,20 @@ void CompStr::beforeGenerateMsg(void)
 	cs.dwCompStrLen += cs.dwCompReadStrLen;
 	compStr[cs.dwCompStrLen] = '\0';
 
-	BYTE* ainsert = compAttr + cs.dwCursorPos;
-	memmove( ainsert + cs.dwCompReadAttrLen, 
-		ainsert, cs.dwCompAttrLen - cs.dwCursorPos);
-	memcpy( ainsert, readAttr, cs.dwCompReadAttrLen );
-	cs.dwCompAttrLen += cs.dwCompReadAttrLen;
+	if (cs.dwCompReadAttrLen == 0 && cs.dwCompAttrLen != 0) {
+		for (int i = 0; i < cs.dwCompClauseLen - 1; i++)
+			if (compClause[i] <= cs.dwCursorPos && cs.dwCursorPos < compClause[i+1]) {
+				for(int j=compClause[i]; j<compClause[i+1]; j++)
+					compAttr[j]=ATTR_TARGET_CONVERTED;
+			}
+
+	} else {
+		BYTE* ainsert = compAttr + cs.dwCursorPos;
+		memmove( ainsert + cs.dwCompReadAttrLen, 
+				ainsert, cs.dwCompAttrLen - cs.dwCursorPos);
+		memcpy( ainsert, readAttr, cs.dwCompReadAttrLen );
+		cs.dwCompAttrLen += cs.dwCompReadAttrLen;
+	}
 
 	if( g_useUnicode )	{
 		if( compStr[0] == 0 ) {	// If quick commit
