@@ -116,7 +116,7 @@ void CompStr::beforeGenerateMsg(void)
 	compStr[cs.dwCompStrLen] = '\0';
 
 	if (cs.dwCompReadAttrLen == 0 && cs.dwCompAttrLen != 0) {
-		for (int i = 0; i < cs.dwCompClauseLen - 1; i++)
+		for (int i = 0; i+1 < cs.dwCompClauseLen; i++)
 			if (compClause[i] <= cs.dwCursorPos && cs.dwCursorPos < compClause[i+1]) {
 				for(int j=compClause[i]; j<compClause[i+1]; j++)
 					compAttr[j]=ATTR_TARGET_CONVERTED;
