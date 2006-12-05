@@ -1662,7 +1662,11 @@ int ControlListCursor( UINT &key, CandList* candList ) {
 		}
 		return ! g_chewing->KeystrokeIgnore();
 	case VK_DOWN:
-		candList->setSelection( candList->getSelection() + g_candPerRow );
+		if (candList->getSelection()/candList->getPageSize() !=
+				(candList->getSelection() + g_candPerRow) / candList->getPageSize())
+			candList->setSelection( (candList->getSelection() + candList->getPageSize() - 1) / candList->getPageSize() * candList->getPageSize() );
+		else
+			candList->setSelection( candList->getSelection() + g_candPerRow );
 		if( candList->getSelection() > candList->getTotalCount() - 1 ) {
 			g_chewing->Down();
 			candList->setSelection( 0 );

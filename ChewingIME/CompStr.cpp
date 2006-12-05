@@ -139,8 +139,10 @@ void CompStr::beforeGenerateMsg(void)
 		else	{	// This composition string contains Chinese characters
 
 			if( cs.dwCompReadStrLen ) {
-				if( 0 == cs.dwCompClauseLen )
-					compClause[cs.dwCompClauseLen++] = 0;
+				if( 0 == cs.dwCompClauseLen ) {
+					for (int i = 0; i <= cs.dwCompStrLen; i++)
+						compClause[cs.dwCompClauseLen++] = i;
+				}
 				int newCompClauseLen = 0;
 				DWORD newCompClause[257];
 				int i;
