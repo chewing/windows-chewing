@@ -67,8 +67,8 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::SetHsuSelectionKeyType ,
 	(ChewingMemberFuncCI) &Chewing::SetCandPerPage ,
 	(ChewingMemberFuncCI) &Chewing::SetEscCleanAllBuf ,
-    (ChewingMemberFuncCI) &Chewing::SetAdvanceAfterSelection,
-    (ChewingMemberFuncCI) &Chewing::SetEasySymbolInput,
+	(ChewingMemberFuncCI) &Chewing::SetAdvanceAfterSelection,
+	(ChewingMemberFuncCI) &Chewing::SetEasySymbolInput,
 
 	  // char* (void)
 	(ChewingMemberFuncCI) (ChewingMemberFuncCV)&Chewing::ZuinStr ,
@@ -223,10 +223,6 @@ bool ChewingServer::processor()
 		}
 
 		ret = 0;
-{
-	char aaa[50];
-	sprintf(aaa, "session: %08x, cmd: %x, dat=%08x\n", session, cmd, dat);
-}
 
 		if( cmd >= cmdFirst && cmd <= cmdLast ) {
 			if ( clients.end()==clients.find(session) ) {
