@@ -11,6 +11,7 @@
 
 #include <windows.h>
 #include "ChewingServer.h"
+#include "pipe.h"
 
 class ChewingClient  
 {
@@ -81,14 +82,15 @@ public:
     bool CheckServer();
 
 	unsigned char* GetIntervalArray(int& len);
+	unsigned int AddClient();
 
 protected:
 	unsigned char* GetDataFromSharedMem(int len);
 	HANDLE sharedMem;
-	LPARAM chewingID;
+	unsigned int chewingID;
 	HWND serverWnd;
-    TCHAR filemapName[MAX_PATH];
-    char *pSelKeys;
+	TCHAR filemapName[MAX_PATH];
+	char *pSelKeys;
 
 public:
 	void SetSpaceAsSelection(bool spaceAsSelection);
@@ -106,6 +108,9 @@ public:
 	int GetAddPhraseForward(void);
 	void SetCandPerPage(int len);
 	void ReloadSymbolTable(void);
+
+private:
+	unsigned int SendMessage(unsigned int session, unsigned int cmd, unsigned int dat);
 };
 
 #endif // !defined(AFX_CHEWINGCLIENT_H__E54E6740_17FB_4E1D_B912_751FF053FFD1__INCLUDED_)

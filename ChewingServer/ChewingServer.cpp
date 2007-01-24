@@ -9,6 +9,8 @@
 #include "ChewingServer.h"
 #include "Chewingpp.h"
 #include "..\include\chewingserver.h"
+#include "private.h"
+#include "pipe.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -99,60 +101,29 @@ char* _gen_event_name(char *buf, int szbuf, const char *prefix)
 
 ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE), checkTimer(0)
 {
-	char classname[512];
-	_gen_event_name(classname, sizeof(classname), chewingServerClassName);
 	g_ChewingServerInstance = this;
-
-	WNDCLASSEX wc;
-	wc.cbSize			= sizeof(WNDCLASSEX);
-	wc.style			= 0;
-	wc.lpfnWndProc		= (WNDPROC)ChewingServer::wndProc;
-	wc.cbClsExtra		= 0;
-	wc.cbWndExtra		= 0;
-	wc.hInstance		= (HINSTANCE)GetModuleHandle(NULL);
-	wc.hCursor			= NULL;
-	wc.hIcon			= NULL;
-	wc.lpszMenuName		= (LPTSTR)NULL;
-	wc.lpszClassName	= classname;
-	wc.hbrBackground	= NULL;
-	wc.hIconSm			= NULL;
-	if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
-		return;
-	hwnd = CreateWindowEx(0, classname, NULL, 0, 
-					0, 0, 0, 0, HWND_DESKTOP, NULL, wc.hInstance, NULL);
 }
 
 ChewingServer::~ChewingServer()
 {
 	CloseHandle(sharedMem);
 	TerminateChewing();
-    OutputDebugString("Chewing server down.");
 }
 
 bool ChewingServer::run()
 {
-	if( !hwnd )
+	if( !startServer() ) {
 		return false;
-	if( !startServer() )
+	}
+	if ( !processor() ) {
 		return false;
-
-	MSG msg;
-	while( GetMessage(&msg, NULL, 0, 0 ) )
-		DispatchMessage( &msg );
-
+	}
 	return true;
-}
-
-LRESULT CALLBACK ChewingServer::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	if( !g_ChewingServerInstance->hwnd )
-		g_ChewingServerInstance->hwnd = hwnd;
-	return g_ChewingServerInstance->wndProc( msg, wp, lp );
 }
 
 void GetUserDataPath( LPTSTR filename )
 {
-    LPITEMIDLIST pidl;
+	LPITEMIDLIST pidl;
 	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
 	{
 		SHGetPathFromIDList(pidl, filename);
@@ -164,100 +135,166 @@ void GetUserDataPath( LPTSTR filename )
 			pmalloc->Free( pidl );
 			pmalloc->Release();
 		}
-    }
+	}
 }
 
-LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
+unsigned int ChewingServer::NewChewingClient(ChewingPipeServ *cs)
 {
-	if( msg >= cmdFirst && msg <= cmdLast ) {
-		if ( chewingClients.end()==chewingClients.find((unsigned int)lp) ) {
-			return	0;
-		}
-		return parseChewingCmd(msg, (int)wp, (Chewing*)lp);
+	Chewing* client = new Chewing();
+	clients[(unsigned int)client] = client;
+	return	(unsigned int) client;
+}
+
+unsigned int ChewingServer::RemoveChewingClient(unsigned int client)
+{
+	if ( clients.erase(client)>0 ) {
+		delete (Chewing*) client;
+	}
+	return	0;
+}
+
+unsigned int ChewingServer::Echo(unsigned int client)
+{
+	map<unsigned int, Chewing*>::iterator iterT;
+	unsigned int ret = -1;
+
+	iterT = clients.find(client);
+	if ( iterT!=clients.end() ) {
+		ret = ~(unsigned int)(iterT->second);
 	}
 
-	switch( msg )
-	{
-	case cmdAddClient:
-		{
-			Chewing* client = new Chewing();
-			chewingClients[(unsigned int)client] = client;
-			return (LRESULT)client;
+	return	ret;
+}
+
+unsigned int ChewingServer::LastPhoneSeq()
+{
+	uint16 *sbuf = GetLastPhoneSeq();
+	uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
+		0, 0, CHEWINGSERVER_BUF_SIZE );
+	for ( int lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop ) {
+		if ( sbuf[lop]==0 ) {
 			break;
 		}
-	case cmdRemoveClient:
-		{
-			if ( chewingClients.erase((unsigned int)lp)>0 )
-            {   
-                delete (Chewing*) lp;
-            }
+		obuf[lop] = sbuf[lop];
+	}
+	obuf[lop] = 0;
+	UnmapViewOfFile( obuf );
+
+	return	(unsigned int)lop;
+}
+
+unsigned int ChewingServer::ReloadSymbolTables()
+{
+	char userdir[MAX_PATH];
+	GetUserDataPath( userdir );
+	Chewing::ReloadSymbolTable(userdir);
+	return	0;
+}
+
+unsigned int ChewingServer::ShutdownServer()
+{
+	map<unsigned int, Chewing*>::iterator it = clients.begin();
+	for( ; it != clients.end(); ++it )
+		delete it->second;
+	clients.clear();
+	return	0;
+}
+
+bool ChewingServer::processor()
+{
+	ChewingPipeServ cserv;
+	time_t	btick, ttick = 60*3;
+	unsigned int session, cmd, dat, ret;
+
+	fireReadyEvent();
+	
+	btick = time(NULL);
+	while ( 1 ) {
+		if ( ! cserv.fetch() ) {
+			continue;
+		}
+
+		if ( ! cserv.read() ) {
+			continue;
+		}
+
+		if ( ! cserv.get_param(session, cmd, dat) ) {
+			continue;
+		}
+
+		ret = 0;
+{
+	char aaa[50];
+	sprintf(aaa, "session: %08x, cmd: %x, dat=%08x\n", session, cmd, dat);
+}
+
+		if( cmd >= cmdFirst && cmd <= cmdLast ) {
+			if ( clients.end()==clients.find(session) ) {
+				continue;
+			}
+			ret = parseChewingCmd(cmd, (int)dat, (Chewing*)session);
+		}
+		else {
+			switch ( cmd ) {
+			case cmdAddClient:
+				ret = NewChewingClient(&cserv);
+				break;
+			case cmdRemoveClient:
+				ret = RemoveChewingClient(session);
+				break;
+			case cmdEcho:
+				ret = Echo(session);
+				break;
+			case cmdLastPhoneSeq:
+				ret = LastPhoneSeq();
+				break;
+			case cmdReloadSymbolTable:
+				ret = ReloadSymbolTables();
+				break;
+			};
+		}
+		
+		cserv.reply(ret);
+		cserv.disconnect();
+
+		if ( cmd==cmdShutdownServer ) {
 			break;
 		}
-    case cmdEcho:
-        {
-            map<unsigned int, Chewing*>::iterator iterT;
-            
-            iterT = chewingClients.find((unsigned int)lp);
-            if ( iterT!=chewingClients.end() )
-            {
-                return  ~((LRESULT)(Chewing*)(iterT->second));
-            }
-        }
-        return  -1; /* return -1 here, so clinet side can identify 
-                       its response from server or API failed */
-    case cmdLastPhoneSeq:
-        {
-            uint16 *sbuf = GetLastPhoneSeq();
-		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
-									    0, 0, CHEWINGSERVER_BUF_SIZE );
-            for ( int lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
-            {
-                if ( sbuf[lop]==0 )
-                {
-                    break;
-                }
-                obuf[lop] = sbuf[lop];
-            }
-            obuf[lop] = 0;
-		    UnmapViewOfFile( obuf );
-            return  lop;
-        }
-	case cmdReloadSymbolTable:
-		char userdir[MAX_PATH];
-		GetUserDataPath( userdir );
-		Chewing::ReloadSymbolTable(userdir);
-		break;
-	case WM_TIMER:
-		checkNewVersion();
-		KillTimer( hwnd, checkTimer );
-		checkTimer = SetTimer( hwnd, 1, 6*60*60*1000, NULL );
-		break;
-    case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
-	case WM_DESTROY:
-		{
-			map<unsigned int, Chewing*>::iterator it = chewingClients.begin();
-			for( ; it != chewingClients.end(); ++it )
-				delete it->second;
-			chewingClients.clear();
-			KillTimer( hwnd, checkTimer );
-			PostQuitMessage(0);
-			break;
+
+		if ( time(NULL)-btick>=ttick ) {
+			checkNewVersion();
+			btick = time(NULL);
+			ttick = 86400*3;
 		}
 	}
 
-	return DefWindowProc( hwnd, msg, wp, lp );
+	return 1;
+}
+
+bool ChewingServer::fireReadyEvent()
+{
+	char evt_name[512];
+	LPCTSTR evtname = evt_name;
+	DWORD osVersion = GetVersion();
+ 	DWORD major = (DWORD)(LOBYTE(LOWORD(osVersion)));
+	DWORD minor =  (DWORD)(HIBYTE(LOWORD(osVersion)));
+
+	_gen_event_name(evt_name, sizeof(evt_name), "Local\\ChewingServerEvent");
+	if( osVersion >= 0x80000000 || major <= 4 )	{ // Windows 9x or Windows NT 4
+		evtname += 6;	// remove prfix "Local\\"
+	}
+
+	HANDLE evt = OpenEvent( EVENT_ALL_ACCESS, FALSE, evtname );
+	if ( evt != INVALID_HANDLE_VALUE ) {
+		SetEvent(evt);
+		CloseHandle(evt);
+		return	true;
+	}
+	return	false;
 }
 
 bool ChewingServer::startServer()
 {
-	HANDLE hprocess = GetCurrentProcess();
-
-	char evt_name[512];
-	_gen_event_name(evt_name, sizeof(evt_name), "Local\\ChewingServerEvent");
-	LPCTSTR evtname = evt_name;
-
 	char prc_name[512];
 	_gen_event_name(prc_name, sizeof(prc_name), "Local\\ChewingServer");
 	LPCTSTR name = prc_name;
@@ -268,10 +305,8 @@ bool ChewingServer::startServer()
 	if( osVersion >= 0x80000000 || major <= 4 )	// Windows 9x or Windows NT 4
 	{
 		name += 6;	// remove prfix "Local\\"
-		evtname += 6;	// remove prfix "Local\\"
 		winname += 6;
 	}
-	HANDLE evt = OpenEvent( EVENT_ALL_ACCESS, FALSE, evtname );
 	SetWindowText( hwnd, winname );
 
 	sharedMem = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
@@ -286,18 +321,18 @@ bool ChewingServer::startServer()
 	GetUserDataPath( hashdir );
 	Chewing::LoadDataFiles( datadir, hashdir );
 
-	if( evt != INVALID_HANDLE_VALUE )
-	{
-		SetEvent(evt);
-		CloseHandle(evt);
-	}
-
-	// Set up a timer to regularly check if there is a new version.
-	checkTimer = SetTimer( hwnd, 1, 5*60*1000, NULL );
 	return true;
 }
 
-LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
+void ChewingServer::write_to_client(char *str, unsigned int len)
+{
+	char* pbuf = (char*)MapViewOfFile(sharedMem, FILE_MAP_WRITE, 
+		0, 0, CHEWINGSERVER_BUF_SIZE );
+	memcpy(pbuf, str, len);
+	UnmapViewOfFile(pbuf);
+}
+
+unsigned int ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 {
 	cmd -= cmdFirst;
 	if( cmd < (cmdKey - cmdFirst) )	 //	int (void)
@@ -350,6 +385,7 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 		(chewing->*func)(pbuf);
 		UnmapViewOfFile( pbuf );
 	}
+
 	return 0;
 }
 

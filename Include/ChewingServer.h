@@ -14,6 +14,7 @@
 //#include <list>
 #include <map>
 #include "chewingpp.h"
+#include "pipe.h"
 
 using namespace std;
 
@@ -102,9 +103,10 @@ public:
 
 		cmdAddClient,
 		cmdRemoveClient,
-        cmdEcho,
-        cmdLastPhoneSeq,
-		cmdReloadSymbolTable
+		cmdEcho,
+		cmdLastPhoneSeq,
+		cmdReloadSymbolTable,
+		cmdShutdownServer
 	};
 
 public:
@@ -112,17 +114,29 @@ public:
 	ChewingServer();
 	virtual ~ChewingServer();
 protected:
-	LRESULT parseChewingCmd( UINT cmd, int param, Chewing* chewing );
+	unsigned int parseChewingCmd(UINT cmd, int param, Chewing *chewing);
 	bool startServer();
-	HWND hwnd;
+	bool processor();
+
+	unsigned int NewChewingClient(ChewingPipeServ *cs);
+	unsigned int RemoveChewingClient(unsigned int client);
+	unsigned int Echo(unsigned int client);
+	unsigned int LastPhoneSeq();
+	unsigned int ReloadSymbolTables();
+	unsigned int ShutdownServer();
+	void checkNewVersion(void);
+	bool fireReadyEvent();
+
 	LRESULT wndProc( UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	map<unsigned int, Chewing*> chewingClients;
 
+	void write_to_client(char *str, unsigned int len);
+
+	map<unsigned int, Chewing*> clients;
+	HWND hwnd;
 	static ChewingMemberFuncCI chewingCmdTable[];
 	HANDLE sharedMem;
 	UINT checkTimer;
-	void checkNewVersion(void);
 };
 
 

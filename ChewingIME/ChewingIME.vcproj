@@ -87,7 +87,7 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories=".\;..\..\libchewing\branches\win32-utf8\include;..\include"
+				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\src;.\;..\..\libchewing\branches\win32-utf8\include;..\include"
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -180,6 +180,9 @@ copy .\Debug\Chewing.ime C:\Windows\System32\*
 			</File>
 			<File
 				RelativePath=".\IMEUILock.cpp">
+			</File>
+			<File
+				RelativePath="..\common\pipe.cpp">
 			</File>
 			<File
 				RelativePath=".\StatusWnd.cpp">
