@@ -205,6 +205,12 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c">
+			</File>
+			<File
+				RelativePath=".\Pho2Chewing.cpp">
+			</File>
+			<File
 				RelativePath=".\PhraseList.cpp">
 			</File>
 			<File
@@ -240,6 +246,9 @@
 				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing-utf8-util.h">
 			</File>
 			<File
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h">
+			</File>
+			<File
 				RelativePath="HashEd.h">
 			</File>
 			<File
@@ -247,6 +256,9 @@
 			</File>
 			<File
 				RelativePath="HashEdit.h">
+			</File>
+			<File
+				RelativePath=".\Pho2Chewing.h">
 			</File>
 			<File
 				RelativePath=".\PhraseList.h">
