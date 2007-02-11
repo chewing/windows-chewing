@@ -8,83 +8,78 @@
 
 using namespace std;
 
-const zuintable *zuin_imap, *zuin_fmap, *zuin_tmap;
-const zuintable *key_imap, *key_fmap, *key_tmap;
+const ZuinKeyCompareTable *zuin_imap, *zuin_fmap, *zuin_tmap;
 int zuin_inum, zuin_fnum, zuin_tnum;
-int key_inum, key_fnum, key_tnum;
 
-static zuintable *zuin_initial()
+static ZuinKeyCompareTable *zuin_initial()
 {
-    static zuintable map[] = {
-	"ㄅ", "ㄆ", "ㄇ", "ㄈ", "ㄉ", "ㄊ", "ㄋ", "ㄌ", "ㄍ", "ㄎ",
-	"ㄏ", "ㄐ", "ㄑ", "ㄒ", "ㄓ", "ㄔ", "ㄕ", "ㄖ", "ㄗ", "ㄘ",
-	"ㄙ"};
+    static ZuinKeyCompareTable map[] = {
+	{"ㄅ","1"}, {"ㄆ","q"}, {"ㄇ","a"}, {"ㄈ","z"}, {"ㄉ","2"}, {"ㄊ","w"},
+	{"ㄋ","s"}, {"ㄌ","x"}, {"ㄍ","e"}, {"ㄎ","d"}, {"ㄏ","c"}, {"ㄐ","r"},
+	{"ㄑ","f"}, {"ㄒ","v"}, {"ㄓ","5"}, {"ㄔ","t"}, {"ㄕ","g"}, {"ㄖ","b"},
+	{"ㄗ","y"}, {"ㄘ","h"},	{"ㄙ","n"}
+	};
+
 	zuin_inum = sizeof(map)/sizeof(map[0]);
 	return map;
 }
 
-static zuintable *zuin_final()
+static ZuinKeyCompareTable *zuin_final()
 {
-	static zuintable map[] = {
-	"ㄧㄚ", "ㄧㄠ", "ㄧㄝ", "ㄧㄡ", "ㄧㄢ", "ㄧㄣ", "ㄧㄤ", "ㄧㄥ","ㄧㄞ","ㄧㄛ",
-	"ㄨㄚ", "ㄨㄛ", "ㄨㄞ", "ㄨㄟ", "ㄨㄢ", "ㄨㄣ", "ㄨㄤ", "ㄨㄥ",
-	"ㄩㄝ", "ㄩㄢ", "ㄩㄣ", "ㄩㄥ",
-	"ㄧ", "ㄨ", "ㄩ", "ㄚ", "ㄛ", "ㄜ", "ㄝ", "ㄞ", "ㄟ", "ㄠ",
-	"ㄡ", "ㄢ", "ㄣ", "ㄤ", "ㄥ", "ㄦ"};
+	static ZuinKeyCompareTable map[] = {
+	{"ㄧㄚ","u8"}, {"ㄧㄠ","ul"}, {"ㄧㄝ","u,"}, {"ㄧㄡ","u."}, {"ㄧㄢ","u0"},
+	{"ㄧㄣ","up"}, {"ㄧㄤ","u;"}, {"ㄧㄥ","u/"}, {"ㄧㄞ","u9"}, {"ㄧㄛ","ui"},
+	{"ㄨㄚ","j8"}, {"ㄨㄛ","ji"}, {"ㄨㄞ","j9"}, {"ㄨㄟ","jo"}, {"ㄨㄢ","j0"},
+	{"ㄨㄣ","jp"}, {"ㄨㄤ","j;"}, {"ㄨㄥ","j/"},
+	{"ㄩㄝ","m,"}, {"ㄩㄢ","m0"}, {"ㄩㄣ","mp"}, {"ㄩㄥ","m/"},
+	{"ㄧ","u"}, {"ㄨ","j"}, {"ㄩ","m"}, {"ㄚ","8"}, {"ㄛ","i"}, {"ㄜ","k"},
+	{"ㄝ",","}, {"ㄞ","9"}, {"ㄟ","o"}, {"ㄠ","l"}, {"ㄡ","."}, {"ㄢ","0"},
+	{"ㄣ","p"}, {"ㄤ",";"}, {"ㄥ","/"}, {"ㄦ","-"}
+	};
+
 	zuin_fnum = sizeof(map)/sizeof(map[0]);
 	return map;
 }
 
-static zuintable *zuin_tone()
+static ZuinKeyCompareTable *zuin_tone()
 {
-	static zuintable map[] = {"˙", "ˊ", "ˇ", "ˋ"};
-	zuin_tnum = sizeof(map)/sizeof(map[0]);
-	return map;
-}
+	static ZuinKeyCompareTable map[] = {
+	{"˙","7"}, {"ˊ","6"}, {"ˇ","3"}, {"ˋ","4"}
+	};
 
-static zuintable *key_initial()
-{
-    static zuintable map[] = {
-	"1", "q", "a", "z", "2", "w", "s", "x", "e", "d",
-	"c", "r", "f", "v", "5", "t", "g", "b", "y", "h",
-	"n"};
-	key_inum = sizeof(map)/sizeof(map[0]);
-	return map;
-}
-
-static zuintable *key_final()
-{
-	static zuintable map[] = {
-	"u8", "ul", "u,", "u.", "u0", "up", "u;", "u/","u9","ui",
-    "j8", "ji", "j9", "jo", "j0", "jp", "j;", "j/",
-    "m,", "m0", "mp", "m/",
-    "u", "j", "m", "8", "i", "k", ",", "9", "o", "l",
-    ".", "0", "p", ";", "/", "-"};
-	key_fnum = sizeof(map)/sizeof(map[0]);
-	return map;
-}
-
-static zuintable *key_tone()
-{
-	static zuintable map[] = {"7", "6", "3", "4"};
 	zuin_tnum = sizeof(map)/sizeof(map[0]);
 	return map;
 }
 
 void FreeMap()
-{}
+{
+}
 
 void InitMap()
 {
 	zuin_imap=zuin_initial();
 	zuin_fmap=zuin_final();
 	zuin_tmap=zuin_tone();
-	key_imap=key_initial();
-	key_fmap=key_final();
-	key_tmap=key_tone();
 }
 
-int big52utf8(string filename)
+int key_lookup(const ZuinKeyCompareTable *table,
+			  int table_size,
+			  char *target)
+{
+	string pstring;
+	int	i,j;
+
+	pstring=string(target);
+	for ( i = 0; i < table_size; i++ ) {
+		j = pstring.find( table[ i ].zuin );
+		if (j>=0) {
+			return	i;
+		}
+	}
+	return	table_size;
+}
+
+int Big52UTF8(string filename)
 {
 	HANDLE hHashFile = CreateFile( filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
 	if( hHashFile == INVALID_HANDLE_VALUE )
@@ -120,7 +115,7 @@ int big52utf8(string filename)
 	return 0;
 }
 
-int utf16le2utf8(string filename)
+int UTF16LE2UTF8(string filename)
 {
 	HANDLE hHashFile = CreateFile( filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
 	if( hHashFile == INVALID_HANDLE_VALUE )
@@ -150,7 +145,7 @@ int utf16le2utf8(string filename)
 	return 0;
 }
 
-void postobegin(string file)
+void Pos2Begin(string file)
 {
 	fstream txtfile;
 	txtfile.open(file.c_str(), ios_base::in);
@@ -158,7 +153,7 @@ void postobegin(string file)
 	txtfile.seekp(0, ios_base::beg);
 }
 
-bool utf16lebom(string file)
+bool DetectUTF16LEBom(string file)
 {
 	const char utf16le_bom[] = {'\xff', '\xfe'};
 	bool isutf16le = false;
@@ -166,14 +161,14 @@ bool utf16lebom(string file)
 	fstream txtfile;
 	txtfile.open(file.c_str(), ios_base::in);
 
-    postobegin(file);
+    Pos2Begin(file);
 	char buf[2];
 	if (txtfile.read(buf, 2)) {
 		isutf16le = strncmp(buf, utf16le_bom, 2) == 0;
 	}
 	txtfile.close();
 
-	postobegin(file);
+	Pos2Begin(file);
 	return isutf16le;
 }
 
@@ -181,8 +176,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	char phase[100];
 	bool isbig5utf16le;
-	string filename, seach;
-	char *data;
+	string filename;
+	char *p;
 
 	int i,j;
 	uint16 num;
@@ -193,8 +188,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << " enter the file name = ";
 	cin >> filename;
 
-	isbig5utf16le=utf16lebom(filename);
-	(isbig5utf16le)? (utf16le2utf8(filename)):(big52utf8(filename));
+	isbig5utf16le=DetectUTF16LEBom(filename);
+	(isbig5utf16le)? (UTF16LE2UTF8(filename)):(Big52UTF8(filename));
 
 	utf8newphonetic.open("~temp1.tmp", ios_base::in);
 	chewingphone.open("~temp2.tmp",ios_base::out);
@@ -203,44 +198,22 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	while(!utf8newphonetic.getline(phase, 100, '\n').eof())
 	{
-		data=strtok(phase," ");
-		chewingphone << data << " ";
+		p=strtok(phase," ");
+		chewingphone << p << " ";
 
-		data=strtok(NULL," ");
+		p=strtok(NULL," ");
 		
-		while(data != NULL)
+		while(p != NULL)
 		{
-			seach=string(data);
-			for(i=0; i<zuin_inum; i++)
-			{
-				j=seach.find(zuin_imap[i].zuin);
-				if(j>=0)	
-				{
-					chewingphone << key_imap[i].zuin;
-					break;
-				}
-			}
+			i=key_lookup(zuin_imap, zuin_inum, p);
+			if (i != zuin_inum) chewingphone << zuin_imap[i].keysel;
+			i=key_lookup(zuin_fmap, zuin_fnum, p);
+			if (i != zuin_fnum) chewingphone << zuin_fmap[i].keysel;
+			i=key_lookup(zuin_tmap, zuin_tnum, p);
+			if (i != zuin_tnum) chewingphone << zuin_tmap[i].keysel;
 
-			for(i=0; i<zuin_fnum; i++)
-			{
-				j=seach.find(zuin_fmap[i].zuin);
-				if(j>=0)	
-				{
-					chewingphone << key_fmap[i].zuin;
-					break;
-				}
-			}
-			for(i=0; i<zuin_tnum; i++)
-			{
-				j=seach.find(zuin_tmap[i].zuin);
-				if(j>=0)	
-				{
-					chewingphone << key_tmap[i].zuin;
-					break;
-				}
-			}
 			chewingphone << " ";
-			data=strtok(NULL," ");
+			p=strtok(NULL," ");
 		};
 	chewingphone << "\n";
 	};
@@ -276,12 +249,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	while(!chewingfone.getline(phase, 100, '\n').eof())
 	{
-		data=strtok(phase," ");
-		vocabulary=data;
+		p=strtok(phase," ");
+		vocabulary=string(p);
 
 		chewingdata.phonenum=int((double) vocabulary.length()/3.0);
 
-		data=strtok(NULL," ");
+		p=strtok(NULL," ");
 		
 		uhashfile.write((char*) &chewingdata.lastfreq, sizeof(int));
 		uhashfile.write((char*) &chewingdata.lasttime, sizeof(int));
@@ -289,13 +262,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		uhashfile.write((char*) &chewingdata.systemfreq, sizeof(int));
 		uhashfile.write((char*) &chewingdata.phonenum, sizeof(bool));
 
-		while(data != NULL)
+		while(p != NULL)
 		{
 			//KB_DEFAULT=0;
-			PhoneFromKey(phoneBuf, data, 0, 1);
+			PhoneFromKey(phoneBuf, p, 0, 1);
 			num=UintFromPhone(phoneBuf);
 			uhashfile.write((char*) &num, sizeof(uint16));
-			data=strtok(NULL," ");
+			p=strtok(NULL," ");
 		};
 		chewingdata.bits=3*chewingdata.phonenum;
 		uhashfile.write((char*) &chewingdata.bits, sizeof(bool));

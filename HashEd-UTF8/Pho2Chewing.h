@@ -14,8 +14,9 @@
 
 typedef struct
 {
-	const char zuin[10];
-}zuintable;
+	char zuin[8];
+	char keysel[5];
+}ZuinKeyCompareTable;
 
 typedef struct
 {
