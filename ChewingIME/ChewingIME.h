@@ -30,6 +30,7 @@ extern DWORD g_enableShift;
 extern DWORD g_fixCompWnd;
 extern DWORD g_ColorCandWnd;
 extern DWORD g_ColoredCompCursor;
+extern DWORD g_enableSimp;
 extern DWORD g_FontSize;
 extern DWORD g_cursorCandList;
 extern DWORD g_phraseMark;

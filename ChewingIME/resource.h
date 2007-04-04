@@ -81,6 +81,7 @@
 #define IDC_CTRL_SYMBOL                 1027
 #define IDC_FONT_SIZE_SPIN              1028
 #define IDC_BUTTON20                    1028
+#define IDC_ENABLE_Simp                 1028
 #define IDC_CURSOR_CANDLIST             1029
 #define IDC_BUTTON21                    1029
 #define IDC_ENABLE_CAPSLOCK             1030

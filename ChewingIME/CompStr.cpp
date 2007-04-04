@@ -77,7 +77,26 @@ void CompStr::setShowMsg(LPCWSTR show_msg)
 
 void CompStr::setResultStr(LPCWSTR result_str)
 {
-	wcscpy( resultStr, result_str );
+	if (GetVersion() < 0x80000000)
+	{
+		wchar_t resulttemp[256];
+		if (g_enableSimp)
+		{
+			wcscpy( resulttemp , result_str );
+			LCMapStringW(
+				0x0404, LCMAP_SIMPLIFIED_CHINESE,
+				(LPCWSTR) resulttemp, -1,
+				(LPWSTR) resultStr, 256);
+		}
+		else
+		{
+			wcscpy( resultStr, result_str );
+		}
+	}
+	else
+	{
+		wcscpy( resultStr, result_str );
+	}
 	cs.dwResultStrLen = wcslen( resultStr );
 	cs.dwResultClauseLen = sizeof(resultClause);
 	resultClause[0] = 0;

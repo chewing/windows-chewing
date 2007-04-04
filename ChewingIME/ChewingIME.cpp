@@ -40,6 +40,7 @@ DWORD g_defaultFullSpace = false;
 DWORD g_spaceAsSelection = false;
 DWORD g_enableShift = true;
 DWORD g_shiftCapital = false;
+DWORD g_enableSimp = false;
 DWORD g_addPhraseForward = true;
 DWORD g_hideStatusWnd = false;
 DWORD g_fixCompWnd = false;
@@ -116,6 +117,7 @@ void LoadConfig()
 		RegQueryValueEx( hk, "SpaceAsSelection", 0, &type, (LPBYTE)&g_spaceAsSelection, &size );
 		RegQueryValueEx( hk, "EnableShift", 0, &type, (LPBYTE)&g_enableShift, &size );
 		RegQueryValueEx( hk, "ShiftCapital", 0, &type, (LPBYTE)&g_shiftCapital, &size );
+		RegQueryValueEx( hk, "EnableSimp", 0, &type, (LPBYTE)&g_enableSimp, &size );
 		RegQueryValueEx( hk, "AddPhraseForward", 0, &type, (LPBYTE)&g_addPhraseForward, &size );
 		RegQueryValueEx( hk, "FixCompWnd", 0, &type, (LPBYTE)&g_fixCompWnd, &size );
 		RegQueryValueEx( hk, "HideStatusWnd", 0, &type, (LPBYTE)&g_hideStatusWnd, &size );
@@ -166,6 +168,7 @@ void SaveConfig()
 		RegSetValueEx( hk, _T("SpaceAsSelection"), 0, REG_DWORD, (LPBYTE)&g_spaceAsSelection, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("EnableShift"), 0, REG_DWORD, (LPBYTE)&g_enableShift, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("ShiftCapital"), 0, REG_DWORD, (LPBYTE)&g_shiftCapital, sizeof(DWORD) );
+		RegSetValueEx( hk, _T("EnableSimp"), 0, REG_DWORD, (LPBYTE)&g_enableSimp, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("AddPhraseForward"), 0, REG_DWORD, (LPBYTE)&g_addPhraseForward, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("FixCompWnd"), 0, REG_DWORD, (LPBYTE)&g_fixCompWnd, sizeof(DWORD) );
 		RegSetValueEx( hk, _T("HideStatusWnd"), 0, REG_DWORD, (LPBYTE)&g_hideStatusWnd, sizeof(DWORD) );
@@ -271,6 +274,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			CheckDlgButton( hwnd, IDC_ESC_CLEAN_ALL_BUF, g_escCleanAllBuf );
 			CheckDlgButton( hwnd, IDC_SHIFT_SYMBOL, g_shiftSymbol );
 			CheckDlgButton( hwnd, IDC_CTRL_SYMBOL, g_ctrlSymbol );
+			CheckDlgButton( hwnd, IDC_ENABLE_Simp, g_enableSimp );
 
 			HWND combo = GetDlgItem( hwnd, IDC_SELKEYS );
 			const TCHAR** pselkeys = g_selKeyNames;
@@ -306,6 +310,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
 			g_shiftSymbol = IsDlgButtonChecked( hwnd, IDC_SHIFT_SYMBOL );
 			g_ctrlSymbol = IsDlgButtonChecked( hwnd, IDC_CTRL_SYMBOL );
+			g_enableSimp = IsDlgButtonChecked( hwnd, IDC_ENABLE_Simp );
 
 			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
