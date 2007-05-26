@@ -22,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"

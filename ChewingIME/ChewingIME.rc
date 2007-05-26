@@ -202,9 +202,9 @@ BEGIN
                     114,66,10
     CONTROL         "漢語拼音",IDC_KB9,"Button",BS_AUTORADIOBUTTON,155,126,
                     65,12
-    CONTROL         "LShift ",IDC_LSHIFT_SYMBOL,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Shift ",IDC_SHIFT_SYMBOL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,9,134,33,10
-    CONTROL         "RShift",IDC_RSHIFT_SYMBOL,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Ctrl",IDC_CTRL_SYMBOL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,47,134,28,10
     LTEXT           "輸入簡易符號",IDC_STATIC,81,135,56,10
     CONTROL         "輸出簡體字",IDC_ENABLE_Simp,"Button",BS_AUTOCHECKBOX | 

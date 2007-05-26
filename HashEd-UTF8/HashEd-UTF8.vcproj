@@ -208,9 +208,6 @@
 				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c">
 			</File>
 			<File
-				RelativePath=".\Pho2Chewing.cpp">
-			</File>
-			<File
 				RelativePath=".\PhraseList.cpp">
 			</File>
 			<File
