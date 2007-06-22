@@ -6,7 +6,6 @@
 #include <string.h>
 #include <tchar.h>
 #include ".\chewingclient.h"
-#include ".\pipe.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -16,171 +15,108 @@ ChewingClient::ChewingClient( int kbLayout, bool spaceAsSel, const char* selKeys
 	: serverWnd(NULL), chewingID(0), sharedMem(INVALID_HANDLE_VALUE)
 	, spaceAsSelection(spaceAsSel)
 	, keyLayout(kbLayout)
-	, advAfterSelection(AdvAfterSel)
+    , advAfterSelection(AdvAfterSel)
 	, escCleanAllBuf( EscCleanAllBuf )
 {
 	ConnectServer();
 	SelKey((char*)selKeys);
-	SetAdvanceAfterSelection(advAfterSelection);
+    SetAdvanceAfterSelection(advAfterSelection);
 	SetEscCleanAllBuf( escCleanAllBuf );
-	pSelKeys = (char*)selKeys;
+    pSelKeys = (char*)selKeys;
 }
 
 ChewingClient::~ChewingClient()
 {
-	SendMessage( chewingID, ChewingServer::cmdRemoveClient, 0);
-	if ( sharedMem==INVALID_HANDLE_VALUE )
-	{
-		CloseHandle(sharedMem);
-	}
-}
-
-unsigned int ChewingClient::SendMessage(unsigned int session, unsigned int cmd,
-					unsigned int dat)
-{
-	ChewingPipeClnt pipe;
-	return	pipe.SendMessageReply(session, cmd, dat);
-}
-
-unsigned int ChewingClient::AddClient()
-{
-	ChewingPipeClnt pipe;
-	return	pipe.SendMessageReply(0, ChewingServer::cmdAddClient, 0);
+	SendMessage( serverWnd, ChewingServer::cmdRemoveClient, 0, chewingID );
+    if ( sharedMem==INVALID_HANDLE_VALUE )
+    {
+        CloseHandle(sharedMem);
+    }
 }
 
 void ChewingClient::SetKeyboardLayout(int kb)
-{
-	SendMessage(chewingID, ChewingServer::cmdSetKeyboardLayout, kb);
-}
-
+{	SendMessage( serverWnd, ChewingServer::cmdSetKeyboardLayout, kb, chewingID);	}
 
 void ChewingClient::SetHsuSelectionKeyType(int type)
-{
-	SendMessage(chewingID, ChewingServer::cmdSetHsuSelectionKeyType, type);
-}
-
+{	SendMessage( serverWnd, ChewingServer::cmdSetHsuSelectionKeyType, type, chewingID);	}
 
 int ChewingClient::Space()
-{
-	return (int)SendMessage(chewingID, ChewingServer::cmdSpace, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdSpace, 0, chewingID);	}
 
 int ChewingClient::Esc()
-{
-	return (int)SendMessage(chewingID, ChewingServer::cmdEsc, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdEsc, 0, chewingID);	}
 
 int ChewingClient::Enter()
-{
-	return (int)SendMessage(chewingID, ChewingServer::cmdEnter, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdEnter, 0, chewingID);	}
 
 int ChewingClient::Delete()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdDelete, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdDelete, 0, chewingID);	}
 
 int ChewingClient::Backspace()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdBackspace, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdBackspace, 0, chewingID);	}
 
 int ChewingClient::Tab()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdTab, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdTab, 0, chewingID);	}
 
 int ChewingClient::ShiftLeft()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdShiftLeft, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdShiftLeft, 0, chewingID);	}
 
 int ChewingClient::ShiftRight()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdShiftRight, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdShiftRight, 0, chewingID);	}
 
 int ChewingClient::ShiftSpace()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdShiftSpace, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdShiftSpace, 0, chewingID);	}
 
 int ChewingClient::Right()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdRight, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdRight, 0, chewingID);	}
 
 int ChewingClient::Left()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdLeft, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdLeft, 0, chewingID);	}
 
 int ChewingClient::Up()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdUp, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdUp, 0, chewingID);	}
 
 int ChewingClient::Down()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdDown, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdDown, 0, chewingID);	}
 
 int ChewingClient::Home()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdHome, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdHome, 0, chewingID);	}
 
 int ChewingClient::End()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdEnd, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdEnd, 0, chewingID);	}
 
 int ChewingClient::Capslock()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCapslock, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCapslock, 0, chewingID);	}
 
 int ChewingClient::Key(unsigned int code)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdKey, code);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdKey, code, chewingID);	}
 
 int ChewingClient::CtrlNum(unsigned int code)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCtrlNum, code);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCtrlNum, code, chewingID);	}
 
 int ChewingClient::NumPad(unsigned int code)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdNumPad, code);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdNumPad, code, chewingID);	}
 
 int ChewingClient::CtrlOption(unsigned int code)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCtrlOption, code);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCtrlOption, code, chewingID);	}
 
 int ChewingClient::DoubleTab()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdDoubleTab, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdDoubleTab, 0, chewingID);	}
 
 // Return the i-th selection key, i >= 0.
 char ChewingClient::SelKey(int i)
-{
-	return (char)SendMessage( chewingID, ChewingServer::cmdGetSelKey, i);
-}
+{	return (char)SendMessage( serverWnd, ChewingServer::cmdGetSelKey, i, chewingID);	}
 
 void ChewingClient::SetAdvanceAfterSelection(bool bDo)
 {
-	SendMessage( chewingID, ChewingServer::cmdAdvanceAfterSelection, 
-		(bDo==true)?1 :0);
+    SendMessage( serverWnd, ChewingServer::cmdAdvanceAfterSelection, 
+                (bDo==true)?1 :0, chewingID);
 }
 
 void ChewingClient::SetEasySymbolInput(bool bSet)
 {
-	SendMessage( chewingID, ChewingServer::cmdEasySymbolInput, 
-		(bSet==true)?1 :0);
+    SendMessage( serverWnd, ChewingServer::cmdEasySymbolInput, 
+                (bSet==true)?1 :0, chewingID);
 }
 
 void ChewingClient::SelKey(char* selkey)
@@ -202,118 +138,85 @@ void ChewingClient::SelKey(char* selkey)
 	CloseHandle(sharedMem);
     sharedMem = INVALID_HANDLE_VALUE;
 
-    SendMessage( chewingID, ChewingServer::cmdSetSelKey, 0);
+    SendMessage( serverWnd, ChewingServer::cmdSetSelKey, 0, chewingID);
 }
 
 char* ChewingClient::ZuinStr()
 {
-	int len = (int)SendMessage( chewingID, ChewingServer::cmdZuinStr, 0);
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdZuinStr, 0, chewingID);
 	return (char*)GetDataFromSharedMem(len);
 }
 
 char* ChewingClient::CommitStr()
 {
-	int len = (int)SendMessage( chewingID, ChewingServer::cmdCommitStr, 0);
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdCommitStr, 0, chewingID);
 	return (char*)GetDataFromSharedMem(len);
 }
 
 int   ChewingClient::CommitReady()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCommitReady, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCommitReady, 0, chewingID);	}
 
 char* ChewingClient::Buffer()
 {
-	int len = (int)SendMessage( chewingID, ChewingServer::cmdBuffer, 0);
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdBuffer, 0, chewingID);
 	return (char*)GetDataFromSharedMem(len);
 }
 
 int   ChewingClient::BufferLen()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdBufferLen, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdBufferLen, 0, chewingID);	}
 
 int ChewingClient::CursorPos()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCursorPos, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCursorPos, 0, chewingID);	}
 
 int ChewingClient::PointStart()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdPointStart, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdPointStart, 0, chewingID);	}
 
 int ChewingClient::PointEnd()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdPointEnd, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdPointEnd, 0, chewingID);	}
 
 int ChewingClient::KeystrokeRtn()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdKeystrokeRtn, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdKeystrokeRtn, 0, chewingID);	}
 
 int ChewingClient::KeystrokeIgnore()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdKeystrokeIgnore, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdKeystrokeIgnore, 0, chewingID);	}
 
 int ChewingClient::ChineseMode()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdChineseMode, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdChineseMode, 0, chewingID);	}
 
 // CandidateWindow-related routines
 int ChewingClient::Candidate()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCandidate, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCandidate, 0, chewingID);	}
 
 int ChewingClient::ChoicePerPage()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdChoicePerPage, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdChoicePerPage, 0, chewingID);	}
 
 int ChewingClient::TotalChoice()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdTotalChoice, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdTotalChoice, 0, chewingID);	}
 
 int ChewingClient::TotalPage()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdTotalPage, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdTotalPage, 0, chewingID);	}
 
 int ChewingClient::CurrentPage()
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdCurrentPage, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdCurrentPage, 0, chewingID);	}
 
 // Return the i-th selection wchar_t, i >= 0.
 char* ChewingClient::Selection(int i)
 {
-	int len = (int)SendMessage( chewingID, ChewingServer::cmdSelection, i);
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdSelection, i, chewingID);
 	return (char*)GetDataFromSharedMem(len);
 }
 
 void ChewingClient::SetFullShape(bool full)
-{
-	SendMessage( chewingID, ChewingServer::cmdSetFullShape, full);
-}
+{	SendMessage( serverWnd, ChewingServer::cmdSetFullShape, full, chewingID);	}
 
 bool ChewingClient::GetFullShape(void)
-{
-	return !!SendMessage( chewingID, ChewingServer::cmdGetFullShape, 0);
-}
+{	return !!SendMessage( serverWnd, ChewingServer::cmdGetFullShape, 0, chewingID);	}
 
 void ChewingClient::SetSpaceAsSelection(bool spaceAsSelection)
-{
-	SendMessage( chewingID, ChewingServer::cmdSetSpaceAsSelection, spaceAsSelection);
-}
+{	SendMessage( serverWnd, ChewingServer::cmdSetSpaceAsSelection, spaceAsSelection, chewingID);	}
 
-void ChewingClient::SetEscCleanAllBuf( bool escCleanAllBuf )
-{
-	SendMessage( chewingID, ChewingServer::cmdSetEscCleanAllBuf, escCleanAllBuf);
+void ChewingClient::SetEscCleanAllBuf( bool escCleanAllBuf ) {
+	SendMessage( serverWnd, ChewingServer::cmdSetEscCleanAllBuf, escCleanAllBuf, chewingID );
 }
 
 unsigned char* ChewingClient::GetDataFromSharedMem(int len)
@@ -325,11 +228,11 @@ unsigned char* ChewingClient::GetDataFromSharedMem(int len)
 	}
 
 	sharedMem = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, filemapName);
-	if ( sharedMem==NULL )
-	{
-		sharedMem = INVALID_HANDLE_VALUE; 
-		return  NULL;
-	}
+    if ( sharedMem==NULL )
+    {
+        sharedMem = INVALID_HANDLE_VALUE; 
+        return  NULL;
+    }
 
 	char* buf = (char*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
 	if( buf )
@@ -338,8 +241,8 @@ unsigned char* ChewingClient::GetDataFromSharedMem(int len)
 		memcpy( data, buf, len );
 		UnmapViewOfFile(buf);
 	}
-	CloseHandle(sharedMem);
-	sharedMem = INVALID_HANDLE_VALUE;
+    CloseHandle(sharedMem);
+    sharedMem = INVALID_HANDLE_VALUE;
 	return data;
 }
 
@@ -359,9 +262,9 @@ char* _gen_event_name(char *buf, int szbuf, const char *prefix)
 void ChewingClient::ConnectServer(void)
 {
 	char tempname[512];
-
 	_gen_event_name(tempname, sizeof(tempname), chewingServerClassName);
-	if ( 0==ChewingClient::EchoFromServer() )
+	serverWnd = FindWindow( tempname, NULL );
+	if( ! serverWnd )
 	{
 		char evt_name[512];
 		_gen_event_name(evt_name, sizeof(evt_name), "Local\\ChewingServerEvent");
@@ -378,68 +281,58 @@ void ChewingClient::ConnectServer(void)
 		GetSystemDirectory( server_path, MAX_PATH );
 		_tcscat( server_path, _T("\\IME\\Chewing\\ChewingServer.exe") );
 		ShellExecute( NULL, "open", server_path, NULL, NULL, SW_HIDE );
-		WaitForSingleObject( evt, 15000 );
+		WaitForSingleObject( evt, 10000 );
 		CloseHandle(evt);
+		serverWnd = FindWindow( tempname, NULL );
 	}
 
-	chewingID = AddClient();
-
-	_gen_event_name(filemapName, sizeof(filemapName), "Local\\ChewingServer");
+	chewingID = SendMessage( serverWnd, ChewingServer::cmdAddClient, 0, 0 );
+	GetWindowText( serverWnd, tempname, sizeof(tempname) );
+	_gen_event_name(filemapName, sizeof(filemapName), tempname);
 
 	SetSpaceAsSelection(spaceAsSelection);
 	SetKeyboardLayout(keyLayout);
 }
 
 int ChewingClient::ShowMsgLen(void)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdShowMsgLen, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdShowMsgLen, 0, chewingID);	}
 
 char* ChewingClient::ShowMsg(void)
 {
-	int len = (int)SendMessage( chewingID, ChewingServer::cmdShowMsg, 0);
+	int len = (int)SendMessage( serverWnd, ChewingServer::cmdShowMsg, 0, chewingID);
 	return (char*)GetDataFromSharedMem(len);
 }
 
 void ChewingClient::SetAddPhraseForward(bool add_forward)
-{
-	SendMessage( chewingID, ChewingServer::cmdSetAddPhraseForward, add_forward);
-}
+{	SendMessage( serverWnd, ChewingServer::cmdSetAddPhraseForward, add_forward, chewingID);	}
 
 int ChewingClient::GetAddPhraseForward(void)
-{
-	return (int)SendMessage( chewingID, ChewingServer::cmdGetAddPhraseForward, 0);
-}
+{	return (int)SendMessage( serverWnd, ChewingServer::cmdGetAddPhraseForward, 0, chewingID);	}
 
 unsigned int ChewingClient::EchoFromServer()
-{
-	return (unsigned int)SendMessage( chewingID, ChewingServer::cmdEcho, 0);
-}
+{	return (unsigned int)SendMessage( serverWnd, ChewingServer::cmdEcho, 0, chewingID);	}
 
 bool ChewingClient::CheckServer()
 {
-	if ( ChewingClient::EchoFromServer()==(~chewingID) )
-	{
-		return  true;
-	}
-	ConnectServer();
+    if ( ChewingClient::EchoFromServer()==(~chewingID) )
+    {
+        return  true;
+    }
+    ConnectServer();
 	SelKey((char*)pSelKeys);
-	return  false;
+    return  false;
 }
 
 void ChewingClient::SetCandPerPage(int len)
-{
-	SendMessage( chewingID, ChewingServer::cmdSetCandPerPage, len);
-}
+{	SendMessage( serverWnd, ChewingServer::cmdSetCandPerPage, len, chewingID);	}
 
-unsigned char* ChewingClient::GetIntervalArray(int& len)
-{
-	len = (int)SendMessage( chewingID, ChewingServer::cmdIntervalArray, 0);
+unsigned char* ChewingClient::GetIntervalArray(int& len) {
+	len = (int)SendMessage( serverWnd, ChewingServer::cmdIntervalArray, 0, chewingID );
 	return GetDataFromSharedMem( len );
 }
 
 void ChewingClient::ReloadSymbolTable(void)
 {
-	SendMessage( chewingID, ChewingServer::cmdReloadSymbolTable, 0);
+	SendMessage( serverWnd, ChewingServer::cmdReloadSymbolTable, 0, 0);
 }
 

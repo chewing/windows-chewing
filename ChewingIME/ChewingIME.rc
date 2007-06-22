@@ -206,9 +206,9 @@ BEGIN
                     WS_TABSTOP,9,134,33,10
     CONTROL         "Ctrl",IDC_CTRL_SYMBOL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,47,134,28,10
-    LTEXT           "輸入簡易符號",IDC_STATIC,81,135,56,10
-    CONTROL         "輸出簡體字",IDC_ENABLE_Simp,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,147,88,10
+    LTEXT           "輸出簡易符號",IDC_STATIC,81,135,56,10
+    CONTROL         "輸出簡體字 (NT以上限定)",IDC_ENABLE_Simp,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,147,98,10
 END
 
 IDD_UPDATE DIALOGEX 0, 0, 237, 113
