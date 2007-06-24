@@ -114,7 +114,7 @@ public:
 	ChewingServer();
 	virtual ~ChewingServer();
 protected:
-	unsigned int parseChewingCmd(UINT cmd, int param, Chewing *chewing);
+	LRESULT parseChewingCmd(UINT cmd, int param, Chewing *chewing);
 	bool startServer();
 	bool processor();
 
@@ -132,7 +132,7 @@ protected:
 
 	void write_to_client(char *str, unsigned int len);
 
-	map<unsigned int, Chewing*> clients;
+	map<unsigned int, Chewing*> chewingClients;
 	HWND hwnd;
 	static ChewingMemberFuncCI chewingCmdTable[];
 	HANDLE sharedMem;

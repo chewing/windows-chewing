@@ -3,8 +3,8 @@
 ; HM NIS Edit Wizard helper defines
 ; TODO don't use chinese in PRODUCT_UNINST_KEY 
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.4.2"
-!define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng"
+!define PRODUCT_VERSION "0.3.4.5"
+!define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng, sky008888"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define TMPDIR "$TEMP\ChewingInst"
@@ -86,7 +86,7 @@ Function uninstOld
 
   ;  run uninstaller
   ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
-  MessageBox MB_OK|MB_ICONINFORMATION "R0 = '$R0'" IDOK
+  ;MessageBox MB_OK|MB_ICONINFORMATION "R0 = '$R0'" IDOK
   ${If} $R0 != ""
     ClearErrors
     ExecWait '$R0 /S _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
