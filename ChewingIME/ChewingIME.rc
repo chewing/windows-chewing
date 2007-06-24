@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中文 (台灣) resources
+// Chinese (Taiwan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
 #ifdef _WIN32
@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,2,2
- PRODUCTVERSION 0,3,2,2
+ FILEVERSION 0,3,4,5
+ PRODUCTVERSION 0,3,4,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -70,12 +70,12 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "FileDescription", "新酷音輸入法"
-            VALUE "FileVersion", "0, 3, 2, 2"
+            VALUE "FileVersion", "0, 3, 4, 5"
             VALUE "InternalName", "ChewingIME"
-            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "LegalCopyright", "Copyright (C) 2007"
             VALUE "OriginalFilename", "ChewingIME.dll"
             VALUE "ProductName", "Win32 Chewing 中文輸入法"
-            VALUE "ProductVersion", "0, 3, 2, 2"
+            VALUE "ProductVersion", "0, 3, 4, 5"
         END
     END
     BLOCK "VarFileInfo"
@@ -104,20 +104,20 @@ IDI_HALF                ICON                    "half.ico"
 // Dialog
 //
 
-IDD_ABOUT DIALOGEX 0, 0, 275, 222
+IDD_ABOUT DIALOGEX 0, 0, 275, 236
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "關於新酷音輸入法"
 FONT 9, "新細明體", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,7,105,261,90
+    GROUPBOX        "",IDC_STATIC,7,119,261,90
     LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 PCMan, seamxr, andyhorng 等人，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
-                    IDC_STATIC,25,115,224,75
-    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.4.2\n\n發行日期：2006.11.26\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng\n\n以多位前輩們發展的的 libchewing 為基礎",
-                    IDC_STATIC,98,7,170,92
+                    IDC_STATIC,25,129,224,75
+    LTEXT           "新酷音 － 智慧型注音輸入法\n\n版本： 0.3.4.5\n\n發行日期：2007.6.24\n\n授權方式： GNU General Public License\n\n軟體開發者：洪任諭 (PCMan), seamxr, andyhorng, sky008888\n\n以多位前輩們發展的的 libchewing 為基礎",
+                    IDC_STATIC,98,7,170,109
     CONTROL         IDI_FULL,IDC_STATIC,"Static",SS_BITMAP,7,7,80,87
     LTEXT           "題字：翁政銓",IDC_STATIC,21,97,49,8
-    PUSHBUTTON      "確定 (&O)",IDOK,112,201,50,14
+    PUSHBUTTON      "確定 (&O)",IDOK,112,215,50,14
 END
 
 IDD_UI DIALOGEX 0, 0, 237, 130
@@ -311,7 +311,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 268
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 229
     END
 
     IDD_UI, DIALOG
@@ -411,7 +411,7 @@ BEGIN
     ID_MENU                 "新酷音輸入法設定"
 END
 
-#endif    // 中文 (台灣) resources
+#endif    // Chinese (Taiwan) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

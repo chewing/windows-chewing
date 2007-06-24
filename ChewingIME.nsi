@@ -4,7 +4,7 @@
 ; TODO don't use chinese in PRODUCT_UNINST_KEY 
 !define PRODUCT_NAME "新酷音輸入法"
 !define PRODUCT_VERSION "0.3.4.5"
-!define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng, sky008888"
+!define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng, sky008888, kcwu"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define TMPDIR "$TEMP\ChewingInst"

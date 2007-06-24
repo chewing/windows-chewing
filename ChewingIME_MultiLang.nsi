@@ -2,8 +2,8 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "New Chewing IM"
-!define PRODUCT_VERSION "0.3.4.2"
-!define PRODUCT_PUBLISHER "PCMan, seamxr, andyhorng"
+!define PRODUCT_VERSION "0.3.4.5"
+!define PRODUCT_PUBLISHER "PCMan, seamxr, andyhorng, sky008888, kcwu"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define TMPDIR "$TEMP\ChewingInst"
@@ -112,8 +112,8 @@ Section "MainSection" SEC01
     SetOutPath "${TMPDIR}"
     File "big52utf8\Release\big52utf8.exe"
 
-    File "..\libchewing-data\utf-8\tsi.src"
-    File "..\libchewing-data\utf-8\phone.cin"
+    File "..\libchewingdata\utf-8\tsi.src"
+    File "..\libchewingdata\utf-8\phone.cin"
     File "dat2bin\Release\dat2bin.exe"
     ExecWait '"${TMPDIR}\dat2bin.exe"'
 
