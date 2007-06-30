@@ -10,6 +10,7 @@
 
 SetCompressor lzma
 
+!include "LogicLib.nsh"
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
 
@@ -23,20 +24,32 @@ SetCompressor lzma
 
 Function uninstOld
   ClearErrors
-  IfFileExists "$SYSDIR\Chewing.ime" 0 ContinueUninst
+  ${If} ${FileExists} "$SYSDIR\Chewing.ime"
     Delete "$SYSDIR\Chewing.ime"
-    IfErrors 0 ContinueUninst
+    ${If} ${Errors}
       StrCmp $LANGUAGE 1028 TradChineseIs TradChineseNot
-      TradChineseIs:
-        MessageBox MB_ICONSTOP|MB_OK "無法移除已存在的新酷音client端。$\n通常是因為舊版的新酷音client端已經被某些程式載入而無法移除。$\n請關閉所有程式或重新開機後，再安裝一次即可。"
-        Abort
-      TradChineseNot:
-        MessageBox MB_ICONSTOP|MB_OK "Unable to remove the new chewing client which already exists. $\nUsually is because the old version new chewing client is already loading by some programs is unable the detachment. $\nAfter please close all programs or reboot computer, then installs one time then."
-        Abort
-  ContinueUninst:
-
+        TradChineseIs:
+          MessageBox MB_ICONSTOP|MB_OK "無法移除已存在的新酷音client端。$\n通常是因為舊版的新酷音client端已經被某些程式載入而無法移除。$\n請關閉所有程式或重新開機後，再安裝一次即可。"
+          Abort
+        TradChineseNot:
+          MessageBox MB_ICONSTOP|MB_OK "Unable to remove the new chewing client which already exists. $\nUsually is because the old version new chewing client is already loading by some programs is unable the detachment. $\nAfter please close all programs or reboot computer, then installs one time then."
+          Abort
+    ${EndIf}
+  ${EndIf}
   ; shutdown chewing server.
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /uninstall'
+  
+; run uninstaller
+  ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
+; MessageBox MB_OK|MB_ICONINFORMATION "R0 = '$R0'" IDOK
+  ${If} $R0 != ""
+    ClearErrors
+    ExecWait '$R0 /S _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
+ 
+    ${Unless} ${Errors}
+      Delete $R0
+    ${EndIf}
+  ${EndIf}
 
   ; uninst.exe will copy itself to $TEMP\~nsu.tmp\Au_.exe and execute that copy.
   ; Therefore, ExecWait "$INSTDIR\uninst.exe" is useless since it terminates after
@@ -55,10 +68,21 @@ Function uninstOld
   RMDir "$TEMP\~nsu.tmp"
   ClearErrors
 
-  ; Ensure the old IME is deleted.
+; Ensure the old IME is deleted.
   Delete "$SYSDIR\Chewing.ime"
-  IfErrors 0 +2
+  ${If} ${Errors}
     Call OnInstError
+  ${EndIf}
+FunctionEnd
+
+Function OnInstError
+  StrCmp $LANGUAGE 1028 TradChineseIs TradChineseNot
+  TradChineseIs:
+    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版並重開機後再安裝一次。"
+    Abort
+  TradChineseNot:
+    MessageBox MB_ICONSTOP|MB_OK "The installment has error. Please determine you have the system manager jurisdiction, as well as old version not in execution.$\n$\nSuggests the control bench input method hypothesis, after remove old version pays equal attention to starting installs one time again."
+    Abort
 FunctionEnd
 
 BGGradient 0000FF 000000 FFFFFF
@@ -67,7 +91,7 @@ BGGradient 0000FF 000000 FFFFFF
 !insertmacro MUI_PAGE_WELCOME
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
-!insertmacro MUI_PAGE_LICENSE "License_English.txt"
+!insertmacro MUI_PAGE_LICENSE "License.txt"
 ; Directory page
 ; !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -95,14 +119,22 @@ InstallDir "$SYSDIR\IME\Chewing"
 ShowInstDetails show
 ShowUnInstDetails show
 
-Function OnInstError
-  StrCmp $LANGUAGE 1028 TradChineseIs TradChineseNot
-  TradChineseIs:
-    MessageBox MB_ICONSTOP|MB_OK "安裝發生錯誤，請確定你有系統管理員權限，以及舊版不在執行中$\n$\n建議到控制台輸入法設定當中，移除舊版並重開機後再安裝一次。"
-    Abort
-  TradChineseNot:
-    MessageBox MB_ICONSTOP|MB_OK "The installment has error. Please determine you have the system manager jurisdiction, as well as old version not in execution.$\n$\nSuggests the control bench input method hypothesis, after remove old version pays equal attention to starting installs one time again."
-    Abort
+Function .onInit
+  !insertmacro MUI_LANGDLL_DISPLAY
+  
+  ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
+  ${If} $0 != ""
+    StrCmp $LANGUAGE 1028 TradChineseIs TradChineseNot
+    TradChineseIs:
+     MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到已安裝舊版 $0 ，是否要移除舊版後繼續安裝新版？" IDOK +2
+      Abort
+      Call uninstOld
+      Goto +5
+    TradChineseNot:
+      MessageBox MB_OKCANCEL|MB_ICONQUESTION "Detects has installed the old version $0, After whether wants the detachment old version to continue to install the new edition?" IDOK +2
+      Abort
+      Call uninstOld
+  ${EndIf}
 FunctionEnd
 
 Section "MainSection" SEC01
@@ -112,8 +144,8 @@ Section "MainSection" SEC01
     SetOutPath "${TMPDIR}"
     File "big52utf8\Release\big52utf8.exe"
 
-    File "..\libchewingdata\utf-8\tsi.src"
-    File "..\libchewingdata\utf-8\phone.cin"
+    File "..\..\..\libchewing-data\source\utf-8\tsi.src"
+    File "..\..\..\libchewing-data\source\utf-8\phone.cin"
     File "dat2bin\Release\dat2bin.exe"
     ExecWait '"${TMPDIR}\dat2bin.exe"'
 
@@ -130,7 +162,7 @@ Section "MainSection" SEC01
     Rename "${TMPDIR}\fonetree.dat_bin" 'fonetree.dat'
 
     File "Data\statuswnd.bmp"
-    File "License_English.txt"
+    File "License.txt"
     File "UserGuide\chewing.chm"
     File "Installer\Release\Installer.exe"
     File "ChewingServer\Release\ChewingServer.exe"
@@ -146,8 +178,10 @@ Section "MainSection" SEC01
     SetOutPath "$SYSDIR"
     File "ChewingIME\Release\Chewing.ime"
 
-  IfErrors 0 +2
-    Call OnInstError
+  ${If} ${Errors}
+    File /oname=Chewing-tmp.ime "ChewingIME\Release\Chewing.ime"
+    Rename /REBOOTOK Chewing-tmp.ime Chewing.ime
+  ${EndIf}
 SectionEnd
 
 Section -AdditionalIcons
@@ -257,20 +291,3 @@ Section Uninstall
   SetAutoClose true
 SectionEnd
 
-Function .onInit
-  !insertmacro MUI_LANGDLL_DISPLAY
-  ReadRegStr $0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"
-  StrCmp $LANGUAGE 1028 TradChineseIs TradChineseNot
-  TradChineseIs:
-  StrCmp $0 "" ContinueInst 0 
-    MessageBox MB_OKCANCEL|MB_ICONQUESTION "偵測到已安裝舊版 $0 ，是否要移除舊版後繼續安裝新版？" IDOK +2
-      Abort
-      Call uninstOld
-      Goto +5
-  TradChineseNot:
-    StrCmp $0 "" ContinueInst 0 
-    MessageBox MB_OKCANCEL|MB_ICONQUESTION "Detects has installed the old version $0, After whether wants the detachment old version to continue to install the new edition?" IDOK +2
-      Abort
-      Call uninstOld
-  ContinueInst:
-FunctionEnd
