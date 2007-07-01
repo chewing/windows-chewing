@@ -169,7 +169,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		HKEY hk = NULL;
 		char cur_ver[32] = "";
 		if( ERROR_SUCCESS == RegOpenKey( HKEY_LOCAL_MACHINE, 
-			_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\新酷音輸入法"), &hk) )
+			_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\New Chewing IM"), &hk) )
 		{
 			DWORD size = sizeof(cur_ver);
 			DWORD type = REG_SZ;

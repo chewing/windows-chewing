@@ -100,7 +100,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	HKL kl;
 
 	HKEY hk = NULL;
-	if( ERROR_SUCCESS != RegCreateKeyEx( HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\新酷音輸入法", 0, 
+	if( ERROR_SUCCESS != RegCreateKeyEx( HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\New Chewing IM", 0, 
 			NULL, 0, KEY_ALL_ACCESS , NULL, &hk, NULL) )
 		hk = NULL;
 
