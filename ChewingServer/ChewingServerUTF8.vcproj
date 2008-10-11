@@ -1,152 +1,212 @@
 <?xml version="1.0" encoding="big5"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9.00"
 	Name="ChewingServerUTF8"
 	ProjectGUID="{FF074876-659D-4BFD-9361-6E22C99BABE2}"
-	SccProjectName=""
-	SccLocalPath="">
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory=".\Debug"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Debug/ChewingServerUTF8.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
-				UsePrecompiledHeader="2"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Debug/ChewingServerUTF8.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1028"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile=".\Debug/ChewingServer.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/ChewingServerUTF8.pdb"
 				SubSystem="2"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/ChewingServerUTF8.tlb"
-				HeaderFileName=""/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1028"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Release/ChewingServerUTF8.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;NDEBUG;_WINDOWS"
-				StringPooling="TRUE"
-				RuntimeLibrary="4"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderThrough=""
 				PrecompiledHeaderFile=".\Release/ChewingServerUTF8.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1028"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile=".\Release/ChewingServer.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Release/ChewingServerUTF8.pdb"
-				GenerateMapFile="TRUE"
+				GenerateMapFile="true"
 				MapFileName=""
-				MapExports="TRUE"
-				MapLines="TRUE"
+				MapExports="true"
 				SubSystem="2"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Release/ChewingServerUTF8.tlb"
-				HeaderFileName=""/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1028"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -154,139 +214,178 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\char.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\char.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\chewing-utf8-util.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\chewing-utf8-util.c"
+				>
 			</File>
 			<File
-				RelativePath=".\Chewing.cpp">
+				RelativePath=".\Chewing.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingio.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingio.c"
+				>
 			</File>
 			<File
-				RelativePath=".\ChewingServer.cpp">
+				RelativePath=".\ChewingServer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingutil.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingutil.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\choice.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\choice.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\dict.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\dict.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hanyupinyin.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\hanyupinyin.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hash.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\hash.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c"
+				>
 			</File>
 			<File
-				RelativePath=".\main.cpp">
+				RelativePath=".\main.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\common\pipe.cpp">
+				RelativePath="..\common\pipe.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\tree.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\tree.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\userphrase.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\userphrase.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\zuin.c">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\zuin.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
+			Filter="h;hpp;hxx;hm;inl"
+			>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\char.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\char.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing-utf8-util.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing-utf8-util.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingio.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingio.h"
+				>
 			</File>
 			<File
-				RelativePath="..\Include\Chewingpp.h">
+				RelativePath="..\Include\Chewingpp.h"
+				>
 			</File>
 			<File
-				RelativePath="..\Include\ChewingServer.h">
+				RelativePath="..\Include\ChewingServer.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingutil.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingutil.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\dict.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\dict.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\hash.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\hash.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\private.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\src\private.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\romanizations.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\romanizations.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\userphrase.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\userphrase.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\zuin.h">
+				RelativePath="..\..\libchewing\branches\win32-utf8\include\zuin.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
 		</Filter>
 		<Filter
 			Name="PortingLayer"
-			Filter="">
+			>
 			<Filter
 				Name="Source Files"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_posix.c">
+					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_posix.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_win32.c">
+					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_win32.c"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="Header Files"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_mmap.h">
+					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_mmap.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_types.h">
+					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_types.h"
+					>
 				</File>
 				<Filter
 					Name="sys"
-					Filter="">
+					>
 					<File
-						RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\sys\plat_win32.h">
+						RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\sys\plat_win32.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 		</Filter>
 		<File
-			RelativePath="ReadMe.txt">
+			RelativePath="ReadMe.txt"
+			>
 		</File>
 	</Files>
 	<Globals>
