@@ -7,7 +7,10 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "winresrc.h"
+#ifndef IDC_STATIC
+#define IDC_STATIC -1
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -244,7 +247,6 @@ LANGUAGE 4, 1
 #pragma code_page(950)
 #endif //_WIN32
 #include "res\HashEd.rc2"  // non-Microsoft Visual C++ edited resources
-#include "l.cht\afxres.rc"          // Standard components
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

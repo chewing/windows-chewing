@@ -207,10 +207,11 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
                        its response from server or API failed */
     case cmdLastPhoneSeq:
         {
+            int lop;
             uint16 *sbuf = GetLastPhoneSeq();
 		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
 									    0, 0, CHEWINGSERVER_BUF_SIZE );
-            for ( int lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
+            for ( lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
             {
                 if ( sbuf[lop]==0 )
                 {
