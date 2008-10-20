@@ -116,6 +116,7 @@
 #define IDC_BUTTON43                    1074
 #define ID_ABOUT                        40001
 #define ID_WEBSITE                      40002
+#define ID_GROUP                        40003
 #define ID_DICT_BUGREPORT               40005
 #define ID_BUGREPORT                    40006
 #define ID_CHEWING_HELP                 40009

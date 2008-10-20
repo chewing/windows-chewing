@@ -144,8 +144,8 @@ Section "MainSection" SEC01
     SetOutPath "${TMPDIR}"
     File "big52utf8\Release\big52utf8.exe"
 
-    File "..\..\..\libchewing-data\source\utf-8\tsi.src"
-    File "..\..\..\libchewing-data\source\utf-8\phone.cin"
+    File "..\libchewingdata\source\utf-8\tsi.src"
+    File "..\libchewingdata\source\utf-8\phone.cin"
     File "dat2bin\Release\dat2bin.exe"
     ExecWait '"${TMPDIR}\dat2bin.exe"'
 

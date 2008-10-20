@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 ; TODO don't use chinese in PRODUCT_UNINST_KEY 
 !define PRODUCT_NAME "新酷音輸入法"
-!define PRODUCT_VERSION "0.3.4.5"
+!define PRODUCT_VERSION "0.3.4.6"
 !define PRODUCT_PUBLISHER "PCMan (洪任諭), seamxr, andyhorng, sky008888, kcwu"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -162,7 +162,7 @@ Section "MainSection" SEC01
 
   File "${LIBCHEWING_DATA_PATH}\utf-8\tsi.src"
   File "${LIBCHEWING_DATA_PATH}\utf-8\phone.cin"
-  File "dat2bin\Release\dat2bin.exe"
+  File "${LIBCHEWING_DATA_PATH}\utf-8\dat2bin.exe"
   ExecWait '"${TMPDIR}\dat2bin.exe"'
   ${If} ${Errors}
     Call OnInstError

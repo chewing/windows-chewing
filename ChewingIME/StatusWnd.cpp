@@ -290,8 +290,11 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 	case ID_WEBSITE:
 		ShellExecute( NULL, "open", _T("http://chewing.csie.net/"), NULL, NULL, SW_SHOWNORMAL );
 		break;
+	case ID_GROUP:
+		ShellExecute( NULL, "open", _T("http://groups.google.com/group/chewing"), NULL, NULL, SW_SHOWNORMAL );
+		break;
 	case ID_BUGREPORT:
-		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Queue=271"), NULL, NULL, SW_SHOWNORMAL );
+		ShellExecute( NULL, "open", _T("http://code.google.com/p/chewing/issues"), NULL, NULL, SW_SHOWNORMAL );
 		break;
 	case ID_DICT_BUGREPORT:
 		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436"), NULL, NULL, SW_SHOWNORMAL );
