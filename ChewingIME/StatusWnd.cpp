@@ -328,7 +328,7 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 	case ID_PROVERBDICT:
 		{
 			LPCTSTR url[]={
-			_T("http://140.111.34.46/dict/"),
+			_T("http://www.sinica.edu.tw/~tdbproj/dict/"),
 			_T("http://140.111.34.46/jdict/main/cover/main.htm"),
 			_T("http://140.111.1.43/"),
 			_T("http://140.111.34.46/chengyu/sort_pho.htm")};
