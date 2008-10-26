@@ -297,7 +297,7 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 		ShellExecute( NULL, "open", _T("http://code.google.com/p/chewing/issues"), NULL, NULL, SW_SHOWNORMAL );
 		break;
 	case ID_DICT_BUGREPORT:
-		ShellExecute( NULL, "open", _T("http://rt.openfoundry.org/Foundry/Project/Tracker/?Type=defect&Queue=436"), NULL, NULL, SW_SHOWNORMAL );
+		ShellExecute( NULL, "open", _T("http://of.openfoundry.org/projects/436/rt"), NULL, NULL, SW_SHOWNORMAL );
 		break;
 	case ID_HASHED:
 	case ID_CHEWING_HELP:
@@ -328,10 +328,10 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
 	case ID_PROVERBDICT:
 		{
 			LPCTSTR url[]={
-			_T("http://www.sinica.edu.tw/~tdbproj/dict/"),
-			_T("http://140.111.34.46/jdict/main/cover/main.htm"),
-			_T("http://140.111.1.43/"),
-			_T("http://140.111.34.46/chengyu/sort_pho.htm")};
+			_T("http://dict.revised.moe.edu.tw/"),
+			_T("http://dict.concised.moe.edu.tw/main/cover/main.htm"),
+			_T("http://dict.mini.moe.edu.tw/"),
+			_T("http://dict.idioms.moe.edu.tw/sort_pho.htm")};
 			ShellExecute( NULL, "open", url[ id - ID_DICT ], NULL, NULL, SW_SHOWNORMAL );
 			break;
 		}
