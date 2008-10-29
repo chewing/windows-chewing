@@ -43,7 +43,7 @@ inline BOOL IsImeMessage(UINT msg)
 			|| (msg >= WM_IME_SETCONTEXT && msg <= WM_IME_KEYUP) );
 }
 
-void LoadConfig();
+BOOL LoadConfig();
 void ToggleChiEngMode(HIMC hIMC);
 void ToggleFullShapeMode(HIMC hIMC);
 

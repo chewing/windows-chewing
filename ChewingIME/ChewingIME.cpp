@@ -91,7 +91,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 
 int ControlListCursor( UINT &key, CandList* candList );
 
-void LoadConfig()
+BOOL LoadConfig()
 {
 /*
 	#define KB_TYPE_NUM 9
@@ -138,6 +138,8 @@ void LoadConfig()
 
 		RegQueryValueEx( hk, "CheckNewVersion", 0, &type, (LPBYTE)&g_checkNewVersion, &size );
 		RegCloseKey( hk );
+	} else {
+		return FALSE;
 	}
 
 	if( g_selKeyType > ((sizeof(g_selKeys)/sizeof(char*))-1) )
@@ -152,6 +154,7 @@ void LoadConfig()
         g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
     if ( g_FontSize>64 || g_FontSize<4 )
         g_FontSize = DEF_FONT_SIZE;
+	return TRUE;
 }
 
 
@@ -1319,7 +1322,8 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			if( !IMEUI::registerUIClasses() )
 				return FALSE;
 
-			LoadConfig();
+			if( !LoadConfig() )
+				return FALSE;
 
 			break;
 		}
