@@ -58,6 +58,7 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 	case IMN_SETOPENSTATUS:
 		break;
 	case IMN_SETCOMPOSITIONFONT:
+		if ( ! g_isWinLogon )		
 		{
 			IMCLock imc(hIMC);
 			if(imc.getIC())
@@ -65,6 +66,7 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 		}
 		break;
 	case IMN_SETCOMPOSITIONWINDOW:
+		if ( ! g_isWinLogon )
 		{
 	// The IMN_SETCOMPOSITIONWINDOW message is sent when the composition form of 
 	// the Input Context is updated. When the UI window receives this message, 
@@ -77,6 +79,7 @@ LRESULT IMEUI::onIMENotify( HIMC hIMC, WPARAM wp , LPARAM lp )
 		}
 		break;
 	case IMN_PRIVATE:
+		if ( ! g_isWinLogon )
 		{
 			switch( lp )
 			{
@@ -237,6 +240,9 @@ void IMEUI::openStatusWnd(HIMC hIMC)
 	if( !statusWnd.isWindow() )
 		statusWnd.create(hwnd);
 
+	if ( g_isWinLogon )
+		return;
+
 	IMCLock imc(hIMC);
 	INPUTCONTEXT* ic = imc.getIC();
 
@@ -292,6 +298,8 @@ void IMEUI::unregisterUIClasses()
 
 LRESULT IMEUI::onComposition(HIMC hIMC, WPARAM wp , LPARAM lp)
 {
+	if ( g_isWinLogon )
+		return 0;
 	IMCLock imc(hIMC);
 	if( !imc.getIC() )
 		return 0;
@@ -489,6 +497,9 @@ void IMEUI::showCandWnd(void)
 		candWnd.create(hwnd);
 
 	candWnd.updateSize();
+
+	if ( g_isWinLogon )
+		return;
 
 	POINT pt = getCandWndPos( IMCLock(getIMC()) );
 	candWnd.move( pt.x, pt.y );

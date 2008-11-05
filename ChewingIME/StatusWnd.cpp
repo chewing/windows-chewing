@@ -68,6 +68,8 @@ LRESULT StatusWnd::wndProc( HWND hwnd, UINT msg, WPARAM wp , LPARAM lp )
 bool StatusWnd::create(HWND imeUIWnd)
 {
 	HIMC hIMC = (HIMC)GetWindowLong( imeUIWnd, IMMGWL_IMC );
+	if ( g_isWinLogon )
+		return false;
 	IMCLock imc(hIMC);
 
 	hwnd = CreateWindowEx(0, g_statusWndClass, NULL,
@@ -132,6 +134,8 @@ void StatusWnd::toggleShapeMode(HIMC hIMC)
 
 void StatusWnd::updateIcons(HIMC hIMC)
 {
+	if ( g_isWinLogon )
+		return;
 	IMCLock imc(hIMC);
 	bool isChinese;
 //	if( g_enableShift )
@@ -144,6 +148,8 @@ void StatusWnd::updateIcons(HIMC hIMC)
 
 LRESULT StatusWnd::wndProc(UINT msg, WPARAM wp, LPARAM lp)
 {
+	if ( g_isWinLogon )
+		return 0;
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
 

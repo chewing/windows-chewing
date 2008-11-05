@@ -44,6 +44,8 @@ BOOL CompWnd::registerClass(void)
 
 LRESULT CompWnd::wndProc( HWND hwnd , UINT msg, WPARAM wp , LPARAM lp)
 {
+	if ( g_isWinLogon )
+		return 0;
 	HIMC hIMC = getIMC(hwnd);
 	IMCLock imc( hIMC );
 	IMEUILock lock( GetParent(hwnd) );

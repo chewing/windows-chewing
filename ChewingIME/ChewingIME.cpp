@@ -922,7 +922,8 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 		(IsKeyDown( lpbKeyState[VK_CONTROL]) || IsKeyDown( lpbKeyState[VK_SHIFT])) ) {
 		return TRUE;	// Eat the message
 	}
-
+	if ( g_isWinLogon )
+		return FALSE;
 	BOOL ret = FilterKeyByChewing( IMCLock(hIMC), uVirKey, GetKeyInfo(lParam), lpbKeyState );
 	if( !ret )
 		return FALSE;
@@ -1067,6 +1068,8 @@ ChewingClient* LoadChewingEngine()
 
 BOOL    APIENTRY ImeSelect(HIMC hIMC, BOOL fSelect)
 {
+	if ( g_isWinLogon )
+		return FALSE;
 	IMCLock imc( hIMC );
 	INPUTCONTEXT* ic = imc.getIC();
 	if( !ic )
@@ -1242,6 +1245,8 @@ BOOL    APIENTRY NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwVal
 		}
 	case NI_COMPOSITIONSTR:
 		{
+			if ( g_isWinLogon )
+				return FALSE;
 			IMCLock imc( hIMC );
 			CompStr* cs = imc.getCompStr();
 			if( !cs )

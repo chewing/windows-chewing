@@ -119,6 +119,8 @@ static void _DecideCandStringcolor(DWORD &CandIndex, DWORD &CandBody, BOOL bCand
 
 void CandWnd::onPaint(HIMC hIMC, PAINTSTRUCT& ps)
 {
+	if ( g_isWinLogon )
+		return;
 	IMCLock imc( hIMC );
 	CandList* candList = imc.getCandList();
 	if( !candList )
