@@ -153,7 +153,11 @@ LRESULT CALLBACK ChewingServer::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM l
 void GetUserDataPath( LPTSTR filename )
 {
     LPITEMIDLIST pidl;
-	if( S_OK == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
+	HRESULT ret;
+	ret = SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl );
+	if ( ret != S_OK )
+		ret = SHGetSpecialFolderLocation( NULL, CSIDL_COMMON_APPDATA, &pidl );
+	if ( ret == S_OK )
 	{
 		SHGetPathFromIDList(pidl, filename);
 		_tcscat( filename, _T("\\Chewing") );

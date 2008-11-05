@@ -135,6 +135,7 @@ BOOL IMEUI::registerUIClasses()
 LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 {
 	HIMC hIMC = (HIMC)GetWindowLong(hwnd, IMMGWL_IMC);
+
 	switch(msg)
 	{
 	case WM_IME_NOTIFY:
@@ -146,13 +147,18 @@ LRESULT IMEUI::wndProc( UINT msg, WPARAM wp, LPARAM lp)
 		{
 			if( ! hIMC )
 				return 0;
-			IMCLock imc( hIMC );
-			if( !imc.getIC() )
-				break;
-			POINT pt = getCompWndPos( imc );
 			if( !compWnd.isWindow() )
 				compWnd.create(hwnd);
-			compWnd.move(pt.x, pt.y);
+			// Can not lock imc in winlogon
+			if( ! g_isWinLogon ) {
+				IMCLock imc( hIMC );
+				if( !imc.getIC() )
+					break;
+				POINT pt = getCompWndPos( imc );			
+				compWnd.move(pt.x, pt.y);
+			} else {
+				compWnd.move(0, 0);
+			}
 			break;
 		}
 	case WM_IME_COMPOSITION:

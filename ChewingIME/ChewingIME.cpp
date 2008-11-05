@@ -91,7 +91,7 @@ BOOL FilterKeyByChewing( IMCLock& imc, UINT key, KeyInfo ki, const BYTE* keystat
 
 int ControlListCursor( UINT &key, CandList* candList );
 
-BOOL LoadConfig()
+void LoadConfig()
 {
 /*
 	#define KB_TYPE_NUM 9
@@ -138,8 +138,6 @@ BOOL LoadConfig()
 
 		RegQueryValueEx( hk, "CheckNewVersion", 0, &type, (LPBYTE)&g_checkNewVersion, &size );
 		RegCloseKey( hk );
-	} else {
-		return FALSE;
 	}
 
 	if( g_selKeyType > ((sizeof(g_selKeys)/sizeof(char*))-1) )
@@ -154,7 +152,6 @@ BOOL LoadConfig()
         g_chewing->SetAdvanceAfterSelection((g_AdvanceAfterSelection!=0)?true: false);
     if ( g_FontSize>64 || g_FontSize<4 )
         g_FontSize = DEF_FONT_SIZE;
-	return TRUE;
 }
 
 
@@ -452,7 +449,11 @@ wstring utf8_to_utf16( const char* text )
 void GetUserDataPath( LPTSTR filename, LPCTSTR name )
 {
     LPITEMIDLIST pidl;
-	if( NOERROR == SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl ) )
+	HRESULT ret;
+	ret = SHGetSpecialFolderLocation( NULL, CSIDL_APPDATA, &pidl );
+	if ( ret != S_OK )
+		ret = SHGetSpecialFolderLocation( NULL, CSIDL_COMMON_APPDATA, &pidl );
+	if( S_OK == ret )
 	{
 		SHGetPathFromIDList(pidl, filename);
 		_tcscat( filename, _T("\\Chewing\\") );
@@ -1322,8 +1323,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			if( !IMEUI::registerUIClasses() )
 				return FALSE;
 
-			if( !LoadConfig() )
-				return FALSE;
+			LoadConfig();
 
 			break;
 		}
