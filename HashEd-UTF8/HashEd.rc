@@ -1,0 +1,254 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winresrc.h"
+#ifndef IDC_STATIC
+#define IDC_STATIC -1
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中性 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(950)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "HashEd.exe.manifest"
+#endif    // 中性 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文 (台灣) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
+#pragma code_page(950)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 1\r\n"
+    "#pragma code_page(950)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\HashEd.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.cht\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\HashEd.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 259, 202
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "關於 新酷音使用者詞庫編輯器"
+FONT 9, "新細明體", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,7,88,245,90
+    LTEXT           "新酷音原是 Linux 系統下知名的輸入法，由 gugod, jserv, kanru\n\n等前輩，改良原本由龔律全與陳康本開發的酷音輸入法而來，\n\n有多種分支，目前已經能夠支援包括 Mac 在內的多種平台。\n\n這個 Windows 版本是由 陽明大學醫學系 洪任諭 (PCMan)，\n\n使用上述前輩們製作的 libchewing 核心，移植出 Windows 版本",
+                    IDC_STATIC,18,98,224,75
+    LTEXT           "新酷音使用者詞庫編輯器\n\n版本： 0.1\n\n發行日期：2006.11.26\n\n授權方式： GNU General Public License\n\n工具作者：seamxr, PCMan\n",
+                    IDC_STATIC,87,11,156,79
+    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,
+                    59,63
+    LTEXT           "題字：翁政銓",IDC_STATIC,13,74,49,8
+    PUSHBUTTON      "確定 (&O)",IDOK,104,181,50,14
+END
+
+IDD_HASHED_DIALOG DIALOGEX 0, 0, 443, 298
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | 
+    WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
+CAPTION "PhraseEd"
+FONT 9, "新細明體", 400, 0, 0x88
+BEGIN
+    CONTROL         "",IDC_PHRASE_LIST,"PhraseList",WS_TABSTOP,13,21,417,200,
+                    WS_EX_CLIENTEDGE
+    PUSHBUTTON      "新增詞彙",IDC_ADD_PHRASE,162,245,61,16
+    PUSHBUTTON      "刪除選取詞彙",IDC_DEL_PHRASE,349,245,80,16
+    GROUPBOX        "使用者詞庫",IDC_BANNER,7,7,429,223
+    PUSHBUTTON      "匯入詞庫檔",IDC_IMPORT,226,275,61,16
+    PUSHBUTTON      "存入使用者詞庫",IDC_SAVE,357,275,79,16
+    PUSHBUTTON      "尋找詞彙",IDC_FIND_PHRASE,230,245,61,16
+    GROUPBOX        "功能",IDC_STATIC,7,234,429,34
+    PUSHBUTTON      "另存成新檔",IDC_SAVE_AS,292,275,61,16
+    PUSHBUTTON      "關於本工具",IDC_ABOUT,7,275,61,16
+    CONTROL         "",IDC_NEW_PHRASE_EDIT,"RichEdit20A",ES_AUTOHSCROLL | 
+                    WS_BORDER | WS_TABSTOP,13,245,141,15
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,3,0
+ PRODUCTVERSION 0,0,3,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040404b0"
+        BEGIN
+            VALUE "FileDescription", "Chewing local phrase editor"
+            VALUE "FileVersion", "0, 0, 3, 0"
+            VALUE "InternalName", "PhraseEd"
+            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "OriginalFilename", "PhraseEd.EXE"
+            VALUE "ProductName", "PhraseEd Application"
+            VALUE "ProductVersion", "0, 0, 3, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x404, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 252
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 195
+    END
+
+    IDD_HASHED_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 436
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 291
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_COOL                BITMAP                  "icon.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "關於 PhraseEd(&A)..."
+    IDS_ALLOW_CHI_STRING    "請輸入中文字串。"
+    IDS_INPUT_RULE          "請依照以下方法輸入:\n\n1. 使用新酷音輸入法輸入中文。\n2. 一次完成整個句子，才按下 enter 鍵。\n"
+    IDS_PHRASE_EXIST        "你輸入的詞彙已經存在。"
+    IDS_SAVE_CONFIRM        "確定要以目前正在編輯的內容取代使用者詞庫檔案嗎？\n此過程將會包含重新載入詞庫，可能需要一點時間。\n"
+    IDS_SAVE_BTN_FACE       "存檔中..."
+    IDS_NUM_OF_PHRASES      "編輯區內共有 %d 個詞彙。"
+    IDS_LOADING             "正在載入 %s"
+    IDS_SUGGEST_DO_SAVE     "載入過程發現詞彙錯誤或重複，\n請執行一次「存入使用者詞庫」，\n以製作一個正確的新檔案。"
+    IDS_NOTFOUND            "找不到指定的詞彙"
+END
+
+#endif    // 中文 (台灣) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE 4, 1
+#pragma code_page(950)
+#endif //_WIN32
+#include "res\HashEd.rc2"  // non-Microsoft Visual C++ edited resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
