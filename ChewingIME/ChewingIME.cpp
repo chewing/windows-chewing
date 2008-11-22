@@ -33,7 +33,7 @@ long g_shiftPressedTime = -1;
 ChewingClient* g_chewing = NULL;
 
 // Configuration
-DWORD g_keyboardLayout = KB_DEFAULT;
+DWORD g_keyboardLayout = 0;
 DWORD g_candPerRow = 4;
 DWORD g_defaultEnglish = false;
 DWORD g_defaultFullSpace = false;
@@ -995,13 +995,13 @@ BOOL    APIENTRY ImeProcessKey(HIMC hIMC, UINT uVirKey, LPARAM lParam, CONST BYT
 	if( g_phraseMark ) {
 		int interval_len = 0;
 		unsigned char* interval = g_chewing->GetIntervalArray(interval_len);
-		cs->setInvervalArray( interval, interval_len );
+		cs->setIntervalArray( interval, interval_len );
 		if( interval ) {
 			free( interval );
 		}
 	}
 	else {
-		cs->setInvervalArray( NULL, 0 );
+		cs->setIntervalArray( NULL, 0 );
 	}
 
 	cs->beforeGenerateMsg();

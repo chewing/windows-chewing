@@ -1,6 +1,5 @@
-
+#include <cstdio>
 #include <windows.h>
-#include "private.h"
 #include "pipe.h"
 
 

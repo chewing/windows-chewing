@@ -8,7 +8,7 @@
 
 #include <assert.h>
 
-#include "hash.h"
+#include "hash-private.h"
 extern "C"
 {
 	#include "chewing-utf8-util.h"
@@ -17,9 +17,7 @@ extern "C"
 #include "chashcontext.h"
 
 
-
 #define		chewingServerClassName		_T("ChewingServer")
-
 
 
 void CHashContext::release__HASH_ITEM(HASH_ITEM *pItem)
@@ -41,6 +39,12 @@ void CHashContext::clear()
     }
     pool.clear();
 }
+
+extern "C" {
+void HashItem2Binary( char *str, HASH_ITEM *pItem );
+int ReadHashItem_bin( const char *srcbuf, HASH_ITEM *pItem, int item_index );
+char *_load_hash_file( const char *filename, int *size );
+};
 
 int CHashContext::load_hash(const char *file, bool doClear)
 {

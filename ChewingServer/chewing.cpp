@@ -1,37 +1,35 @@
-#include <string.h>
+#include <cstring>
 #include "Chewingpp.h"
-#include "..\include\chewingpp.h"
+
+uint16 Chewing::g_lastPhoneSeq[MAX_PHONE_SEQ_LEN] = {0};
 
 Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
-    cf = (ChewingConf *) calloc( 1, sizeof( ChewingConf ) );
-    cd = (ChewingData *) calloc( 1, sizeof( ChewingData ) );
-    co = (ChewingOutput *) calloc( 1, sizeof( ChewingOutput ) );
-    kbLayout = keyLayout;
+    ctx = chewing_new();
+    
+	chewing_set_KBType( ctx, keyLayout );
+	chewing_set_candPerPage( ctx, 9 );
+	chewing_set_maxChiSymbolLen( ctx, 20 );
+	//chewing_set_addPhraseDirection( ctx, 1 );
+	//chewing_set_selKey( ctx, selKey_define, 10 );
+	chewing_set_spaceAsSelection( ctx, spaceAsSelection );
+}
 
-    cf->inp_cname = "Chewing";
-    cf->inp_ename = "Chewing";
-    cf->kb_type   = kbLayout;
-
-    InitChewing(cd,cf);
-
-    config.candPerPage = 9;
-    config.maxChiSymbolLen = 20;
-	config.bSpaceAsSelection = spaceAsSelection;
-
-    SetKeyboardLayout(kbLayout);
+Chewing::~Chewing()
+{
+	chewing_Terminate();
+	chewing_delete(ctx);
 }
 
 void Chewing::SetHsuSelectionKeyType(int type)
 {
     if(type > HSU_SELKEY_TYPE2)
-        cd->config.hsuSelKeyType = HSU_SELKEY_TYPE1;
+        chewing_set_hsuSelKeyType( ctx, HSU_SELKEY_TYPE1 );
     else
-        cd->config.hsuSelKeyType = type;
+		chewing_set_hsuSelKeyType( ctx, type );
 }
 
 void Chewing::SetKeyboardLayout(int kb)
 {
-    kbLayout = kb;
 /*    if (kb==KB_HSU) {
         if(cd->config.hsuSelKeyType == HSU_SELKEY_TYPE2) {
             SelKey("asdfzxcv89");
@@ -41,47 +39,67 @@ void Chewing::SetKeyboardLayout(int kb)
     } else if (kb==KB_DVORAK_HSU) SelKey("aoeuhtn789");
     else SelKey("1234567890");
 */
-    cd->zuinData.kbtype=kb;
-    SetConfig(cd, &config);
+    chewing_set_KBType(ctx, kb);
 }
 
 /*
  * Return i-th selection-key. i starts from 0.
  */
 char Chewing::SelKey(int i) {
-  if(0 <= i && i < 10)
-    return config.selKey[i];
-  return 0;
+	char ret;
+	int *selkey = chewing_get_selKey( ctx );
+	if ( 0 <= i && i < 10 )
+		ret = selkey[i];
+	else
+		ret = 0;
+	chewing_free( selkey );
+	return ret;
 }
 
 void Chewing::SelKey(char *selkey) {
-  for (int i = 0; i < 10;i++ ) config.selKey[ i ] = selkey[i];
-  SetConfig( cd, &config );
+	int sk[10];
+	for (int i = 0; i < 10;i++ )
+		sk[i] = selkey[i];	
+	chewing_set_selKey( ctx, sk, 10 );
 }
 
-int Chewing::Space()     { return OnKeySpace((void*)cd,co); }
-int Chewing::Enter()     { return OnKeyEnter((void*)cd,co); }
-int Chewing::Delete()    { return OnKeyDel((void*)cd,co); }
-int Chewing::Backspace() { return OnKeyBackspace((void*)cd,co); }
-int Chewing::Tab()       { return OnKeyTab((void*)cd,co); }
-int Chewing::ShiftLeft() { return OnKeyShiftLeft((void*)cd,co); }
-int Chewing::ShiftRight() { return OnKeyShiftRight((void*)cd,co); }
-int Chewing::ShiftSpace() { return OnKeyShiftSpace((void*)cd,co); }
-int Chewing::Right()     { return OnKeyRight((void*)cd, co);}
-int Chewing::Left()      { return OnKeyLeft((void*)cd, co);}
-int Chewing::Up()        { return OnKeyUp((void*)cd, co);}
-int Chewing::Down()      { return OnKeyDown((void*)cd, co);}
-int Chewing::Home()      { return OnKeyHome((void*)cd, co);}
-int Chewing::End()       { return OnKeyEnd((void*)cd, co);}
-int Chewing::Capslock()  { return OnKeyCapslock((void*)cd, co);}
-int Chewing::DoubleTab() { return OnKeyDblTab((void*)cd, co);}
-int Chewing::Esc()   { return OnKeyEsc((void*)cd,co); }
-int Chewing::CtrlOption(unsigned int code) { return OnKeyCtrlOption((void*)cd,(int)code, co);}
-int Chewing::CtrlNum(unsigned int code)    { return OnKeyCtrlNum((void*)cd, (int)code,co);}
-int Chewing::NumPad(unsigned int code)    { return OnKeyNumlock((void*)cd, (int)code,co);}
+int Chewing::Space()     { return chewing_handle_Space(ctx); }
+int Chewing::Enter() {
+	int rt;
+	uint16 *oldSeq = chewing_get_phoneSeq(ctx);
+	int seqLen = chewing_get_phoneSeqLen(ctx);
+	rt = chewing_handle_Enter(ctx);
+	if (chewing_commit_Check(ctx)) {		
+		memcpy(g_lastPhoneSeq, oldSeq, seqLen*sizeof(uint16));
+		g_lastPhoneSeq[seqLen] = 0;
+	}
+	chewing_free(oldSeq);
+	return rt;
+}
+int Chewing::Delete()    { return chewing_handle_Del(ctx); }
+int Chewing::Backspace() { return chewing_handle_Backspace(ctx); }
+int Chewing::Tab()       { return chewing_handle_Tab(ctx); }
+int Chewing::ShiftLeft() { return chewing_handle_ShiftLeft(ctx); }
+int Chewing::ShiftRight() { return chewing_handle_ShiftRight(ctx); }
+int Chewing::ShiftSpace() { return chewing_handle_ShiftSpace(ctx); }
+int Chewing::Right()     { return chewing_handle_Right(ctx);}
+int Chewing::Left()      { return chewing_handle_Left(ctx);}
+int Chewing::Up()        { return chewing_handle_Up(ctx);}
+int Chewing::Down()      { return chewing_handle_Down(ctx);}
+int Chewing::Home()      { return chewing_handle_Home(ctx);}
+int Chewing::End()       { return chewing_handle_End(ctx);}
+int Chewing::Capslock()  { return chewing_handle_Capslock(ctx);}
+int Chewing::DoubleTab() { return chewing_handle_DblTab(ctx);}
+int Chewing::Esc()   { return chewing_handle_Esc(ctx); }
+int Chewing::CtrlNum(unsigned int code)    { return chewing_handle_CtrlNum(ctx ,(int)code);}
+int Chewing::NumPad(unsigned int code)    { return chewing_handle_Numlock(ctx, (int)code);}
 int Chewing::Key(unsigned int code) {
-    SetKeyboardLayout(kbLayout);
-    return OnKeyDefault((void*)cd,(int)code,co);
+    //SetKeyboardLayout(kbLayout);
+    return chewing_handle_Default(ctx, (int)code);
+}
+
+uint16* Chewing::GetLastPhoneSeq() {
+	return g_lastPhoneSeq;
 }
 
 /*
@@ -89,7 +107,7 @@ int Chewing::Key(unsigned int code) {
   is at the "end-of-a-char".
  */
 int Chewing::CommitReady() {
-  return (co->keystrokeRtn & KEYSTROKE_COMMIT);
+  return chewing_commit_Check(ctx);
 }
 
 /*
@@ -100,94 +118,54 @@ int Chewing::CommitReady() {
  */
 
 char* Chewing::CommitStr() {
-    return CommitStr(0,co->nCommitStr-1);
-}
-
-char* Chewing::CommitStr(int from) {
-    return CommitStr(from,co->nCommitStr-1);
-}
-
-char* Chewing::CommitStr(int from, int to) {
-  char *s = (char*) calloc (1 + co->nCommitStr, sizeof(char) * MAX_CHAR_SIZE);
-  if(from >= 0 && to < co->nCommitStr ) {
-    for(int i=from; i <= to ; i++)
-      strcat(s,(char*)(co->commitStr[i].s));
-  }
-  return s;
+    return chewing_commit_String(ctx);
 }
 
 /*
   Always returns a char pointer, caller must free it.
  */
 char* Chewing::ZuinStr() {
-  char *s;
-  s = (char*) calloc ( 1+ ZUIN_SIZE ,sizeof(char) * WCH_SIZE );
-  for(int i = 0; i < ZUIN_SIZE ; i++)
-    if(co->zuinBuf[i].s) strcat(s,(char*)(co->zuinBuf[i].s));
-  return s;
+	return chewing_zuin_String(ctx, NULL);
+}
+
+char* Chewing::Buffer() {
+	return chewing_buffer_String(ctx);
 }
 
 int Chewing::BufferLen() {
-  return co->chiSymbolBufLen;
-}
-
-char* Chewing::Buffer() { return Buffer(0,BufferLen() - 1); }
-char* Chewing::Buffer(int from) {
-  return Buffer(from, BufferLen() - 1);
-}
-char* Chewing::Buffer(int from,int to) {
-  char *s;
-  s = (char*)calloc( 1+ BufferLen(), sizeof(char) * MAX_CHAR_SIZE);
-  if(from >= 0 && to < BufferLen() ) {
-    for(int i = from; i <= to; i++) {
-      strcat(s,(char*)(co->chiSymbolBuf[i].s));
-    }
-  }
-  return s;
+	return chewing_buffer_Len(ctx);
 }
 
 int Chewing::CursorPos() {
-  return co->chiSymbolCursor;
-}
-
-int Chewing::PointStart() {
-  return co->PointStart;
-}
-
-int Chewing::PointEnd() {
-  return co->PointEnd;
-}
-
-int Chewing::KeystrokeRtn() {
-  return co->keystrokeRtn;
+  return (int)chewing_cursor_Current(ctx);
 }
 
 int Chewing::KeystrokeIgnore() {
-  return (co->keystrokeRtn & KEYSTROKE_IGNORE);
+  return chewing_keystroke_CheckIgnore(ctx);
 }
 
 int Chewing::ChineseMode() {
-  return (cd->bChiSym == CHINESE_MODE);
+  return (chewing_get_ChiEngMode(ctx) == CHINESE_MODE);
 }
 
 int Chewing::Candidate() {
-	return (co->pci ? co->pci->nPage : 0);
+	return chewing_cand_TotalPage(ctx);
 }
 
 int Chewing::ChoicePerPage() {
-	return (co->pci ? co->pci->nChoicePerPage : 0);
+	return chewing_cand_ChoicePerPage(ctx);
 }
 
 int Chewing::TotalChoice() {
-	return (co->pci ? co->pci->nTotalChoice : 0);
+	return chewing_cand_TotalChoice(ctx);
 }
 
 int Chewing::TotalPage() {
-	return (co->pci ? co->pci->nPage : 0);
+	return chewing_cand_TotalPage(ctx);
 }
 
 int Chewing::CurrentPage() {
-	return (co->pci ? co->pci->pageNo : -1);
+	return chewing_cand_CurrentPage(ctx);
 }
 
 /*
@@ -196,20 +174,18 @@ int Chewing::CurrentPage() {
  * even if it's a false value.
  */
 char* Chewing::Selection(int i) {
-  char *s;
-  int no = co->pci->pageNo * ChoicePerPage() + i;
-
-  if(i >=0 && no < co->pci->nTotalChoice)
-    s = strdup(co->pci->totalChoiceStr[no]);
-  else
-    s = strdup("");
-
-  return s;
+	/* FIXME: This can be more efficient */
+  int j = 0;
+  chewing_cand_Enumerate(ctx);
+  for (j = 0; chewing_cand_hasNext(ctx) && j < i; j++)
+	  chewing_free(chewing_cand_String(ctx));
+  return chewing_cand_String(ctx);
 }
 
 // A debugging purpose Dumping routing. Output current inputed Zuin
 // and Commit string.
 void Chewing::Dump() {
+#if 0
   fprintf(stderr,"nCommitStr = %d\n",co->nCommitStr);
   
   fprintf(stderr,"zuin: ");
@@ -225,87 +201,77 @@ void Chewing::Dump() {
     fprintf(stderr,"%s",co->commitStr[i].s);
   fprintf(stderr,"\n");
   fprintf(stderr,"-----\n");
+#endif
 }
 
 void Chewing::SetFullShape(bool full)
 {
-	::SetShapeMode( cd, full ? FULLSHAPE_MODE : HALFSHAPE_MODE );
+	chewing_set_ShapeMode(ctx, full ? FULLSHAPE_MODE : HALFSHAPE_MODE );
 }
 
 bool Chewing::GetFullShape(void)
 {
-	return !!cd->bFullShape;
+	return chewing_get_ShapeMode(ctx) == FULLSHAPE_MODE;
 }
 
 void Chewing::SetAdvanceAfterSelection(int bDo)
 {
-    cd->bAutoShiftCur = bDo;
+    chewing_set_autoShiftCur(ctx, bDo);
 }
 
 void Chewing::SetEasySymbolInput(int bSet)
 {
-    cd->bEasySymbolInput = bSet;
+    chewing_set_easySymbolInput(ctx, bSet);
 }
 
 bool Chewing::LoadDataFiles(const char *dataDir, const char *userDir)
 {
-    ReadTree( (char*)dataDir );
-    InitChar( (char*)dataDir );
-    InitDict( (char*)dataDir );
-    ReadHash( (char*)userDir );
-	if( ! InitSymbolTable((char*)userDir) )
-		InitSymbolTable((char*)dataDir);
-	if( ! InitEasySymbolInput((char*)userDir) )
-		InitEasySymbolInput((char*)dataDir);
+	chewing_Init(dataDir, userDir);
 	return true; 
 }
 
 void Chewing::SetSpaceAsSelection(bool spaceAsSelection)
 {
-	config.bSpaceAsSelection = spaceAsSelection;
-    SetConfig(cd, &config);
+	chewing_set_spaceAsSelection(ctx, spaceAsSelection);
 }
 
 void Chewing::SetEscCleanAllBuf( bool escCleanAllBuf ) {
-	config.bEscCleanAllBuf = escCleanAllBuf;
-	SetConfig( cd, &config );
+	chewing_set_escCleanAllBuf(ctx, escCleanAllBuf);
 }
 
 int Chewing::ShowMsgLen(void)
 {
-	return co->bShowMsg ? co->showMsgLen : 0;
+	return chewing_aux_Length(ctx);
 }
 
 char* Chewing::ShowMsg(void)
 {
-	char *msg = (char*) calloc (1 + co->showMsgLen, sizeof(char) * MAX_CHAR_SIZE);
-	for(int i = 0; i < co->showMsgLen ; ++i )
-		strcat(msg, (char*)(co->showMsg[i].s));
-	return msg;
+	return chewing_aux_String(ctx);
 }
 
 void Chewing::SetAddPhraseForward(bool add_forward)
 {
-	cd->config.bAddPhraseForward = add_forward;
-	config.bAddPhraseForward = add_forward;
-	SetConfig( cd, &config );
+	chewing_set_addPhraseDirection(ctx, add_forward);
 }
 
 bool Chewing::GetAddPhraseForward(void)
 {
-	return !!cd->config.bAddPhraseForward;
+	return !!chewing_get_addPhraseDirection(ctx);
 }
 
 void Chewing::SetCandPerPage(int len)
 {
-	config.candPerPage = len;
-	SetConfig( cd, &config );
+	chewing_set_candPerPage(ctx, len);
 }
 
 // Return the length of interval array
 int Chewing::IntervalLen()
 {
-	return co->nDispInterval * 2;
+	int i;
+	chewing_interval_Enumerate(ctx);
+	for (i = 0; chewing_interval_hasNext(ctx); i++)
+		chewing_interval_Get(ctx, NULL);
+	return i*2;
 }
 
 //	Return interval array
@@ -313,19 +279,23 @@ int Chewing::IntervalLen()
 unsigned char* Chewing::IntervalArray()
 {
 	unsigned char* interval = (unsigned char*)calloc( IntervalLen(), sizeof( unsigned char ) );
-	for( int i = 0; i < co->nDispInterval; ++i ) {
-		interval[i * 2] = (unsigned char)co->dispInterval[i].from;
-		interval[i * 2 + 1] = (unsigned char)co->dispInterval[i].to;
+	IntervalType it;
+	chewing_interval_Enumerate(ctx);
+	for( int i = 0; chewing_interval_hasNext(ctx); ++i ) {
+		chewing_interval_Get(ctx, &it);
+		interval[i * 2] = it.from;
+		interval[i * 2 + 1] = it.to;
 	}
 	return interval;
 }
 
+void TerminateSymbolTable();
+void TerminateEasySymbolTable();
+int InitSymbolTable( const char *prefix );
+int InitEasySymbolInput( const char *prefix );
 
-void Chewing::ReloadSymbolTable( const char* userDir )
+void Chewing::ReloadSymbolTable(const char* dataDir, const char* userDir )
 {
-	TerminateSymbolTable();
-	InitSymbolTable(userDir);
-
-	TerminateEasySymbolTable();
-	InitEasySymbolInput(userDir);
+	chewing_Terminate();
+	chewing_Init(dataDir, userDir);
 }

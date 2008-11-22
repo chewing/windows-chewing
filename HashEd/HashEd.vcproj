@@ -24,7 +24,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include;..\Include;&quot;C:\Documents and Settings\Administrator\орн▒\chewing\libchewing\branches\win32\include&quot;"
+				AdditionalIncludeDirectories="..\..\libchewing\tags\0.3.1\include;..\Include;&quot;C:\Documents and Settings\Administrator\орн▒\chewing\libchewing\tags\0.3.1\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -90,7 +90,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32\include,..\Include"
+				AdditionalIncludeDirectories="..\..\libchewing\tags\0.3.1\include,..\Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"

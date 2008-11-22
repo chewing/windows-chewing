@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\include;..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;_DEBUG;_WINDOWS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -143,7 +143,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\include;..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -217,47 +217,11 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\char.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\chewing-utf8-util.c"
-				>
-			</File>
-			<File
 				RelativePath=".\Chewing.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingio.c"
-				>
-			</File>
-			<File
 				RelativePath=".\ChewingServer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\chewingutil.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\choice.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\dict.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hanyupinyin.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hash.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c"
 				>
 			</File>
 			<File
@@ -268,39 +232,11 @@
 				RelativePath="..\common\pipe.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\tree.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\userphrase.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\zuin.c"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\char.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing-utf8-util.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingio.h"
-				>
-			</File>
 			<File
 				RelativePath="..\Include\Chewingpp.h"
 				>
@@ -309,79 +245,11 @@
 				RelativePath="..\Include\ChewingServer.h"
 				>
 			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewingutil.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\dict.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\hash.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\private.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\romanizations.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\userphrase.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\zuin.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
-		</Filter>
-		<Filter
-			Name="PortingLayer"
-			>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_posix.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\src\plat_mmap_win32.c"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_mmap.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\plat_types.h"
-					>
-				</File>
-				<Filter
-					Name="sys"
-					>
-					<File
-						RelativePath="..\..\libchewing\branches\win32-utf8\src\porting_layer\include\sys\plat_win32.h"
-						>
-					</File>
-				</Filter>
-			</Filter>
 		</Filter>
 		<File
 			RelativePath="ReadMe.txt"

@@ -49,7 +49,7 @@ public:
 	void setCursorPos(int pos);
 	void setZuin(LPCWSTR zuin);
 	void beforeGenerateMsg(void);
-	void setInvervalArray( unsigned char* interval, int count );
+	void setIntervalArray( unsigned char* interval, int count );
 	DWORD* getIntervalArray() {	return compClause; }
 	DWORD getInternalLen() {	return cs.dwCompClauseLen / sizeof(DWORD);	}
 

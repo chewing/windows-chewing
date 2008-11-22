@@ -207,7 +207,7 @@ void CompStr::beforeGenerateMsg(void)
 
 }
 
-void CompStr::setInvervalArray( unsigned char* interval, int count )
+void CompStr::setIntervalArray( unsigned char* interval, int count )
 {
 	cs.dwCompClauseLen = 0;
 	if ( count<=0 ) {

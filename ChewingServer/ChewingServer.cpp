@@ -37,9 +37,6 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::CommitReady ,
 	(ChewingMemberFuncCI) &Chewing::BufferLen ,
 	(ChewingMemberFuncCI) &Chewing::CursorPos ,
-	(ChewingMemberFuncCI) &Chewing::PointStart ,
-	(ChewingMemberFuncCI) &Chewing::PointEnd ,
-	(ChewingMemberFuncCI) &Chewing::KeystrokeRtn ,
 	(ChewingMemberFuncCI) &Chewing::KeystrokeIgnore ,
 	(ChewingMemberFuncCI) &Chewing::ChineseMode ,
 	(ChewingMemberFuncCI) &Chewing::GetFullShape ,
@@ -55,7 +52,6 @@ ChewingMemberFuncCI ChewingServer::chewingCmdTable[] = {
 	(ChewingMemberFuncCI) &Chewing::Key ,
 	(ChewingMemberFuncCI) &Chewing::CtrlNum ,
 	(ChewingMemberFuncCI) &Chewing::NumPad ,
-	(ChewingMemberFuncCI) &Chewing::CtrlOption ,
 	(ChewingMemberFuncCI) (GetSelKeyFunc)&Chewing::SelKey ,
 
 	(ChewingMemberFuncCI) &Chewing::SetFullShape ,
@@ -124,8 +120,7 @@ ChewingServer::ChewingServer() : hwnd(NULL), sharedMem(INVALID_HANDLE_VALUE), ch
 
 ChewingServer::~ChewingServer()
 {
-	CloseHandle(sharedMem);
-	TerminateChewing();
+	CloseHandle(sharedMem);	
     OutputDebugString("Chewing server down.");
 }
 
@@ -212,7 +207,7 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
     case cmdLastPhoneSeq:
         {
             int lop;
-            uint16 *sbuf = GetLastPhoneSeq();
+			uint16 *sbuf = Chewing::GetLastPhoneSeq();
 		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
 									    0, 0, CHEWINGSERVER_BUF_SIZE );
             for ( lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
@@ -228,9 +223,13 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
             return  lop;
         }
 	case cmdReloadSymbolTable:
-		char userdir[MAX_PATH];
-		GetUserDataPath( userdir );
-		Chewing::ReloadSymbolTable(userdir);
+		TCHAR datadir[MAX_PATH];
+		TCHAR hashdir[MAX_PATH];
+		GetSystemDirectory( datadir, MAX_PATH );
+		_tcscat( datadir, _T("\\IME\\Chewing") );
+
+		GetUserDataPath( hashdir );
+		Chewing::ReloadSymbolTable(datadir, hashdir);
 		break;
 	case WM_TIMER:
 		checkNewVersion();
@@ -343,7 +342,10 @@ LRESULT ChewingServer::parseChewingCmd(UINT cmd, int param, Chewing *chewing)
 										0, 0, CHEWINGSERVER_BUF_SIZE );
 			memcpy( pbuf, str, len );
 			UnmapViewOfFile( pbuf );
-			free(str);
+			if( cmd == (cmdIntervalArray - cmdFirst) )
+				free(str);
+			else
+				chewing_free(str);
 			return len;
 		}
 	}

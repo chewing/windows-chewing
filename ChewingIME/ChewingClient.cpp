@@ -97,9 +97,6 @@ int ChewingClient::CtrlNum(unsigned int code)
 int ChewingClient::NumPad(unsigned int code)
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdNumPad, code, chewingID);	}
 
-int ChewingClient::CtrlOption(unsigned int code)
-{	return (int)SendMessage( serverWnd, ChewingServer::cmdCtrlOption, code, chewingID);	}
-
 int ChewingClient::DoubleTab()
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdDoubleTab, 0, chewingID);	}
 
@@ -167,15 +164,6 @@ int   ChewingClient::BufferLen()
 
 int ChewingClient::CursorPos()
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdCursorPos, 0, chewingID);	}
-
-int ChewingClient::PointStart()
-{	return (int)SendMessage( serverWnd, ChewingServer::cmdPointStart, 0, chewingID);	}
-
-int ChewingClient::PointEnd()
-{	return (int)SendMessage( serverWnd, ChewingServer::cmdPointEnd, 0, chewingID);	}
-
-int ChewingClient::KeystrokeRtn()
-{	return (int)SendMessage( serverWnd, ChewingServer::cmdKeystrokeRtn, 0, chewingID);	}
 
 int ChewingClient::KeystrokeIgnore()
 {	return (int)SendMessage( serverWnd, ChewingServer::cmdKeystrokeIgnore, 0, chewingID);	}

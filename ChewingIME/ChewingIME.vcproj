@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\src&quot;;.\;&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\include"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\include;.\;..\include"
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -73,7 +73,7 @@
 				AdditionalDependencies="imm32.lib comctl32.lib shell32.lib"
 				OutputFile="$(OutDir)/Chewing.ime"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Debug"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile="ChewingIME.def"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
@@ -136,7 +136,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\src;.\;..\..\libchewing\branches\win32-utf8\include;..\include"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\include;.\;..\include"
 				PreprocessorDefinitions="COMPILE_MULTIMON_STUBS;NOIME;WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -161,7 +161,7 @@
 				AdditionalDependencies="imm32.lib comctl32.lib shell32.lib"
 				OutputFile="$(OutDir)/Chewing.ime"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\libchewing\branches\win32\win32\Release"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile="ChewingIME.def"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
@@ -324,10 +324,6 @@
 			</File>
 			<File
 				RelativePath=".\imm.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32\src\private.h"
 				>
 			</File>
 			<File

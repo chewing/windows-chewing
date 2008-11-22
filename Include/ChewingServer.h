@@ -55,9 +55,6 @@ public:
 		cmdCommitReady,
 		cmdBufferLen,
 		cmdCursorPos,
-		cmdPointStart,
-		cmdPointEnd,
-		cmdKeystrokeRtn,
 		cmdKeystrokeIgnore,
 		cmdChineseMode,
 		cmdGetFullShape,
@@ -73,7 +70,6 @@ public:
 		cmdKey,
 		cmdCtrlNum,
 		cmdNumPad,
-		cmdCtrlOption,
 		cmdGetSelKey,
 
 		cmdSetFullShape,

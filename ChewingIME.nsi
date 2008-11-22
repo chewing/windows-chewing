@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 ; TODO don't use chinese in PRODUCT_UNINST_KEY 
 !define PRODUCT_NAME "New Chewing IM"
-!define PRODUCT_VERSION "0.3.4.8"
+!define PRODUCT_VERSION "0.4-dev"
 !define PRODUCT_PUBLISHER "PCMan (¬x¥ô¿Ù), seamxr, andyhorng, sky008888, kcwu"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -136,7 +136,7 @@ Function OnInstError
     Abort
 FunctionEnd
 
-!define LIBCHEWING_DATA_PATH	"..\libchewingdata"
+;!define LIBCHEWING_DATA_PATH	"..\libchewingdata"
 
 ;----------------------------------------------------------------------------------------------
 
@@ -154,37 +154,37 @@ Section "MainSection" SEC01
 ;  File /oname=ch_index.dat "..\libchewing-data\utf-8\ch_index.dat"
 
 ; Generate data files on installation to reduce the size of installer.
-  SetOutPath "${TMPDIR}"
-  File "big52utf8\Release\big52utf8.exe"
-  ${If} ${Errors}
-    Call OnInstError
-  ${EndIf}
+  ;SetOutPath "${TMPDIR}"
+  ;File "big52utf8\Release\big52utf8.exe"
+  ;${If} ${Errors}
+  ;  Call OnInstError
+  ;${EndIf}
 
-  File "${LIBCHEWING_DATA_PATH}\utf-8\tsi.src"
-  File "${LIBCHEWING_DATA_PATH}\utf-8\phone.cin"
-  File "${LIBCHEWING_DATA_PATH}\utf-8\dat2bin.exe"
-  ExecWait '"${TMPDIR}\dat2bin.exe"'
-  ${If} ${Errors}
-    Call OnInstError
-  ${EndIf}
+  ;File "${LIBCHEWING_DATA_PATH}\utf-8\tsi.src"
+  ;File "${LIBCHEWING_DATA_PATH}\utf-8\phone.cin"
+  ;File "${LIBCHEWING_DATA_PATH}\utf-8\dat2bin.exe"
+  ;ExecWait '"${TMPDIR}\dat2bin.exe"'
+  ;${If} ${Errors}
+  ;  Call OnInstError
+  ;${EndIf}
 
   ; Rename will fail if destination file exists. So, delete them all.
-  Delete "$SYSDIR\IME\Chewing\*"
+  ;Delete "$SYSDIR\IME\Chewing\*"
   ; If the files to delete don't exist, error flag if *NOT* set.
-  ${If} ${Errors}
-    Call OnInstError
-  ${EndIf}
+  ;${If} ${Errors}
+  ;  Call OnInstError
+  ;${EndIf}
 
   SetOutPath "$SYSDIR\IME\Chewing"
-  Rename "${TMPDIR}\dat2bin.exe" 'dat2bin.exe'
-  Rename "${TMPDIR}\ch_index.dat_bin" 'ch_index.dat'
-  Rename "${TMPDIR}\dict.dat" 'dict.dat'
-  Rename "${TMPDIR}\us_freq.dat" 'us_freq.dat'
-  Rename "${TMPDIR}\ph_index.dat_bin" 'ph_index.dat'
-  Rename "${TMPDIR}\fonetree.dat_bin" 'fonetree.dat'
-  ${If} ${Errors}
-    Call OnInstError
-  ${EndIf}
+  ;Rename "${TMPDIR}\dat2bin.exe" 'dat2bin.exe'
+  ;Rename "${TMPDIR}\ch_index.dat_bin" 'ch_index.dat'
+  ;Rename "${TMPDIR}\dict.dat" 'dict.dat'
+  ;Rename "${TMPDIR}\us_freq.dat" 'us_freq.dat'
+  ;Rename "${TMPDIR}\ph_index.dat_bin" 'ph_index.dat'
+  ;Rename "${TMPDIR}\fonetree.dat_bin" 'fonetree.dat'
+  ;${If} ${Errors}
+  ;  Call OnInstError
+  ;${EndIf}
 
   File "Data\statuswnd.bmp"
   File "License.txt"	; TODO handle translated license file
@@ -196,9 +196,16 @@ Section "MainSection" SEC01
 
   SetOverwrite off
   ; TODO should not place on system-wise directory
-  File "..\libchewing\branches\win32-utf8\data\symbols.dat"
-  File "..\libchewing\branches\win32-utf8\data\swkb.dat"
+  File "C:\Program Files\libchewing\share\chewing\symbols.dat"
+  File "C:\Program Files\libchewing\share\chewing\swkb.dat"
   SetOverwrite on
+  File "C:\Program Files\libchewing\share\chewing\ch_index_begin.dat"
+  File "C:\Program Files\libchewing\share\chewing\ch_index_phone.dat"
+  File "C:\Program Files\libchewing\share\chewing\dict.dat"
+  File "C:\Program Files\libchewing\share\chewing\fonetree.dat"
+  File "C:\Program Files\libchewing\share\chewing\ph_index.dat"
+  File "C:\Program Files\libchewing\share\chewing\us_freq.dat"
+  File "C:\Program Files\libchewing\lib\chewing.dll"
   
   ExecWait '"$SYSDIR\IME\Chewing\Installer.exe" /privilege'
 
@@ -230,7 +237,9 @@ Section -Post
 
   SetShellVarContext current
   ${Unless} ${FileExists} $APPDATA\Chewing\uhash.dat
-    ExecWait '"${TMPDIR}\big52utf8.exe" $APPDATA\Chewing\hash.dat'
+    ${If} ${FileExists} $APPDATA\Chewing\hash.dat
+        ExecWait '"${TMPDIR}\big52utf8.exe" $APPDATA\Chewing\hash.dat'
+    ${EndIf}
   ${EndIf}
 
   Delete "${TMPDIR}\*"
@@ -261,6 +270,8 @@ Section Uninstall
   Delete "$INSTDIR\License.txt"	; TODO handle translated license file
   Delete "$INSTDIR\statuswnd.bmp"
   Delete "$INSTDIR\ch_index.dat"
+  Delete "$INSTDIR\ch_index_phone.dat"
+  Delete "$INSTDIR\ch_index_begin.dat"
   Delete "$INSTDIR\dict.dat"
   Delete "$INSTDIR\fonetree.dat"
   Delete "$INSTDIR\ph_index.dat"
@@ -268,6 +279,7 @@ Section Uninstall
   Delete "$INSTDIR\Chewing.chm"
   Delete "$INSTDIR\Installer.exe"
   Delete "$INSTDIR\ChewingServer.exe"
+  Delete "$INSTDIR\chewing.dll"
   Delete "$INSTDIR\HashEd.exe"
   Delete "$INSTDIR\Update.exe"
 

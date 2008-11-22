@@ -50,7 +50,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\libchewing\branches\win32-utf8\include,..\Include"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\src\porting_layer\include;..\..\libchewing\trunk\include\internal;..\..\libchewing\trunk\include;..\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -145,7 +145,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\libchewing\branches\win32-utf8\include&quot;;..\Include;&quot;..\..\libchewing\branches\win32-utf8\src\porting_layer\include&quot;"
+				AdditionalIncludeDirectories="..\..\libchewing\trunk\src\porting_layer\include;..\..\libchewing\trunk\include;..\Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0410"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -219,11 +219,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\chewing-utf8-util.c"
+				RelativePath="..\..\libchewing\trunk\src\common\chewing-utf8-util.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\hash.c"
+				RelativePath="..\..\libchewing\trunk\src\hash.c"
 				>
 			</File>
 			<File
@@ -281,7 +281,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\src\common\key2pho.c"
+				RelativePath="..\..\libchewing\trunk\src\common\key2pho.c"
 				>
 			</File>
 			<File
@@ -325,11 +325,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\chewing-utf8-util.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libchewing\branches\win32-utf8\include\global.h"
+				RelativePath="..\..\libchewing\trunk\include\global.h"
 				>
 			</File>
 			<File

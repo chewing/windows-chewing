@@ -3,7 +3,7 @@
 
 
 #include <vector>
-#include "hash.h"
+#include "hash-private.h"
 
 
 /**

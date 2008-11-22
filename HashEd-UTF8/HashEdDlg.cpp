@@ -9,7 +9,7 @@
 #include <shlobj.h>
 #include <tchar.h>
 
-#include "hash.h"
+#include "hash-private.h"
 
 #include "PhraseList.h"
 #include "Richedit.h"

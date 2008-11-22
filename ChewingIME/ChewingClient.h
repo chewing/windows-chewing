@@ -41,7 +41,6 @@ public:
 	int Key(unsigned int code);
 	int CtrlNum(unsigned int code);
 	int NumPad(unsigned int code);
-	int CtrlOption(unsigned int code);
 	int DoubleTab();
 
 	// Return the i-th selection key, i >= 0.
@@ -58,9 +57,6 @@ public:
 	int   BufferLen();
 
 	int CursorPos();
-	int PointStart();
-	int PointEnd();
-	int KeystrokeRtn();
 	int KeystrokeIgnore();
 
 	int ChineseMode();

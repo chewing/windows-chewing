@@ -10,6 +10,7 @@
 	#include <direct.h>
 #endif
 
+#include "chewing.h"
 #include "global.h"
 #include "char.h"
 
