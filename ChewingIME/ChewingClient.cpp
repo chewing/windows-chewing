@@ -252,6 +252,7 @@ void ChewingClient::ConnectServer(void)
 	char tempname[512];
 	_gen_event_name(tempname, sizeof(tempname), chewingServerClassName);
 	serverWnd = FindWindow( tempname, NULL );
+
 	if( ! serverWnd )
 	{
 		char evt_name[512];
@@ -302,7 +303,7 @@ unsigned int ChewingClient::EchoFromServer()
 
 bool ChewingClient::CheckServer()
 {
-    if ( ChewingClient::EchoFromServer()==(~chewingID) )
+    if ( ChewingClient::EchoFromServer()==(~((unsigned int)chewingID)) )
     {
         return  true;
     }

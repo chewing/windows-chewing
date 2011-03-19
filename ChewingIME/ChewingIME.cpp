@@ -247,7 +247,7 @@ BOOL    APIENTRY ImeInquire(LPIMEINFO lpIMEInfo, LPTSTR lpszUIClass, LPCTSTR lps
 #endif
 	}
 
-	if(g_isWindowNT && (DWORD(lpszOptions) & IME_SYSINFO_WINLOGON ))
+	if(g_isWindowNT && (UINT_PTR(lpszOptions) & IME_SYSINFO_WINLOGON ))
 	{
 		// Some functions should be disabled under WinLogon for security reason
 		g_isWinLogon = true;
@@ -312,7 +312,7 @@ static BOOL CALLBACK TypingPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			g_ctrlSymbol = IsDlgButtonChecked( hwnd, IDC_CTRL_SYMBOL );
 			g_enableSimp = IsDlgButtonChecked( hwnd, IDC_ENABLE_Simp );
 
-			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			SetWindowLongPtr( hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
 		}
 			break;
@@ -379,7 +379,7 @@ static BOOL CALLBACK UIPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			//g_selAreaLen = cand_per_page * ( 1 * 2 + 3 ) + 5;
 
 
-			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			SetWindowLongPtr( hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
 		}
 		break;
@@ -392,7 +392,7 @@ wstring RichEdit20_GetText( HWND edit )
 {
 	WCHAR *buf;
 	GETTEXTLENGTHEX gtl = { GTL_USECRLF|GTL_CLOSE, 1200 };
-	DWORD len = SendMessage( edit, EM_GETTEXTLENGTHEX, (WPARAM)&gtl, (LPARAM)0 );
+	DWORD_PTR len = SendMessage( edit, EM_GETTEXTLENGTHEX, (WPARAM)&gtl, (LPARAM)0 );
 	if( len <= 0 )
 		return wstring( L"" );
 	GETTEXTEX gt = {0};
@@ -487,7 +487,7 @@ static LRESULT CALLBACK RichEditProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		return 0;
 	}
 	else if( msg == WM_COMMAND ) {
-		LRESULT r;
+//		LRESULT r;
 		switch( LOWORD(wp) )
 		{
 		case ID_EDIT_UNDO:
@@ -519,7 +519,7 @@ static LRESULT CALLBACK RichEditProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		SendMessage( hwnd, EM_EXSETSEL, 0, (LPARAM)&cr );
 	}
 	else if( msg == WM_DESTROY ) {
-		SetWindowLongPtr( hwnd, GWL_WNDPROC, LONG_PTR(oldEditProc) );
+		SetWindowLongPtr( hwnd, GWLP_WNDPROC, DWORD_PTR(oldEditProc) );
 	}
 	return CallWindowProc( oldEditProc, hwnd, msg, wp, lp );
 }
@@ -536,7 +536,7 @@ static BOOL CALLBACK SymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			SendMessage( edit, EM_SETTEXTMODE, TM_PLAINTEXT|TM_MULTICODEPAGE, 0 );
 
 			//Subclass
-			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWL_WNDPROC, LONG_PTR(RichEditProc) );
+			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWLP_WNDPROC, DWORD_PTR(RichEditProc) );
 
 			CHARFORMAT2 cf;
 			cf.cbSize = sizeof(cf);
@@ -582,7 +582,7 @@ static BOOL CALLBACK SymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				WriteFile( file, text.c_str(), text.length(), &wsize, NULL );
 				CloseHandle(file);
 			}
-			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			SetWindowLongPtr( hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
 
 			// Reload symbol table
 			if( g_chewing ) {
@@ -607,7 +607,7 @@ static BOOL CALLBACK EzSymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp
 			SendMessage( edit, EM_SETTEXTMODE, TM_PLAINTEXT|TM_MULTICODEPAGE, 0 );
 
 			//Subclass
-			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWL_WNDPROC, LONG_PTR(RichEditProc) );
+			oldEditProc = (WNDPROC)SetWindowLongPtr( edit, GWLP_WNDPROC, UINT_PTR(RichEditProc) );
 
 			CHARFORMAT2 cf;
 			cf.cbSize = sizeof(cf);
@@ -653,7 +653,7 @@ static BOOL CALLBACK EzSymbolsPageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp
 				WriteFile( file, text.c_str(), text.length(), &wsize, NULL );
 				CloseHandle(file);
 			}
-			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			SetWindowLongPtr( hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
 
 			// Reload symbol table
 			if( g_chewing ) {
@@ -679,7 +679,7 @@ static BOOL CALLBACK UpdatePageProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		if(  LPNMHDR(lp)->code == PSN_APPLY)
 		{
 			g_checkNewVersion = IsDlgButtonChecked( hwnd, IDC_CHECK_NEW_VERSION );
-			SetWindowLong( hwnd, DWL_MSGRESULT, PSNRET_NOERROR);
+			SetWindowLongPtr( hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
 			return TRUE;
 		}
 		break;

@@ -22,11 +22,11 @@ void IMEChildWnd::assocWndObj(void)
 		void* ptr = this;
 		LONG ptrparts[] = {0, 0};
 		memcpy( ptrparts, &ptr, sizeof(IMEChildWnd*) );
-		SetWindowLong( hwnd, GWL_USERDATA, ptrparts[0] );
-		SetWindowLong( hwnd, IMMGWL_PRIVATE, ptrparts[1] );		
+		SetWindowLongPtr( hwnd, GWL_USERDATA, ptrparts[0] );
+		SetWindowLongPtr( hwnd, IMMGWL_PRIVATE, ptrparts[1] );		
 	}
 	else
-		SetWindowLong( hwnd, GWL_USERDATA, (LONG)this );
+		SetWindowLongPtr( hwnd, GWL_USERDATA, (LONG)this );
 }
 
 IMEChildWnd* IMEChildWnd::getAssocWndObj(HWND hwnd)
@@ -35,13 +35,13 @@ IMEChildWnd* IMEChildWnd::getAssocWndObj(HWND hwnd)
 	{
 		IMEChildWnd* ptr = NULL;
 		LONG ptrparts[] = {0, 0};
-		ptrparts[0] = GetWindowLong( hwnd, GWL_USERDATA  );
-		ptrparts[1] = GetWindowLong( hwnd, IMMGWL_PRIVATE );		
+		ptrparts[0] = GetWindowLongPtr( hwnd, GWL_USERDATA  );
+		ptrparts[1] = GetWindowLongPtr( hwnd, IMMGWL_PRIVATE );		
 		memcpy( &ptr, ptrparts, sizeof(IMEChildWnd*) );
 		return ptr;
 	}
 	else
-		return (IMEChildWnd*)GetWindowLong( hwnd, GWL_USERDATA );
+		return (IMEChildWnd*)GetWindowLongPtr( hwnd, GWL_USERDATA );
 
 	return NULL;
 }

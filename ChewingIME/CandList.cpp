@@ -15,7 +15,7 @@ CandList::CandList(void)
 
 	for( int i = 0; i <= (sizeof(offset)/sizeof(DWORD)); ++i )
 	{
-		cl.dwOffset[i] = ((DWORD)candStr[i] - (DWORD)&cl);
+		cl.dwOffset[i] = ((UINT_PTR)candStr[i] - (UINT_PTR)&cl);
 		*candStr[i] = 0;
 	}
 

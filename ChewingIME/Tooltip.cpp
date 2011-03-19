@@ -47,7 +47,8 @@ void Tooltip::unregisterClass()
 LRESULT CALLBACK Tooltip::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	Tooltip* pthis = NULL;
-	pthis = (Tooltip*)GetWindowLongPtr( hwnd, GWL_USERDATA );
+
+	pthis = (Tooltip*)GetWindowLongPtr( hwnd, GWLP_USERDATA );
 	if( pthis )
 		return pthis->wndProc(msg, wp, lp);
 	return DefWindowProc(hwnd, msg, wp, lp );
@@ -132,7 +133,7 @@ BOOL Tooltip::create(void)
 		HWND_DESKTOP, NULL, HINSTANCE(GetModuleHandle(NULL)), NULL);
 	if( !hwnd )
 		return FALSE;
-	SetWindowLongPtr( hwnd, GWL_USERDATA, LONG_PTR(this));
+	SetWindowLongPtr( hwnd, GWLP_USERDATA, LONG_PTR(this));
 	return TRUE;
 }
 

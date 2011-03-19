@@ -25,7 +25,7 @@ IMEUI* IMEUILock::getIMEUI()
 IMEUI* IMEUILock::createIMEUI(void)
 {
 	hIMEUI = GlobalAlloc(GHND, sizeof(IMEUI));
-	SetWindowLong(hUIWnd, IMMGWL_PRIVATE, (LONG)hIMEUI );
+	SetWindowLong(hUIWnd, IMMGWL_PRIVATE, (UINT_PTR)hIMEUI );
 	ui = (IMEUI*)GlobalLock(hIMEUI);
 	if( ui )
 		return new(ui) IMEUI(hUIWnd);	// placement new

@@ -50,7 +50,8 @@ BOOL XPToolbar::registerClass()
 LRESULT CALLBACK XPToolbar::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	XPToolbar* pthis = NULL;
-	pthis = (XPToolbar*)GetWindowLongPtr( hwnd, GWL_USERDATA );
+
+	pthis = (XPToolbar*)GetWindowLongPtr( hwnd, GWLP_USERDATA );
 	if( pthis )
 		return pthis->wndProc(msg, wp, lp);
 	return DefWindowProc(hwnd, msg, wp, lp );
@@ -107,7 +108,7 @@ bool XPToolbar::create(HWND parent, UINT id, LONG style, int x, int y, int w, in
 {
 	hwnd = CreateWindowEx( 0, xpToolbarClass, NULL, WS_CHILD|WS_VISIBLE, x, y, w, h, 
 		parent, NULL, HINSTANCE(GetModuleHandle(NULL)), NULL);
-	SetWindowLongPtr( hwnd, GWL_USERDATA, LONG_PTR(this));
+	SetWindowLongPtr( hwnd, GWLP_USERDATA, LONG_PTR(this));
 	return !!hwnd;
 }
 

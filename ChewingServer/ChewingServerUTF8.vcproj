@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="ChewingServerUTF8"
 	ProjectGUID="{FF074876-659D-4BFD-9361-6E22C99BABE2}"
+	RootNamespace="ChewingServerUTF8"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -47,6 +48,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4996"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\libchewing\trunk\include;..\include"
 				PreprocessorDefinitions="USE_BINARY_DAT;WIN32;_WIN32;_DEBUG;_WINDOWS"
@@ -60,6 +62,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 				CompileAs="0"
 			/>
