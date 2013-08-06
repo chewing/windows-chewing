@@ -97,7 +97,7 @@ BGGradient 0000FF 000000 FFFFFF
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_LINK_LOCATION "http://chewing.csie.net/"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://chewing.im/"
 !define MUI_FINISHPAGE_LINK "Visit Our Web Site¡G ${MUI_FINISHPAGE_LINK_LOCATION}"
 !insertmacro MUI_PAGE_FINISH
 

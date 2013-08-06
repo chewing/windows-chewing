@@ -294,7 +294,7 @@ void StatusWnd::onCommand(UINT id, HIMC hIMC)
         }
 		break;
 	case ID_WEBSITE:
-		ShellExecute( NULL, "open", _T("http://chewing.csie.net/"), NULL, NULL, SW_SHOWNORMAL );
+		ShellExecute( NULL, "open", _T("http://chewing.im/"), NULL, NULL, SW_SHOWNORMAL );
 		break;
 	case ID_GROUP:
 		ShellExecute( NULL, "open", _T("http://groups.google.com/group/chewing"), NULL, NULL, SW_SHOWNORMAL );

@@ -38,7 +38,7 @@ SetCompressor zlib
   !insertmacro MUI_PAGE_INSTFILES
   
   ; Finish page
-  !define MUI_FINISHPAGE_LINK_LOCATION "http://chewing.csie.net/"
+  !define MUI_FINISHPAGE_LINK_LOCATION "http://chewing.im/"
   !define MUI_FINISHPAGE_LINK "$(VISIT_WEBSITE) ${MUI_FINISHPAGE_LINK_LOCATION}"
   !insertmacro MUI_PAGE_FINISH
   

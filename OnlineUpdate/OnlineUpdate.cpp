@@ -11,7 +11,7 @@
 
 #include "resource.h"
 
-TCHAR url[100] = _T("http://chewing.csie.net/download/win32/");
+TCHAR url[100] = _T("https://code.google.com/p/chewing/downloads/list");
 TCHAR* url_file_name = url + 39; // dir path is 39 bytes long
 char CSig[] = "ISTA";
 
