@@ -5,7 +5,6 @@
 #include <vector>
 #include "hash-private.h"
 
-
 /**
  *  A context that load a hash.dat,
  *  and provide some function to manipulate the context.
@@ -53,12 +52,12 @@ public:
      *  Append a phrase into context
      *  You must provide the big5 string and its phoneSeq
      */
-    HASH_ITEM* append_phrase(const char *str, uint16 *phoneSeq);
+    HASH_ITEM* append_phrase(const char *str, uint16_t *phoneSeq);
 
     /**
      *  Find a phrase in exactly match.
      */
-    HASH_ITEM* find_phrase_exact(const char *str, uint16 *phoneSeq);
+    HASH_ITEM* find_phrase_exact(const char *str, uint16_t *phoneSeq);
 
     /**
      *  Find a phrase in partial match.
@@ -78,7 +77,7 @@ public:
     /**
      *  Retrive lastest phoneSeq info from chewing-server
      */
-    int _get_phone_seq_from_server(uint16 *pPhoneSeq);
+    int _get_phone_seq_from_server(uint16_t *pPhoneSeq);
 
     /**
      *  Shutdown chewing-server

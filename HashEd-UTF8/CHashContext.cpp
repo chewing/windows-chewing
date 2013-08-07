@@ -88,7 +88,7 @@ int CHashContext::load_hash(const char *file, bool doClear)
     return  1;
 }
 
-static int _PhoneSeqTheSame(const uint16 p1[], const uint16 p2[])
+static int _PhoneSeqTheSame(const uint16_t p1[], const uint16_t p2[])
 {
 	int i;
 
@@ -161,7 +161,7 @@ void CHashContext::list_phrase()
     FILE *foFile;
     std::vector<HASH_ITEM*>::iterator iter;
     HASH_ITEM *pItem;
-    uint16 *pui;
+    uint16_t *pui;
     
     foFile = fopen("lista.txt", "w+b");
     iter = pool.begin();
@@ -269,14 +269,14 @@ void CHashContext::del_phrase_by_id(int index)
     };
 }
 
-HASH_ITEM* CHashContext::append_phrase(const char *str, uint16 *phoneSeq)
+HASH_ITEM* CHashContext::append_phrase(const char *str, uint16_t *phoneSeq)
 {
     //  existing?
 
     //  new
     HASH_ITEM *hitem = (HASH_ITEM*) calloc(1, sizeof(HASH_ITEM));
     hitem->data.wordSeq = (char*) malloc(strlen(str)+1);
-    hitem->data.phoneSeq = (uint16*) calloc(MAX_PHONE_SEQ_LEN+1, sizeof(uint16));
+    hitem->data.phoneSeq = (uint16_t*) calloc(MAX_PHONE_SEQ_LEN+1, sizeof(uint16_t));
     strcpy(hitem->data.wordSeq, str);
     for ( int lop=0; *phoneSeq!=0; ++lop, ++phoneSeq )
     {
@@ -289,7 +289,7 @@ HASH_ITEM* CHashContext::append_phrase(const char *str, uint16 *phoneSeq)
     return	hitem;
 }
 
-HASH_ITEM* CHashContext::find_phrase_exact(const char *str, uint16 *phoneSeq)
+HASH_ITEM* CHashContext::find_phrase_exact(const char *str, uint16_t *phoneSeq)
 {
 	return	NULL;
 }
@@ -346,7 +346,7 @@ void CHashContext::_connect_server(void)
 	_gen_event_name(filemapName, sizeof(filemapName), classname);
 }
 
-int CHashContext::_get_phone_seq_from_server(uint16 *pPhoneSeq)
+int CHashContext::_get_phone_seq_from_server(uint16_t *pPhoneSeq)
 {
     int phone_cnt = SendMessage(serverWnd, ChewingServer::cmdLastPhoneSeq, 0, 0 );
 	if( phone_cnt>0 && phone_cnt<=MAX_PHONE_SEQ_LEN )
@@ -358,10 +358,10 @@ int CHashContext::_get_phone_seq_from_server(uint16 *pPhoneSeq)
             return  0;
         }
 
-		uint16 *pword = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
+		uint16_t *pword = (uint16_t*)MapViewOfFile( sharedMem, FILE_MAP_READ, 0, 0, CHEWINGSERVER_BUF_SIZE );
 		if( pword!=NULL )
 		{
-            memcpy(pPhoneSeq, pword, sizeof(uint16)*phone_cnt);
+            memcpy(pPhoneSeq, pword, sizeof(uint16_t)*phone_cnt);
             pPhoneSeq[phone_cnt] = 0;
 			UnmapViewOfFile(pword);
 		}

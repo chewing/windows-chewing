@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="原始程式檔">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="標頭檔">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CandList.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="CandWnd.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="chewingclient.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="ChewingIME.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="CompStr.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="CompWnd.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawUtil.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="IMCLock.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="IMEChildWnd.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="IMEUI.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="IMEUILock.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\pipe.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusWnd.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Tooltip.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="XPToolbar.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ChewingIME.def">
+      <Filter>原始程式檔</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CandList.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="CandWnd.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="ChewingClient.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="ChewingIME.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="CompStr.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="CompWnd.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawUtil.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IMCLock.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IMEChildWnd.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IMEUI.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IMEUILock.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="imm.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusWnd.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Tooltip.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="XPToolbar.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ChewingIME.rc">
+      <Filter>資源檔</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="chi.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="config.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="cool.bmp">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="cool2.bmp">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="eng.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="full.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="half.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="icon.bmp">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="mainicon.ico">
+      <Filter>資源檔</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

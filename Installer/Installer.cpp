@@ -106,6 +106,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if( strstr( lpCmdLine, "/uninstall" ) )
 	{
+	
 		char temp[1024];
 		_gen_event_name(temp, sizeof(temp), "ChewingServer");
 		HWND hwnd = FindWindow(temp, NULL);
