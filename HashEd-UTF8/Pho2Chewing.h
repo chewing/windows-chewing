@@ -25,6 +25,6 @@ typedef struct
 	int maxfreq;
 	int systemfreq;
 	int phonenum;
-	uint16 phoneserial;
+	uint16_t phoneserial;
 	int bits;
 }chewing;

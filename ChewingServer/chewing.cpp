@@ -1,7 +1,7 @@
 #include <cstring>
 #include "Chewingpp.h"
 
-uint16 Chewing::g_lastPhoneSeq[MAX_PHONE_SEQ_LEN] = {0};
+uint16_t Chewing::g_lastPhoneSeq[MAX_PHONE_SEQ_LEN] = {0};
 
 Chewing::Chewing(  bool spaceAsSelection, int keyLayout ) {
     ctx = chewing_new();
@@ -66,11 +66,11 @@ void Chewing::SelKey(char *selkey) {
 int Chewing::Space()     { return chewing_handle_Space(ctx); }
 int Chewing::Enter() {
 	int rt;
-	uint16 *oldSeq = chewing_get_phoneSeq(ctx);
+	uint16_t *oldSeq = chewing_get_phoneSeq(ctx);
 	int seqLen = chewing_get_phoneSeqLen(ctx);
 	rt = chewing_handle_Enter(ctx);
 	if (chewing_commit_Check(ctx)) {		
-		memcpy(g_lastPhoneSeq, oldSeq, seqLen*sizeof(uint16));
+		memcpy(g_lastPhoneSeq, oldSeq, seqLen*sizeof(uint16_t));
 		g_lastPhoneSeq[seqLen] = 0;
 	}
 	chewing_free(oldSeq);
@@ -98,7 +98,7 @@ int Chewing::Key(unsigned int code) {
     return chewing_handle_Default(ctx, (int)code);
 }
 
-uint16* Chewing::GetLastPhoneSeq() {
+uint16_t* Chewing::GetLastPhoneSeq() {
 	return g_lastPhoneSeq;
 }
 

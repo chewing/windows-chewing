@@ -7,6 +7,7 @@
 #include <imm.h>
 #include <winreg.h>
 #include "Installer.h"
+#include <stdio.h>
 
 // 全域變數:
 HINSTANCE hInst;								// 目前執行個體
@@ -98,14 +99,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
                      int       nCmdShow)
 {
 	HKL kl;
-
+	MessageBox(NULL,"DEBUG\n","Debug",0);
 	HKEY hk = NULL;
 	if( ERROR_SUCCESS != RegCreateKeyEx( HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\New Chewing IM", 0, 
 			NULL, 0, KEY_ALL_ACCESS , NULL, &hk, NULL) )
 		hk = NULL;
-
+	printf("DEBUG\n");
 	if( strstr( lpCmdLine, "/uninstall" ) )
 	{
+	
 		char temp[1024];
 		_gen_event_name(temp, sizeof(temp), "ChewingServer");
 		HWND hwnd = FindWindow(temp, NULL);
@@ -167,8 +169,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		GetSystemDirectory(path, MAX_PATH);
 
 		lstrcat( path, "\\Chewing.ime" );
+		printf("Install Path:%s\n",path);
 		kl = ImmInstallIME( path, 
 			(GetVersion() < 0x80000000) ? "中文 (繁體) - 新酷音輸入法" : "新酷音輸入法" );
+
+		printf("Imm Install IME Result: %d\n",kl);
 		if( hk )
 			RegSetValueEx( hk, "KeyboardLayout", 0, REG_DWORD, (LPBYTE)&kl, sizeof(DWORD) );
 	}

@@ -4,7 +4,9 @@
 #ifndef _CHEWINGPP_H
 #define _CHEWINGPP_H 1
 
-#include <chewing/chewing.h>
+#include "chewing.h"
+#include <cstdint>
+#include <cstdlib>
 #pragma comment(lib, "chewing")
 
 #ifdef	MAX_UTF8_SIZE
@@ -21,12 +23,12 @@ class Chewing
 {
   ChewingContext *ctx;
 
-  static uint16 g_lastPhoneSeq[MAX_PHONE_SEQ_LEN];
+  static uint16_t g_lastPhoneSeq[MAX_PHONE_SEQ_LEN];
 
  public:
   static bool LoadDataFiles( const char* dataDir, const char* userDir );
   static void ReloadSymbolTable( const char* datadir, const char* userDir );
-  static uint16* GetLastPhoneSeq( void );
+  static uint16_t* GetLastPhoneSeq( void );
 
   Chewing( bool spaceAsSelection = true, int keyLayout=0);
   ~Chewing();
@@ -64,7 +66,7 @@ class Chewing
 
   char* ZuinStr();
   char* CommitStr();
-  uint16* PhoneSeq();
+  uint16_t* PhoneSeq();
   int   CommitReady();
 
   char* Buffer();

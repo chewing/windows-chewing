@@ -207,8 +207,8 @@ LRESULT ChewingServer::wndProc(UINT msg, WPARAM wp, LPARAM lp)
     case cmdLastPhoneSeq:
         {
             int lop;
-			uint16 *sbuf = Chewing::GetLastPhoneSeq();
-		    uint16 *obuf = (uint16*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
+			uint16_t *sbuf = Chewing::GetLastPhoneSeq();
+		    uint16_t *obuf = (uint16_t*)MapViewOfFile( sharedMem, FILE_MAP_WRITE, 
 									    0, 0, CHEWINGSERVER_BUF_SIZE );
             for ( lop=0; lop<MAX_PHONE_SEQ_LEN; ++lop )
             {

@@ -5,7 +5,7 @@
 #define AFX_HASHEDDLG_H__35818C20_FC7D_4643_ABE9_61774E0F5CBC__INCLUDED_
 
 #include "chashcontext.h"
-
+#include "Chewingpp.h"
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -41,7 +41,7 @@ public:
 	CPhraseList* phraseList;	// Phrase List control
 
     CHashContext    m_context;
-    uint16  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];
+    uint16_t  m_PhoneSeq[MAX_PHONE_SEQ_LEN+1];
     int     m_NumPhoneSeq;
     char    m_string[(MAX_PHONE_SEQ_LEN+1)*2];
     char    m_msgStr[256];
