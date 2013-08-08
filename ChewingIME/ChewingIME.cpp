@@ -1310,6 +1310,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 		{
+			MessageBox(NULL,"Debug","Debug",0);
 			DisableThreadLibraryCalls((HMODULE)hModule);
 			g_dllInst = (HINSTANCE)hModule;
 
